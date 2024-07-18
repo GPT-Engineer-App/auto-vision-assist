@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { addDoc, collection } from "firebase/firestore";
-import { auth, db } from "@/lib/firebase";
+import { db } from "@/lib/firebase";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -19,14 +19,9 @@ const AddVehicleForm = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!auth.currentUser) {
-      toast.error("You must be logged in to add a vehicle");
-      return;
-    }
 
     try {
       const docRef = await addDoc(collection(db, "vehicles"), {
-        userId: auth.currentUser.uid,
         year,
         make,
         model,

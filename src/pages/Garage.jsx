@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
-import { collection, query, where, getDocs } from "firebase/firestore";
-import { auth, db } from "@/lib/firebase";
+import { collection, query, getDocs } from "firebase/firestore";
+import { db } from "@/lib/firebase";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
@@ -18,15 +18,8 @@ const Garage = () => {
 
   useEffect(() => {
     const fetchVehicles = async () => {
-      if (!auth.currentUser) {
-        toast.error("You must be logged in to view your garage");
-        setLoading(false);
-        navigate("/login");
-        return;
-      }
-
       try {
-        const q = query(collection(db, "vehicles"), where("userId", "==", auth.currentUser.uid));
+        const q = query(collection(db, "vehicles"));
         const querySnapshot = await getDocs(q);
         const vehicleData = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
         setVehicles(vehicleData);
@@ -41,7 +34,7 @@ const Garage = () => {
     };
 
     fetchVehicles();
-  }, [navigate]);
+  }, []);
 
   const handleAddVehicle = () => {
     if (!isPro && vehicles.length >= 1) {
@@ -59,9 +52,9 @@ const Garage = () => {
 
   return (
     <div className="container mx-auto p-4">
-      <h1 className="text-3xl font-bold mb-6">My Garage</h1>
+      <h1 className="text-3xl font-bold mb-6">Garage</h1>
       {vehicles.length === 0 ? (
-        <p>You haven't added any vehicles yet.</p>
+        <p>No vehicles have been added yet.</p>
       ) : isPro ? (
         <ProGarageView vehicles={vehicles} />
       ) : (

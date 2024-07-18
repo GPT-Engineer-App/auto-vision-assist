@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { auth, db } from "@/lib/firebase";
+import { db } from "@/lib/firebase";
 import { collection, addDoc, query, where, getDocs, limit } from "firebase/firestore";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
@@ -12,11 +12,9 @@ const DiagnosticChat = ({ vehicleId, isPro }) => {
   const [queryCount, setQueryCount] = useState(0);
 
   const fetchQueryCount = async () => {
-    if (!auth.currentUser) return 0;
     const queryCountRef = collection(db, "queryCounts");
     const q = query(
       queryCountRef,
-      where("userId", "==", auth.currentUser.uid),
       where("timestamp", ">=", new Date(Date.now() - 29 * 24 * 60 * 60 * 1000))
     );
     const querySnapshot = await getDocs(q);
@@ -24,9 +22,8 @@ const DiagnosticChat = ({ vehicleId, isPro }) => {
   };
 
   const { data: currentQueryCount } = useQuery({
-    queryKey: ["queryCount", auth.currentUser?.uid],
+    queryKey: ["queryCount"],
     queryFn: fetchQueryCount,
-    enabled: !!auth.currentUser,
   });
 
   useEffect(() => {
@@ -37,10 +34,6 @@ const DiagnosticChat = ({ vehicleId, isPro }) => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!auth.currentUser) {
-      toast.error("You must be logged in to use the diagnostic chat");
-      return;
-    }
 
     if (!isPro && queryCount >= 30) {
       toast.error("You have reached your query limit. Upgrade to Pro for unlimited queries.");
@@ -54,7 +47,6 @@ const DiagnosticChat = ({ vehicleId, isPro }) => {
 
       // Store query and response in Firestore
       await addDoc(collection(db, "diagnosticQueries"), {
-        userId: auth.currentUser.uid,
         vehicleId,
         query: input,
         response: aiResponse,
@@ -63,7 +55,6 @@ const DiagnosticChat = ({ vehicleId, isPro }) => {
 
       // Update query count
       await addDoc(collection(db, "queryCounts"), {
-        userId: auth.currentUser.uid,
         timestamp: new Date(),
       });
 
