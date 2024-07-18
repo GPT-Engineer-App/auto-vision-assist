@@ -16,6 +16,13 @@ const AuthForm = ({ isLogin }) => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
+      // Check for generic login credentials in development environment
+      if (import.meta.env.DEV && email === "dev@example.com" && password === "devpassword") {
+        toast.success("Logged in with generic credentials");
+        navigate("/garage");
+        return;
+      }
+
       if (isLogin) {
         await signInWithEmailAndPassword(auth, email, password);
         toast.success("Logged in successfully");
@@ -66,6 +73,11 @@ const AuthForm = ({ isLogin }) => {
       <Button type="submit" className="w-full">
         {isLogin ? "Log In" : "Sign Up"}
       </Button>
+      {import.meta.env.DEV && (
+        <p className="text-sm text-muted-foreground mt-2">
+          Dev login: dev@example.com / devpassword
+        </p>
+      )}
     </form>
   );
 };
