@@ -6,11 +6,14 @@ import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import ProGarageView from "@/components/ProGarageView";
 import { useNavigate } from "react-router-dom";
+import DiagnosticChat from "@/components/DiagnosticChat";
+import VehicleHistory from "@/components/VehicleHistory";
 
 const Garage = () => {
   const [vehicles, setVehicles] = useState([]);
   const [loading, setLoading] = useState(true);
   const [isPro, setIsPro] = useState(false); // In a real app, this would be fetched from the user's profile
+  const [selectedVehicle, setSelectedVehicle] = useState(null);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -27,6 +30,9 @@ const Garage = () => {
         const querySnapshot = await getDocs(q);
         const vehicleData = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
         setVehicles(vehicleData);
+        if (vehicleData.length > 0) {
+          setSelectedVehicle(vehicleData[0].id);
+        }
       } catch (error) {
         toast.error("Error fetching vehicles: " + error.message);
       } finally {
@@ -61,7 +67,7 @@ const Garage = () => {
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           {vehicles.map((vehicle) => (
-            <Card key={vehicle.id}>
+            <Card key={vehicle.id} className={selectedVehicle === vehicle.id ? "border-primary" : ""}>
               <CardHeader>
                 <CardTitle>{vehicle.year} {vehicle.make} {vehicle.model}</CardTitle>
               </CardHeader>
@@ -69,6 +75,13 @@ const Garage = () => {
                 <p><strong>Engine Size:</strong> {vehicle.engineSize}</p>
                 <p><strong>Drivetrain:</strong> {vehicle.drivetrain}</p>
                 <p><strong>Body Configuration:</strong> {vehicle.bodyConfig}</p>
+                <Button 
+                  onClick={() => setSelectedVehicle(vehicle.id)} 
+                  variant="outline" 
+                  className="mt-2"
+                >
+                  Select
+                </Button>
               </CardContent>
             </Card>
           ))}
@@ -80,6 +93,18 @@ const Garage = () => {
           <Button variant="outline" className="ml-4">Upgrade to Pro</Button>
         )}
       </div>
+      {selectedVehicle && (
+        <div className="mt-8">
+          <h2 className="text-2xl font-bold mb-4">Diagnostic Chat</h2>
+          <DiagnosticChat vehicleId={selectedVehicle} isPro={isPro} />
+          {isPro && (
+            <>
+              <h2 className="text-2xl font-bold mt-8 mb-4">Vehicle History</h2>
+              <VehicleHistory vehicleId={selectedVehicle} />
+            </>
+          )}
+        </div>
+      )}
     </div>
   );
 };
