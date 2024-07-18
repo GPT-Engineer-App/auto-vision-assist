@@ -1,5 +1,5 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Wrench, Tool, Gauge } from "lucide-react";
+import { Wrench, Gauge, Hammer } from "lucide-react";
 
 const ProGarageView = ({ vehicles }) => {
   return (
@@ -36,7 +36,7 @@ const ProGarageView = ({ vehicles }) => {
         <Card className="bg-gradient-to-br from-green-500 to-green-600 text-white">
           <CardHeader>
             <CardTitle className="flex items-center">
-              <Tool className="h-6 w-6 mr-2" />
+              <Hammer className="h-6 w-6 mr-2" />
               Premium Tools
             </CardTitle>
           </CardHeader>
