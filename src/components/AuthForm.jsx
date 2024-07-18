@@ -18,6 +18,7 @@ const AuthForm = ({ isLogin }) => {
     try {
       // Check for generic login credentials in development environment
       if (import.meta.env.DEV && email === "dev@example.com" && password === "devpassword") {
+        console.log("Logging in with generic credentials");
         toast.success("Logged in with generic credentials");
         navigate("/garage");
         return;
@@ -32,6 +33,7 @@ const AuthForm = ({ isLogin }) => {
       }
       navigate("/garage");
     } catch (error) {
+      console.error("Authentication error:", error);
       toast.error(error.message);
     }
   };
