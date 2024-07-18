@@ -1,19 +1,21 @@
-import { Package2 } from "lucide-react";
-import { NavItem } from "./NavItem";
+import { NavLink } from "react-router-dom";
+import { cn } from "@/lib/utils";
 
 export const DesktopNavbar = ({ navItems }) => (
-  <nav className="hidden md:flex md:items-center md:gap-5 lg:gap-6 text-lg font-medium md:text-sm">
-    <NavItem
-      to="/"
-      className="flex items-center gap-2 text-lg font-semibold md:text-base"
-    >
-      <Package2 className="h-6 w-6" />
-      <span className="sr-only">Acme Inc</span>
-    </NavItem>
+  <nav className="hidden md:flex items-center space-x-6 lg:space-x-8">
     {navItems.map((item) => (
-      <NavItem key={item.to} to={item.to}>
+      <NavLink
+        key={item.to}
+        to={item.to}
+        className={({ isActive }) =>
+          cn(
+            "text-sm font-medium transition-colors hover:text-primary",
+            isActive ? "text-foreground" : "text-muted-foreground"
+          )
+        }
+      >
         {item.title}
-      </NavItem>
+      </NavLink>
     ))}
   </nav>
 );

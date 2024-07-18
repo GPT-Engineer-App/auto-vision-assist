@@ -1,29 +1,33 @@
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
-import { Menu, Package2 } from "lucide-react";
-import { NavItem } from "./NavItem";
+import { Menu } from "lucide-react";
+import { NavLink } from "react-router-dom";
+import { cn } from "@/lib/utils";
 
-export const MobileSheet = ({ navItems }) => (
-  <Sheet>
+export const MobileSheet = ({ navItems, isOpen, setIsOpen }) => (
+  <Sheet open={isOpen} onOpenChange={setIsOpen}>
     <SheetTrigger asChild>
-      <Button variant="outline" size="icon" className="shrink-0 md:hidden">
-        <Menu className="h-5 w-5" />
-        <span className="sr-only">Toggle navigation menu</span>
+      <Button variant="ghost" className="px-0 text-base hover:bg-transparent focus-visible:bg-transparent focus-visible:ring-0 focus-visible:ring-offset-0 md:hidden">
+        <Menu className="h-6 w-6" />
+        <span className="sr-only">Toggle menu</span>
       </Button>
     </SheetTrigger>
-    <SheetContent side="left">
+    <SheetContent side="left" className="pr-0">
       <nav className="grid gap-6 text-lg font-medium">
-        <NavItem
-          to="/"
-          className="flex items-center gap-2 text-lg font-semibold"
-        >
-          <Package2 className="h-6 w-6" />
-          <span className="sr-only">Acme Inc</span>
-        </NavItem>
         {navItems.map((item) => (
-          <NavItem key={item.to} to={item.to}>
+          <NavLink
+            key={item.to}
+            to={item.to}
+            className={({ isActive }) =>
+              cn(
+                "transition-colors hover:text-foreground",
+                isActive ? "text-foreground" : "text-muted-foreground"
+              )
+            }
+            onClick={() => setIsOpen(false)}
+          >
             {item.title}
-          </NavItem>
+          </NavLink>
         ))}
       </nav>
     </SheetContent>
