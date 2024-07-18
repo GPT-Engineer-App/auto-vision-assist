@@ -2,6 +2,8 @@ import { Home, LogIn, UserPlus, Car, Garage } from "lucide-react";
 import Index from "./pages/Index.jsx";
 import Login from "./pages/Login.jsx";
 import Signup from "./pages/Signup.jsx";
+import AddVehicle from "./pages/AddVehicle.jsx";
+import GaragePage from "./pages/Garage.jsx";
 
 export const navItems = [
   {
@@ -26,12 +28,12 @@ export const navItems = [
     title: "Add Vehicle",
     to: "/add-vehicle",
     icon: <Car className="h-4 w-4" />,
-    page: null, // We'll implement this later
+    page: <AddVehicle />,
   },
   {
     title: "Garage",
     to: "/garage",
     icon: <Garage className="h-4 w-4" />,
-    page: null, // We'll implement this later
+    page: <GaragePage />,
   },
 ];
