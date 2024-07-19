@@ -1,6 +1,5 @@
-import { Home, LogIn, UserPlus, Car, Wrench, FileCode2 } from "lucide-react";
+import { Home, UserPlus, Car, Wrench, FileCode2 } from "lucide-react";
 import Index from "./pages/Index.jsx";
-import Login from "./pages/Login.jsx";
 import Signup from "./pages/Signup.jsx";
 import AddVehicle from "./pages/AddVehicle.jsx";
 import GaragePage from "./pages/Garage.jsx";
@@ -12,12 +11,6 @@ export const navItems = [
     to: "/",
     icon: <Home className="h-4 w-4" />,
     page: <Index />,
-  },
-  {
-    title: "Log In",
-    to: "/login",
-    icon: <LogIn className="h-4 w-4" />,
-    page: <Login />,
   },
   {
     title: "Sign Up",
