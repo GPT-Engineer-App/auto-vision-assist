@@ -51,53 +51,55 @@ const Garage = () => {
   }
 
   return (
-    <div className="container mx-auto p-4">
-      <h1 className="text-3xl font-bold mb-6">Garage</h1>
-      {vehicles.length === 0 ? (
-        <p>No vehicles have been added yet.</p>
-      ) : isPro ? (
-        <ProGarageView vehicles={vehicles} />
-      ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          {vehicles.map((vehicle) => (
-            <Card key={vehicle.id} className={selectedVehicle === vehicle.id ? "border-primary" : ""}>
-              <CardHeader>
-                <CardTitle>{vehicle.year} {vehicle.make} {vehicle.model}</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <p><strong>Engine Size:</strong> {vehicle.engineSize}</p>
-                <p><strong>Drivetrain:</strong> {vehicle.drivetrain}</p>
-                <p><strong>Body Configuration:</strong> {vehicle.bodyConfig}</p>
-                <Button 
-                  onClick={() => setSelectedVehicle(vehicle.id)} 
-                  variant="outline" 
-                  className="mt-2"
-                >
-                  Select
-                </Button>
-              </CardContent>
-            </Card>
-          ))}
-        </div>
-      )}
-      <div className="mt-6">
-        <Button onClick={handleAddVehicle}>Add Vehicle</Button>
-        {!isPro && (
-          <Button variant="outline" className="ml-4">Upgrade to Pro</Button>
+    <div className="min-h-screen bg-cover bg-center p-4" style={{backgroundImage: 'linear-gradient(0deg, rgba(0, 0, 0, 0.4) 0%, rgba(0, 0, 0, 0) 25%), url("/images/garage-background.png")'}}>
+      <div className="container mx-auto bg-white/80 backdrop-blur-sm p-8 rounded-xl shadow-lg">
+        <h1 className="text-3xl font-bold mb-6">Garage</h1>
+        {vehicles.length === 0 ? (
+          <p>No vehicles have been added yet.</p>
+        ) : isPro ? (
+          <ProGarageView vehicles={vehicles} />
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            {vehicles.map((vehicle) => (
+              <Card key={vehicle.id} className={selectedVehicle === vehicle.id ? "border-primary" : ""}>
+                <CardHeader>
+                  <CardTitle>{vehicle.year} {vehicle.make} {vehicle.model}</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <p><strong>Engine Size:</strong> {vehicle.engineSize}</p>
+                  <p><strong>Drivetrain:</strong> {vehicle.drivetrain}</p>
+                  <p><strong>Body Configuration:</strong> {vehicle.bodyConfig}</p>
+                  <Button 
+                    onClick={() => setSelectedVehicle(vehicle.id)} 
+                    variant="outline" 
+                    className="mt-2"
+                  >
+                    Select
+                  </Button>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
         )}
-      </div>
-      {selectedVehicle && (
-        <div className="mt-8">
-          <h2 className="text-2xl font-bold mb-4">Diagnostic Chat</h2>
-          <DiagnosticChat vehicleId={selectedVehicle} isPro={isPro} />
-          {isPro && (
-            <>
-              <h2 className="text-2xl font-bold mt-8 mb-4">Vehicle History</h2>
-              <VehicleHistory vehicleId={selectedVehicle} />
-            </>
+        <div className="mt-6">
+          <Button onClick={handleAddVehicle}>Add Vehicle</Button>
+          {!isPro && (
+            <Button variant="outline" className="ml-4">Upgrade to Pro</Button>
           )}
         </div>
-      )}
+        {selectedVehicle && (
+          <div className="mt-8">
+            <h2 className="text-2xl font-bold mb-4">Diagnostic Chat</h2>
+            <DiagnosticChat vehicleId={selectedVehicle} isPro={isPro} />
+            {isPro && (
+              <>
+                <h2 className="text-2xl font-bold mt-8 mb-4">Vehicle History</h2>
+                <VehicleHistory vehicleId={selectedVehicle} />
+              </>
+            )}
+          </div>
+        )}
+      </div>
     </div>
   );
 };
