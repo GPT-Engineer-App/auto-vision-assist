@@ -23,14 +23,14 @@ const Login = () => {
 
   return (
     <div
-      className="relative flex size-full min-h-screen flex-col bg-[#faf3ef] justify-between group/design-root overflow-x-hidden"
+      className="relative flex size-full min-h-screen flex-col bg-background justify-between group/design-root overflow-x-hidden"
       style={{ fontFamily: '"Plus Jakarta Sans", "Noto Sans", sans-serif' }}
     >
       <div>
         <div className="@container">
           <div className="@[480px]:px-4 @[480px]:py-3">
             <div
-              className="bg-cover bg-center flex flex-col justify-end overflow-hidden bg-[#faf3ef] @[480px]:rounded-xl min-h-80"
+              className="bg-cover bg-center flex flex-col justify-end overflow-hidden bg-muted @[480px]:rounded-xl min-h-80"
               style={{
                 backgroundImage: 'linear-gradient(0deg, rgba(0, 0, 0, 0.4) 0%, rgba(0, 0, 0, 0) 25%), url("https://cdn.usegalileo.ai/sdxl10/b72f9abd-5a1e-4f9e-b281-bb88e55e4d29.png")',
               }}

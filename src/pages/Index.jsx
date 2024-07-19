@@ -24,11 +24,11 @@ const Index = () => {
   };
 
   return (
-    <div className="relative flex flex-col min-h-screen bg-[#faf3ef] justify-between overflow-x-hidden" style={{ fontFamily: '"Plus Jakarta Sans", "Noto Sans", sans-serif' }}>
+    <div className="relative flex flex-col min-h-screen bg-background justify-between overflow-x-hidden" style={{ fontFamily: '"Plus Jakarta Sans", "Noto Sans", sans-serif' }}>
       <div className="flex-grow">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
           <div 
-            className="bg-cover bg-center flex flex-col justify-end overflow-hidden bg-[#faf3ef] rounded-xl sm:min-h-screen" 
+            className="bg-cover bg-center flex flex-col justify-end overflow-hidden bg-muted rounded-xl sm:min-h-screen" 
             style={{
               backgroundImage: 'linear-gradient(0deg, rgba(0, 0, 0, 0.4) 0%, rgba(0, 0, 0, 0) 25%), url("https://cdn.usegalileo.ai/sdxl10/b72f9abd-5a1e-4f9e-b281-bb88e55e4d29.png")',
             }}
@@ -69,7 +69,7 @@ const Index = () => {
           </form>
         </div>
       </div>
-      <footer className="border-t border-[#f5e5db] bg-[#faf3ef] p-4 text-center">
+      <footer className="border-t border-[#f5e5db] bg-muted p-4 text-center">
         {/* Footer content can be added here if needed */}
       </footer>
     </div>
