@@ -25,11 +25,11 @@ const DTCCodes = () => {
 
   return (
     <div className="container mx-auto py-8">
-      <h1 className="text-3xl font-bold mb-6">DTC Codes Reference</h1>
+      <h1 className="text-3xl font-bold mb-6">DTC Code Reference</h1>
       <div className="flex gap-4 mb-6">
         <Input
           type="text"
-          placeholder="Search DTC codes..."
+          placeholder="Search DTC code..."
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
           className="flex-grow"
