@@ -1,3 +1,5 @@
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;700;800&family=Noto+Sans:wght@400;500;700;900&display=swap');
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -55,5 +57,14 @@
   }
   body {
     @apply bg-background text-foreground;
+    font-feature-settings: "rlig" 1, "calt" 1;
   }
+}
+
+.form-input {
+  @apply bg-[#faf3ef] border-[#eed3c4] text-[#201109] placeholder-[#ae6032];
+}
+
+.form-input:focus {
+  @apply border-[#eed3c4] ring-0 outline-none;
 }
