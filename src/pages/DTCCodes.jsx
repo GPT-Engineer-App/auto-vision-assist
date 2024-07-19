@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { 
@@ -13,15 +13,13 @@ import { dtcCodes } from '@/lib/dtc-codes';
 
 const DTCCodes = () => {
   const [searchTerm, setSearchTerm] = useState('');
-  const [filteredCodes, setFilteredCodes] = useState(dtcCodes);
 
-  const handleSearch = () => {
-    const filtered = dtcCodes.filter(code => 
+  const filteredCodes = useMemo(() => {
+    return dtcCodes.filter(code => 
       code.code.toLowerCase().includes(searchTerm.toLowerCase()) ||
       code.description.toLowerCase().includes(searchTerm.toLowerCase())
     );
-    setFilteredCodes(filtered);
-  };
+  }, [searchTerm]);
 
   return (
     <div className="container mx-auto py-8">
@@ -34,7 +32,6 @@ const DTCCodes = () => {
           onChange={(e) => setSearchTerm(e.target.value)}
           className="flex-grow"
         />
-        <Button onClick={handleSearch}>Search</Button>
       </div>
       <Table>
         <TableHeader>
