@@ -25,24 +25,12 @@ const Index = () => {
 
   return (
     <div className="relative flex flex-col min-h-screen bg-[#faf3ef] justify-between overflow-x-hidden" style={{ fontFamily: '"Plus Jakarta Sans", "Noto Sans", sans-serif' }}>
-      <header className="flex justify-between items-center p-4 bg-[#faf3ef] border-b border-[#f5e5db]">
-        <nav className="flex space-x-4">
-          <Link to="/" className="text-[#ae6032] hover:text-[#201109]">Home</Link>
-          <Link to="/garage" className="text-[#ae6032] hover:text-[#201109]">Garage</Link>
-          <Link to="/dtc-codes" className="text-[#ae6032] hover:text-[#201109]">DTC Codes</Link>
-          <Link to="/add-vehicle" className="text-[#ae6032] hover:text-[#201109]">Add Vehicle</Link>
-          <Link to="/login" className="text-[#ae6032] hover:text-[#201109]">Account</Link>
-        </nav>
-      </header>
       <div className="flex-grow">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
           <div 
-            className="bg-cover bg-center flex flex-col justify-end overflow-hidden bg-[#faf3ef] rounded-xl sm:min-h-80" 
+            className="bg-cover bg-center flex flex-col justify-end overflow-hidden bg-[#faf3ef] rounded-xl sm:min-h-screen" 
             style={{
               backgroundImage: 'linear-gradient(0deg, rgba(0, 0, 0, 0.4) 0%, rgba(0, 0, 0, 0) 25%), url("https://cdn.usegalileo.ai/sdxl10/b72f9abd-5a1e-4f9e-b281-bb88e55e4d29.png")',
-              backgroundSize: 'contain',
-              backgroundRepeat: 'no-repeat',
-              height: '300px'
             }}
           >
             <div className="flex p-4">
