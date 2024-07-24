@@ -5,6 +5,7 @@ import { Input } from "@/components/ui/input";
 import { signInWithEmailAndPassword } from "firebase/auth";
 import { auth } from "@/lib/firebase";
 import { toast } from "sonner";
+import CarWireframe from "@/components/CarWireframe";
 
 const Index = () => {
   const [email, setEmail] = useState("");
@@ -24,24 +25,20 @@ const Index = () => {
   };
 
   return (
-    <div className="relative flex flex-col min-h-screen bg-background justify-between overflow-x-hidden" style={{ fontFamily: '"Plus Jakarta Sans", "Noto Sans", sans-serif' }}>
-      <div className="flex-grow">
+    <div className="relative flex flex-col min-h-screen bg-black justify-between overflow-x-hidden" style={{ fontFamily: '"Plus Jakarta Sans", "Noto Sans", sans-serif' }}>
+      <CarWireframe />
+      <div className="flex-grow z-10">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-          <div 
-            className="bg-cover bg-center flex flex-col justify-end overflow-hidden bg-muted rounded-xl sm:min-h-screen" 
-            style={{
-              backgroundImage: 'linear-gradient(0deg, rgba(0, 0, 0, 0.4) 0%, rgba(0, 0, 0, 0) 25%), url("https://cdn.usegalileo.ai/sdxl10/b72f9abd-5a1e-4f9e-b281-bb88e55e4d29.png")',
-            }}
-          >
+          <div className="flex flex-col justify-end overflow-hidden rounded-xl sm:min-h-screen">
             <div className="flex p-4">
-              <p className="text-white tracking-light text-[28px] font-bold leading-tight">Auto Vision V2</p>
+              <p className="text-[#ff6600] tracking-light text-[28px] font-bold leading-tight">Auto Vision V2</p>
             </div>
           </div>
           <form onSubmit={handleLogin} className="mt-6 space-y-4">
             <Input
               type="email"
               placeholder="Enter your email"
-              className="form-input w-full rounded-xl text-[#201109] border border-[#eed3c4] bg-[#faf3ef] focus:border-[#eed3c4] h-14 placeholder:text-[#ae6032] p-[15px] text-base font-normal leading-normal"
+              className="form-input w-full rounded-xl text-[#ff6600] border border-[#ff6600] bg-black/50 focus:border-[#ff6600] h-14 placeholder:text-[#ff6600] p-[15px] text-base font-normal leading-normal"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               required
@@ -49,18 +46,18 @@ const Index = () => {
             <Input
               type="password"
               placeholder="Password"
-              className="form-input w-full rounded-xl text-[#201109] border border-[#eed3c4] bg-[#faf3ef] focus:border-[#eed3c4] h-14 placeholder:text-[#ae6032] p-[15px] text-base font-normal leading-normal"
+              className="form-input w-full rounded-xl text-[#ff6600] border border-[#ff6600] bg-black/50 focus:border-[#ff6600] h-14 placeholder:text-[#ff6600] p-[15px] text-base font-normal leading-normal"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               required
             />
             <div className="flex justify-center">
               <div className="flex flex-col items-stretch w-full max-w-md space-y-3">
-                <Button type="submit" className="flex items-center justify-center rounded-full h-12 px-5 bg-[#da560a] text-[#faf3ef] text-base font-bold leading-normal tracking-[0.015em] w-full hover:bg-[#c14d09]">
+                <Button type="submit" className="flex items-center justify-center rounded-full h-12 px-5 bg-[#ff6600] text-black text-base font-bold leading-normal tracking-[0.015em] w-full hover:bg-[#ff8533]">
                   <span className="truncate">Login</span>
                 </Button>
                 <Link to="/signup">
-                  <Button variant="secondary" className="flex items-center justify-center rounded-full h-12 px-5 bg-[#f5e5db] text-[#201109] text-base font-bold leading-normal tracking-[0.015em] w-full hover:bg-[#eed3c4]">
+                  <Button variant="secondary" className="flex items-center justify-center rounded-full h-12 px-5 bg-black text-[#ff6600] border border-[#ff6600] text-base font-bold leading-normal tracking-[0.015em] w-full hover:bg-[#ff6600] hover:text-black">
                     <span className="truncate">Sign Up</span>
                   </Button>
                 </Link>
@@ -69,7 +66,7 @@ const Index = () => {
           </form>
         </div>
       </div>
-      <footer className="border-t border-[#f5e5db] bg-muted p-4 text-center">
+      <footer className="border-t border-[#ff6600] bg-black/50 p-4 text-center text-[#ff6600] z-10">
         {/* Footer content can be added here if needed */}
       </footer>
     </div>
