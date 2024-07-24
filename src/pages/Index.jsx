@@ -1,82 +1,15 @@
-import { useState, useEffect, useRef } from "react";
+import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { signInWithEmailAndPassword } from "firebase/auth";
 import { auth } from "@/lib/firebase";
 import { toast } from "sonner";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import * as THREE from 'three';
 
 const Index = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const navigate = useNavigate();
-  const mountRef = useRef(null);
-
-  useEffect(() => {
-    // Three.js scene setup
-    const scene = new THREE.Scene();
-    const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
-    const renderer = new THREE.WebGLRenderer({ alpha: true });
-    renderer.setSize(window.innerWidth, window.innerHeight);
-    mountRef.current.appendChild(renderer.domElement);
-
-    // Create a car-like shape
-    const carGeometry = new THREE.BoxGeometry(2, 1, 4);
-    const carMaterial = new THREE.MeshBasicMaterial({ 
-      color: 0x00ffff, 
-      wireframe: true,
-      transparent: true,
-      opacity: 0.7
-    });
-    const car = new THREE.Mesh(carGeometry, carMaterial);
-    scene.add(car);
-
-    // Add some details to make it more car-like
-    const wheelGeometry = new THREE.CylinderGeometry(0.5, 0.5, 0.2, 32);
-    const wheelMaterial = new THREE.MeshBasicMaterial({ color: 0x00ffff, wireframe: true });
-    const wheel1 = new THREE.Mesh(wheelGeometry, wheelMaterial);
-    wheel1.rotation.z = Math.PI / 2;
-    wheel1.position.set(-1, -0.5, -1);
-    car.add(wheel1);
-
-    const wheel2 = wheel1.clone();
-    wheel2.position.set(1, -0.5, -1);
-    car.add(wheel2);
-
-    const wheel3 = wheel1.clone();
-    wheel3.position.set(-1, -0.5, 1);
-    car.add(wheel3);
-
-    const wheel4 = wheel1.clone();
-    wheel4.position.set(1, -0.5, 1);
-    car.add(wheel4);
-
-    camera.position.z = 5;
-
-    // Animation
-    const animate = () => {
-      requestAnimationFrame(animate);
-      car.rotation.y += 0.01;
-      renderer.render(scene, camera);
-    };
-    animate();
-
-    // Handle window resize
-    const handleResize = () => {
-      camera.aspect = window.innerWidth / window.innerHeight;
-      camera.updateProjectionMatrix();
-      renderer.setSize(window.innerWidth, window.innerHeight);
-    };
-    window.addEventListener('resize', handleResize);
-
-    // Cleanup
-    return () => {
-      window.removeEventListener('resize', handleResize);
-      mountRef.current.removeChild(renderer.domElement);
-    };
-  }, []);
 
   const handleLogin = async (e) => {
     e.preventDefault();
@@ -91,16 +24,24 @@ const Index = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-900 flex items-center justify-center relative">
-      <div ref={mountRef} className="absolute inset-0" />
-      <div className="relative bg-gray-800 rounded-lg shadow-lg overflow-hidden max-w-4xl w-full z-10">
-        <div className="p-8">
-          <h1 className="text-3xl font-bold text-white mb-4">Auto Vision V2</h1>
-          <form onSubmit={handleLogin} className="space-y-4">
+    <div className="relative flex flex-col min-h-screen bg-background justify-between overflow-x-hidden" style={{ fontFamily: '"Plus Jakarta Sans", "Noto Sans", sans-serif' }}>
+      <div className="flex-grow">
+        <div className="container mx-auto px-4 sm:px-6 lg:px-8">
+          <div 
+            className="bg-cover bg-center flex flex-col justify-end overflow-hidden bg-muted rounded-xl sm:min-h-screen" 
+            style={{
+              backgroundImage: 'linear-gradient(0deg, rgba(0, 0, 0, 0.4) 0%, rgba(0, 0, 0, 0) 25%), url("https://cdn.usegalileo.ai/sdxl10/b72f9abd-5a1e-4f9e-b281-bb88e55e4d29.png")',
+            }}
+          >
+            <div className="flex p-4">
+              <p className="text-white tracking-light text-[28px] font-bold leading-tight">Auto Vision V2</p>
+            </div>
+          </div>
+          <form onSubmit={handleLogin} className="mt-6 space-y-4">
             <Input
               type="email"
               placeholder="Enter your email"
-              className="bg-gray-700 text-white border-orange-500"
+              className="form-input w-full rounded-xl text-[#201109] border border-[#eed3c4] bg-[#faf3ef] focus:border-[#eed3c4] h-14 placeholder:text-[#ae6032] p-[15px] text-base font-normal leading-normal"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               required
@@ -108,61 +49,29 @@ const Index = () => {
             <Input
               type="password"
               placeholder="Password"
-              className="bg-gray-700 text-white border-orange-500"
+              className="form-input w-full rounded-xl text-[#201109] border border-[#eed3c4] bg-[#faf3ef] focus:border-[#eed3c4] h-14 placeholder:text-[#ae6032] p-[15px] text-base font-normal leading-normal"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               required
             />
-            <div className="flex justify-center space-x-4">
-              <Button type="submit" className="bg-orange-500 hover:bg-orange-600 text-white">
-                Login
-              </Button>
-              <Link to="/signup">
-                <Button variant="outline" className="border-orange-500 text-orange-500 hover:bg-orange-500 hover:text-white">
-                  Sign Up
+            <div className="flex justify-center">
+              <div className="flex flex-col items-stretch w-full max-w-md space-y-3">
+                <Button type="submit" className="flex items-center justify-center rounded-full h-12 px-5 bg-[#da560a] text-[#faf3ef] text-base font-bold leading-normal tracking-[0.015em] w-full hover:bg-[#c14d09]">
+                  <span className="truncate">Login</span>
                 </Button>
-              </Link>
+                <Link to="/signup">
+                  <Button variant="secondary" className="flex items-center justify-center rounded-full h-12 px-5 bg-[#f5e5db] text-[#201109] text-base font-bold leading-normal tracking-[0.015em] w-full hover:bg-[#eed3c4]">
+                    <span className="truncate">Sign Up</span>
+                  </Button>
+                </Link>
+              </div>
             </div>
           </form>
-          <div className="mt-8 text-white">
-            <h2 className="text-xl font-bold mb-4">Features</h2>
-            <div className="grid grid-cols-2 gap-4">
-              <Card className="bg-gray-700">
-                <CardHeader>
-                  <CardTitle className="text-orange-500">Vehicle Management</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <p className="text-sm">Easily manage and track your vehicles</p>
-                </CardContent>
-              </Card>
-              <Card className="bg-gray-700">
-                <CardHeader>
-                  <CardTitle className="text-orange-500">Diagnostic Tools</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <p className="text-sm">Access advanced diagnostic features</p>
-                </CardContent>
-              </Card>
-              <Card className="bg-gray-700">
-                <CardHeader>
-                  <CardTitle className="text-orange-500">Maintenance Reminders</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <p className="text-sm">Stay on top of your vehicle maintenance</p>
-                </CardContent>
-              </Card>
-              <Card className="bg-gray-700">
-                <CardHeader>
-                  <CardTitle className="text-orange-500">Performance Tracking</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <p className="text-sm">Monitor and optimize your vehicle's performance</p>
-                </CardContent>
-              </Card>
-            </div>
-          </div>
         </div>
       </div>
+      <footer className="border-t border-[#f5e5db] bg-muted p-4 text-center">
+        {/* Footer content can be added here if needed */}
+      </footer>
     </div>
   );
 };
