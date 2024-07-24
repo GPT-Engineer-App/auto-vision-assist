@@ -5,11 +5,13 @@ import { collection, addDoc, query, where, getDocs, limit } from "firebase/fires
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { toast } from "sonner";
+import { generateDiagnosticResponse } from "@/lib/openai";
 
 const DiagnosticChat = ({ vehicleId, isPro }) => {
   const [input, setInput] = useState("");
   const [response, setResponse] = useState("");
   const [queryCount, setQueryCount] = useState(0);
+  const [isLoading, setIsLoading] = useState(false);
 
   const fetchQueryCount = async () => {
     const queryCountRef = collection(db, "queryCounts");
@@ -40,9 +42,10 @@ const DiagnosticChat = ({ vehicleId, isPro }) => {
       return;
     }
 
+    setIsLoading(true);
+
     try {
-      // TODO: Replace with actual AI model API call
-      const aiResponse = await mockAIResponse(input);
+      const aiResponse = await generateDiagnosticResponse(input);
       setResponse(aiResponse);
 
       // Store query and response in Firestore
@@ -61,13 +64,9 @@ const DiagnosticChat = ({ vehicleId, isPro }) => {
       setQueryCount((prev) => prev + 1);
     } catch (error) {
       toast.error("Error processing your query: " + error.message);
+    } finally {
+      setIsLoading(false);
     }
-  };
-
-  // Mock AI response function (replace with actual API call)
-  const mockAIResponse = async (input) => {
-    await new Promise((resolve) => setTimeout(resolve, 1000)); // Simulate API delay
-    return `Here's a possible diagnosis for "${input}": [Mock AI response]`;
   };
 
   return (
@@ -79,8 +78,8 @@ const DiagnosticChat = ({ vehicleId, isPro }) => {
           placeholder="Enter vehicle symptoms or diagnostic trouble codes..."
           className="w-full"
         />
-        <Button type="submit" disabled={!isPro && queryCount >= 30}>
-          Get Diagnosis
+        <Button type="submit" disabled={!isPro && queryCount >= 30 || isLoading}>
+          {isLoading ? "Generating..." : "Get Diagnosis"}
         </Button>
       </form>
       {response && (
