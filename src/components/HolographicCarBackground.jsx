@@ -97,7 +97,15 @@ const HolographicCarBackground = () => {
     // Cleanup
     return () => {
       window.removeEventListener('resize', handleResize);
-      mountRef.current.removeChild(renderer.domElement);
+      if (mountRef.current) {
+        mountRef.current.removeChild(renderer.domElement);
+      }
+      renderer.dispose();
+      holographicMaterial.dispose();
+      bodyGeometry.dispose();
+      roofGeometry.dispose();
+      wheelGeometry.dispose();
+      wheelMaterial.dispose();
     };
   }, []);
 

@@ -76,7 +76,12 @@ const CarWireframe = () => {
 
     return () => {
       window.removeEventListener('resize', handleResize);
-      mountRef.current.removeChild(renderer.domElement);
+      if (mountRef.current) {
+        mountRef.current.removeChild(renderer.domElement);
+      }
+      renderer.dispose();
+      material.dispose();
+      carGeometry.dispose();
     };
   }, []);
 
