@@ -5,7 +5,7 @@ import { Input } from "@/components/ui/input";
 import { signInWithEmailAndPassword } from "firebase/auth";
 import { auth } from "@/lib/firebase";
 import { toast } from "sonner";
-import CarWireframe from "@/components/CarWireframe";
+import HolographicCarBackground from "@/components/HolographicCarBackground";
 
 const Index = () => {
   const [email, setEmail] = useState("");
@@ -26,7 +26,7 @@ const Index = () => {
 
   return (
     <div className="relative flex flex-col min-h-screen bg-black justify-between overflow-x-hidden" style={{ fontFamily: '"Plus Jakarta Sans", "Noto Sans", sans-serif' }}>
-      <CarWireframe />
+      <HolographicCarBackground />
       <div className="flex-grow z-10">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex flex-col justify-end overflow-hidden rounded-xl sm:min-h-screen">
