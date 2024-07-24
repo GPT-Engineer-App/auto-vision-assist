@@ -43,9 +43,9 @@ const AuthForm = ({ isLogin }) => {
     <form onSubmit={handleSubmit} className="space-y-4">
       {!isLogin && (
         <div className="space-y-2">
-          <Label htmlFor="username" className="text-[#ff6600]">Username</Label>
+          <Label htmlFor="username" className="text-gray-700">Username</Label>
           <div className="relative">
-            <User className="absolute left-3 top-1/2 transform -translate-y-1/2 text-[#ff6600]" size={18} />
+            <User className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500" size={18} />
             <Input
               id="username"
               name="username"
@@ -54,15 +54,15 @@ const AuthForm = ({ isLogin }) => {
               onChange={(e) => setUsername(e.target.value)}
               required
               autoComplete="username"
-              className="pl-10 bg-black/50 border-[#ff6600] text-[#ff6600] placeholder-[#ff6600]/50 focus:border-[#ff6600] focus:ring-[#ff6600]"
+              className="pl-10 bg-white border-gray-300 text-gray-700 placeholder-gray-400 focus:border-blue-500 focus:ring-blue-500"
             />
           </div>
         </div>
       )}
       <div className="space-y-2">
-        <Label htmlFor="email" className="text-[#ff6600]">Email</Label>
+        <Label htmlFor="email" className="text-gray-700">Email</Label>
         <div className="relative">
-          <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 text-[#ff6600]" size={18} />
+          <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500" size={18} />
           <Input
             id="email"
             name="email"
@@ -71,14 +71,14 @@ const AuthForm = ({ isLogin }) => {
             onChange={(e) => setEmail(e.target.value)}
             required
             autoComplete="email"
-            className="pl-10 bg-black/50 border-[#ff6600] text-[#ff6600] placeholder-[#ff6600]/50 focus:border-[#ff6600] focus:ring-[#ff6600]"
+            className="pl-10 bg-white border-gray-300 text-gray-700 placeholder-gray-400 focus:border-blue-500 focus:ring-blue-500"
           />
         </div>
       </div>
       <div className="space-y-2">
-        <Label htmlFor="password" className="text-[#ff6600]">Password</Label>
+        <Label htmlFor="password" className="text-gray-700">Password</Label>
         <div className="relative">
-          <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-[#ff6600]" size={18} />
+          <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500" size={18} />
           <Input
             id="password"
             name="password"
@@ -87,15 +87,15 @@ const AuthForm = ({ isLogin }) => {
             onChange={(e) => setPassword(e.target.value)}
             required
             autoComplete={isLogin ? "current-password" : "new-password"}
-            className="pl-10 bg-black/50 border-[#ff6600] text-[#ff6600] placeholder-[#ff6600]/50 focus:border-[#ff6600] focus:ring-[#ff6600]"
+            className="pl-10 bg-white border-gray-300 text-gray-700 placeholder-gray-400 focus:border-blue-500 focus:ring-blue-500"
           />
         </div>
       </div>
-      <Button type="submit" className="w-full bg-[#ff6600] hover:bg-[#ff8533] text-black font-bold">
+      <Button type="submit" className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold">
         {isLogin ? "Log In" : "Sign Up"}
       </Button>
       {import.meta.env.DEV && (
-        <p className="text-sm text-[#ff6600]/70 mt-2">
+        <p className="text-sm text-gray-500 mt-2">
           Dev login: dev@example.com / devpassword
         </p>
       )}

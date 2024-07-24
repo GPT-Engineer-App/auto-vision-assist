@@ -13,7 +13,7 @@ const CarWireframe = () => {
     mountRef.current.appendChild(renderer.domElement);
 
     // Create a wireframe material with increased line width
-    const material = new THREE.LineBasicMaterial({ color: 0xff6600, linewidth: 2 });
+    const material = new THREE.LineBasicMaterial({ color: 0x3b82f6, linewidth: 2 });
 
     // Create a more detailed car shape
     const carGeometry = new THREE.BufferGeometry();
