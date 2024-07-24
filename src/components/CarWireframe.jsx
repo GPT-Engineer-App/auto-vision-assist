@@ -13,21 +13,37 @@ const CarWireframe = () => {
     mountRef.current.appendChild(renderer.domElement);
 
     // Create a wireframe material with increased line width
-    const material = new THREE.LineBasicMaterial({ color: 0xff6600, linewidth: 3 });
+    const material = new THREE.LineBasicMaterial({ color: 0xff6600, linewidth: 2 });
 
-    // Create a basic car shape
+    // Create a more detailed car shape
     const carGeometry = new THREE.BufferGeometry();
     const vertices = new Float32Array([
       // Body
-      -1, 0, 1,    1, 0, 1,
-      1, 0, -1,    -1, 0, -1,
-      -1, 1, 1,    1, 1, 1,
-      1, 1, -1,    -1, 1, -1,
-      // Connecting lines
-      -1, 0, 1,    -1, 1, 1,
-      1, 0, 1,     1, 1, 1,
-      1, 0, -1,    1, 1, -1,
-      -1, 0, -1,   -1, 1, -1,
+      -2, 0, 1,    2, 0, 1,
+      2, 0, -1,    -2, 0, -1,
+      -2, 1, 1,    2, 1, 1,
+      2, 1, -1,    -2, 1, -1,
+      // Roof
+      -1.5, 1, 0.5,  1.5, 1, 0.5,
+      1.5, 1, -0.5,  -1.5, 1, -0.5,
+      -1.5, 1.5, 0.5,  1.5, 1.5, 0.5,
+      1.5, 1.5, -0.5,  -1.5, 1.5, -0.5,
+      // Hood
+      -2, 0.5, 1,   -1.5, 0.75, 1,
+      2, 0.5, 1,    1.5, 0.75, 1,
+      // Trunk
+      -2, 0.5, -1,   -1.5, 0.75, -1,
+      2, 0.5, -1,    1.5, 0.75, -1,
+      // Windows
+      -1.5, 1, 0.5,   -1.5, 1.5, 0.5,
+      1.5, 1, 0.5,    1.5, 1.5, 0.5,
+      1.5, 1, -0.5,   1.5, 1.5, -0.5,
+      -1.5, 1, -0.5,  -1.5, 1.5, -0.5,
+      // Wheels
+      -1.5, 0.3, 1.1,  -1.2, 0.3, 1.1,
+      1.5, 0.3, 1.1,   1.2, 0.3, 1.1,
+      -1.5, 0.3, -1.1, -1.2, 0.3, -1.1,
+      1.5, 0.3, -1.1,  1.2, 0.3, -1.1,
     ]);
     carGeometry.setAttribute('position', new THREE.BufferAttribute(vertices, 3));
     const carWireframe = new THREE.LineSegments(carGeometry, material);
@@ -38,12 +54,13 @@ const CarWireframe = () => {
     scene.add(ambientLight);
 
     // Adjust camera position
-    camera.position.z = 3;
+    camera.position.z = 5;
     camera.position.y = 1;
+    camera.position.x = -3;
 
     const animate = () => {
       requestAnimationFrame(animate);
-      carWireframe.rotation.y += 0.01;
+      carWireframe.rotation.y += 0.005;
       renderer.render(scene, camera);
     };
 
