@@ -12,8 +12,8 @@ const CarWireframe = () => {
     renderer.setSize(window.innerWidth, window.innerHeight);
     mountRef.current.appendChild(renderer.domElement);
 
-    // Create a wireframe material
-    const material = new THREE.LineBasicMaterial({ color: 0xff6600, linewidth: 2 });
+    // Create a wireframe material with increased line width
+    const material = new THREE.LineBasicMaterial({ color: 0xff6600, linewidth: 3 });
 
     // Create a basic car shape
     const carGeometry = new THREE.BufferGeometry();
@@ -33,7 +33,13 @@ const CarWireframe = () => {
     const carWireframe = new THREE.LineSegments(carGeometry, material);
     scene.add(carWireframe);
 
-    camera.position.z = 5;
+    // Add ambient light to the scene
+    const ambientLight = new THREE.AmbientLight(0xffffff, 0.5);
+    scene.add(ambientLight);
+
+    // Adjust camera position
+    camera.position.z = 3;
+    camera.position.y = 1;
 
     const animate = () => {
       requestAnimationFrame(animate);
