@@ -43,46 +43,54 @@ const AddVehicleForm = () => {
         <Label htmlFor="year">Year</Label>
         <Input
           id="year"
+          name="year"
           type="number"
           value={year}
           onChange={(e) => setYear(e.target.value)}
           required
+          autoComplete="off"
         />
       </div>
       <div className="space-y-2">
         <Label htmlFor="make">Make</Label>
         <Input
           id="make"
+          name="make"
           type="text"
           value={make}
           onChange={(e) => setMake(e.target.value)}
           required
+          autoComplete="off"
         />
       </div>
       <div className="space-y-2">
         <Label htmlFor="model">Model</Label>
         <Input
           id="model"
+          name="model"
           type="text"
           value={model}
           onChange={(e) => setModel(e.target.value)}
           required
+          autoComplete="off"
         />
       </div>
       <div className="space-y-2">
         <Label htmlFor="engineSize">Engine Size</Label>
         <Input
           id="engineSize"
+          name="engineSize"
           type="text"
           value={engineSize}
           onChange={(e) => setEngineSize(e.target.value)}
           required
+          autoComplete="off"
         />
       </div>
       <div className="space-y-2">
         <Label htmlFor="drivetrain">Drivetrain</Label>
         <Select onValueChange={setDrivetrain} required>
-          <SelectTrigger>
+          <SelectTrigger id="drivetrain" name="drivetrain">
             <SelectValue placeholder="Select drivetrain" />
           </SelectTrigger>
           <SelectContent>
@@ -96,7 +104,7 @@ const AddVehicleForm = () => {
       <div className="space-y-2">
         <Label htmlFor="bodyConfig">Body Configuration</Label>
         <Select onValueChange={setBodyConfig} required>
-          <SelectTrigger>
+          <SelectTrigger id="bodyConfig" name="bodyConfig">
             <SelectValue placeholder="Select body configuration" />
           </SelectTrigger>
           <SelectContent>

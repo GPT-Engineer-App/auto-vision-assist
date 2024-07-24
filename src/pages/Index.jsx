@@ -36,20 +36,26 @@ const Index = () => {
           </div>
           <form onSubmit={handleLogin} className="mt-6 space-y-4">
             <Input
+              id="email"
+              name="email"
               type="email"
               placeholder="Enter your email"
               className="form-input w-full rounded-xl text-[#ff6600] border border-[#ff6600] bg-black/50 focus:border-[#ff6600] h-14 placeholder:text-[#ff6600] p-[15px] text-base font-normal leading-normal"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               required
+              autoComplete="email"
             />
             <Input
+              id="password"
+              name="password"
               type="password"
               placeholder="Password"
               className="form-input w-full rounded-xl text-[#ff6600] border border-[#ff6600] bg-black/50 focus:border-[#ff6600] h-14 placeholder:text-[#ff6600] p-[15px] text-base font-normal leading-normal"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               required
+              autoComplete="current-password"
             />
             <div className="flex justify-center">
               <div className="flex flex-col items-stretch w-full max-w-md space-y-3">

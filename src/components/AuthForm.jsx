@@ -48,10 +48,12 @@ const AuthForm = ({ isLogin }) => {
             <User className="absolute left-3 top-1/2 transform -translate-y-1/2 text-[#ff6600]" size={18} />
             <Input
               id="username"
+              name="username"
               type="text"
               value={username}
               onChange={(e) => setUsername(e.target.value)}
               required
+              autoComplete="username"
               className="pl-10 bg-black/50 border-[#ff6600] text-[#ff6600] placeholder-[#ff6600]/50 focus:border-[#ff6600] focus:ring-[#ff6600]"
             />
           </div>
@@ -63,10 +65,12 @@ const AuthForm = ({ isLogin }) => {
           <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 text-[#ff6600]" size={18} />
           <Input
             id="email"
+            name="email"
             type="email"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             required
+            autoComplete="email"
             className="pl-10 bg-black/50 border-[#ff6600] text-[#ff6600] placeholder-[#ff6600]/50 focus:border-[#ff6600] focus:ring-[#ff6600]"
           />
         </div>
@@ -77,10 +81,12 @@ const AuthForm = ({ isLogin }) => {
           <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-[#ff6600]" size={18} />
           <Input
             id="password"
+            name="password"
             type="password"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             required
+            autoComplete={isLogin ? "current-password" : "new-password"}
             className="pl-10 bg-black/50 border-[#ff6600] text-[#ff6600] placeholder-[#ff6600]/50 focus:border-[#ff6600] focus:ring-[#ff6600]"
           />
         </div>
