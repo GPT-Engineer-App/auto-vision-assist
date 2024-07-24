@@ -14,7 +14,7 @@ import DTCAnalysisView from '@/components/DTCAnalysisView';
 
 const DTCCodes = () => {
   const [searchTerm, setSearchTerm] = useState('');
-  const [showAnalysis, setShowAnalysis] = useState(false);
+  const [selectedDTC, setSelectedDTC] = useState(null);
 
   const filteredCodes = useMemo(() => {
     return dtcCodes.filter(code => 
@@ -23,49 +23,41 @@ const DTCCodes = () => {
     );
   }, [searchTerm]);
 
-  // Mock data for the analysis view
-  const mockAnalysisData = {
-    components: [
-      { name: "Disc Brake Pad", count: 37764 },
-      { name: "Brake Rotor", count: 30194 },
-      { name: "Battery", count: 27079 },
-      { name: "Engine Water Pump", count: 19514 },
-      { name: "Fuel Filter", count: 16361 },
-      { name: "Wheel Hub Assembly", count: 15947 },
-      { name: "Air Conditioning Refri...", count: 12771 },
-      { name: "Spark Plug", count: 11367 },
-      { name: "Engine Coolant Ther...", count: 11216 },
-      { name: "Fuel Pump", count: 9367 },
-    ],
-    dtcs: [
-      { code: "P0171: System Too L...", count: 1848 },
-      { code: "P0174: System Too L...", count: 1444 },
-      { code: "P0300: Random/Multi...", count: 1124 },
-      { code: "P0446: Evaporative E...", count: 1102 },
-      { code: "P0455: Evaporative E...", count: 1086 },
-      { code: "C0327", count: 863 },
-      { code: "P0442: Evaporative E...", count: 848 },
-      { code: "P0101: Mass Or Volu...", count: 708 },
-      { code: "P0135: O2 Sensor He...", count: 704 },
-      { code: "P0449: Evaporative E...", count: 693 },
-    ],
-    symptoms: [
-      { description: "Engine Does Not Start", count: 6310 },
-      { description: "Coolant Leaks From V...", count: 5307 },
-      { description: "Air Conditioning Inop...", count: 3420 },
-      { description: "Noise Heard From Bra...", count: 3345 },
-      { description: "Fluid Leaks From Vehi...", count: 2917 },
-      { description: "Noise Heard", count: 2144 },
-      { description: "Noise Heard From Fro...", count: 1935 },
-      { description: "Engine Runs Rough", count: 1680 },
-      { description: "Engine Overheats", count: 1387 },
-      { description: "4wd Light On", count: 1278 },
-    ],
+  // This function would be replaced with actual API calls or more complex logic
+  const generateAnalysisData = (dtc) => {
+    // Mock data generation based on the selected DTC
+    return {
+      components: [
+        { name: "Throttle Body", count: 5 },
+        { name: "Throttle Body Gasket", count: 4 },
+        { name: "Throttle Position Sensor", count: 3 },
+        { name: "Brake Light Switch", count: 2 },
+        { name: "Powertrain Control Module", count: 1 },
+      ],
+      dtcs: [
+        { code: dtc, count: 10 },
+        { code: "P0122", count: 8 },
+        { code: "P0123", count: 6 },
+        { code: "P0124", count: 4 },
+        { code: "P0125", count: 2 },
+      ],
+      symptoms: [
+        { description: "Check Engine Light On", count: 15 },
+        { description: "Poor Acceleration", count: 12 },
+        { description: "Stalling", count: 9 },
+        { description: "Reduced Power", count: 7 },
+        { description: "Rough Idle", count: 5 },
+      ],
+    };
+  };
+
+  const handleDTCSelect = (dtc) => {
+    setSelectedDTC(dtc);
   };
 
   return (
-    <div className="min-h-screen bg-cover bg-center p-4" style={{backgroundImage: 'linear-gradient(0deg, rgba(0, 0, 0, 0.4) 0%, rgba(0, 0, 0, 0) 25%), url("/images/dtc-codes-background.png")'}}>
-      <div className="container mx-auto bg-white/80 backdrop-blur-sm p-8 rounded-xl shadow-lg">
+    <div className="min-h-screen bg-gray-100 p-4">
+      <div className="container mx-auto bg-white p-8 rounded-xl shadow-lg">
         <h1 className="text-3xl font-bold mb-6">DTC Code Reference</h1>
         <div className="flex gap-4 mb-6">
           <Input
@@ -75,34 +67,37 @@ const DTCCodes = () => {
             onChange={(e) => setSearchTerm(e.target.value)}
             className="flex-grow"
           />
-          <Button onClick={() => setShowAnalysis(!showAnalysis)}>
-            {showAnalysis ? "Hide Analysis" : "Show Analysis"}
-          </Button>
         </div>
-        {showAnalysis ? (
-          <DTCAnalysisView
-            components={mockAnalysisData.components}
-            dtcs={mockAnalysisData.dtcs}
-            symptoms={mockAnalysisData.symptoms}
-          />
-        ) : (
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead className="w-[100px]">Code</TableHead>
-                <TableHead>Description</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {filteredCodes.map((code) => (
-                <TableRow key={code.code}>
-                  <TableCell className="font-medium">{code.code}</TableCell>
-                  <TableCell>{code.description}</TableCell>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div>
+            <h2 className="text-xl font-semibold mb-4">DTC Codes</h2>
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead className="w-[100px]">Code</TableHead>
+                  <TableHead>Description</TableHead>
+                  <TableHead className="w-[100px]">Action</TableHead>
                 </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-        )}
+              </TableHeader>
+              <TableBody>
+                {filteredCodes.map((code) => (
+                  <TableRow key={code.code}>
+                    <TableCell className="font-medium">{code.code}</TableCell>
+                    <TableCell>{code.description}</TableCell>
+                    <TableCell>
+                      <Button onClick={() => handleDTCSelect(code.code)}>Analyze</Button>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </div>
+          <div>
+            {selectedDTC && (
+              <DTCAnalysisView {...generateAnalysisData(selectedDTC)} />
+            )}
+          </div>
+        </div>
       </div>
     </div>
   );
