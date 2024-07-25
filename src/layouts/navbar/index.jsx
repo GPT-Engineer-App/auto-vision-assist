@@ -1,17 +1,12 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
+import { navItems } from "@/nav-items";
 import { Outlet } from "react-router-dom";
 import { DesktopNavbar } from "./_components/DesktopNavbar";
 import { MobileSheet } from "./_components/MobileSheet";
 import { UserMenu } from "./_components/UserMenu";
-import { navItems } from "@/nav-items";
 
 const Layout = () => {
-  console.log("Layout component rendered"); // Add this line for debugging
   const [isOpen, setIsOpen] = useState(false);
-
-  useEffect(() => {
-    console.log("Layout component mounted"); // Add this line for debugging
-  }, []);
 
   return (
     <div className="flex min-h-screen w-full flex-col bg-background text-foreground">

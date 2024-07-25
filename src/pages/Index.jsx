@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -8,22 +8,14 @@ import { toast } from "sonner";
 import HolographicCarBackground from "@/components/HolographicCarBackground";
 
 const Index = () => {
-  console.log("Index component rendered"); // Add this line for debugging
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const navigate = useNavigate();
 
-  useEffect(() => {
-    console.log("Index component mounted"); // Add this line for debugging
-    // You can add any necessary setup or data fetching here
-  }, []);
-
   const handleLogin = async (e) => {
     e.preventDefault();
-    console.log("Login attempt with email:", email); // Add this line for debugging
     try {
       await signInWithEmailAndPassword(auth, email, password);
-      console.log("Login successful"); // Add this line for debugging
       toast.success("Logged in successfully");
       navigate("/garage");
     } catch (error) {
