@@ -6,6 +6,7 @@ import { UserMenu } from "./_components/UserMenu";
 import { navItems } from "@/nav-items";
 
 const Layout = () => {
+  console.log("Layout component rendered"); // Add this line for debugging
   const [isOpen, setIsOpen] = useState(false);
 
   return (
