@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { collection, query, getDocs, doc, deleteDoc, updateDoc } from "firebase/firestore";
+import { collection, query, getDocs, doc, deleteDoc, updateDoc, where } from "firebase/firestore";
 import { db, auth } from "@/lib/firebase";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -14,22 +14,21 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import AdPlaceholder from "@/components/AdPlaceholder";
 
-const Garage = () => {
+const Garage = ({ isPro, setIsPro, user }) => {
   const [vehicles, setVehicles] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [isPro, setIsPro] = useState(false);
   const [selectedVehicle, setSelectedVehicle] = useState(null);
   const [editingVehicle, setEditingVehicle] = useState(null);
   const navigate = useNavigate();
 
   useEffect(() => {
     const fetchVehicles = async () => {
-      if (!auth.currentUser) {
+      if (!user) {
         setLoading(false);
         return;
       }
       try {
-        const q = query(collection(db, "vehicles"));
+        const q = query(collection(db, "vehicles"), where("userId", "==", user.uid));
         const querySnapshot = await getDocs(q);
         const vehicleData = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
         setVehicles(vehicleData);
@@ -44,7 +43,7 @@ const Garage = () => {
     };
 
     fetchVehicles();
-  }, []);
+  }, [user]);
 
   const handleAddVehicle = () => {
     if (!isPro && vehicles.length >= 1) {
@@ -87,17 +86,22 @@ const Garage = () => {
     }
   };
 
-  const handleUpgradeToPro = () => {
-    // Implement the logic for upgrading to Pro
-    toast.success("Upgraded to Pro successfully!");
-    setIsPro(true);
+  const handleUpgradeToPro = async () => {
+    try {
+      await updateDoc(doc(db, "users", user.uid), { isPro: true });
+      setIsPro(true);
+      toast.success("Upgraded to Pro successfully!");
+    } catch (error) {
+      console.error("Error upgrading to Pro:", error);
+      toast.error("Failed to upgrade to Pro");
+    }
   };
 
   if (loading) {
     return <div className="text-center mt-8">Loading...</div>;
   }
 
-  if (!auth.currentUser) {
+  if (!user) {
     return (
       <div className="text-center mt-8">
         <p>Please log in to view your garage.</p>

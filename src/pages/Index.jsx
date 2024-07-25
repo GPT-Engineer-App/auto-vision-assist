@@ -1,13 +1,24 @@
-import { useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import HolographicCarBackground from "@/components/HolographicCarBackground";
 import AuthForm from "@/components/AuthForm";
+import { auth } from "@/lib/firebase";
 
 const Index = () => {
   const [isLogin, setIsLogin] = useState(true);
   const navigate = useNavigate();
+
+  useEffect(() => {
+    const unsubscribe = auth.onAuthStateChanged((user) => {
+      if (user) {
+        navigate("/garage");
+      }
+    });
+
+    return () => unsubscribe();
+  }, [navigate]);
 
   return (
     <div className="relative flex flex-col min-h-screen bg-black justify-between overflow-x-hidden">

@@ -5,7 +5,7 @@ import { DesktopNavbar } from "./_components/DesktopNavbar";
 import { MobileSheet } from "./_components/MobileSheet";
 import { UserMenu } from "./_components/UserMenu";
 
-const Layout = () => {
+const Layout = ({ user, isPro }) => {
   const [isOpen, setIsOpen] = useState(false);
 
   return (
@@ -14,7 +14,7 @@ const Layout = () => {
         <div className="container flex h-16 items-center justify-between">
           <DesktopNavbar navItems={navItems} />
           <MobileSheet navItems={navItems} isOpen={isOpen} setIsOpen={setIsOpen} />
-          <UserMenu />
+          <UserMenu user={user} isPro={isPro} />
         </div>
       </header>
       <main className="flex-1 container py-6">
