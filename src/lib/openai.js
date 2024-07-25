@@ -1,7 +1,7 @@
 import OpenAI from 'openai';
 
 const openai = new OpenAI({
-  apiKey: 'sk-proj-xpVFxxcM6z7lwCJdhDZDT3BlbkFJjQ4IDUVyj4nIaLGlErlp',
+  apiKey: process.env.OPENAI_API_KEY,
   dangerouslyAllowBrowser: true // Note: This is not recommended for production. Use a backend proxy instead.
 });
 
