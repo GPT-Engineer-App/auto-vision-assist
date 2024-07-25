@@ -12,6 +12,7 @@ import DTCCodes from "./pages/DTCCodes";
 const queryClient = new QueryClient();
 
 const App = () => {
+  console.log("App component rendered"); // Add this line for debugging
   return (
     <QueryClientProvider client={queryClient}>
       <TooltipProvider>
