@@ -2,9 +2,11 @@ import React, { useRef, useEffect } from 'react';
 import * as THREE from 'three';
 
 const HolographicCarBackground = () => {
+  console.log("HolographicCarBackground component rendered"); // Add this line for debugging
   const mountRef = useRef(null);
 
   useEffect(() => {
+    console.log("HolographicCarBackground effect running"); // Add this line for debugging
     // Scene setup
     const scene = new THREE.Scene();
     const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
@@ -94,8 +96,11 @@ const HolographicCarBackground = () => {
 
     window.addEventListener('resize', handleResize);
 
+    console.log("HolographicCarBackground setup complete"); // Add this line for debugging
+
     // Cleanup
     return () => {
+      console.log("HolographicCarBackground cleanup"); // Add this line for debugging
       window.removeEventListener('resize', handleResize);
       if (mountRef.current) {
         mountRef.current.removeChild(renderer.domElement);

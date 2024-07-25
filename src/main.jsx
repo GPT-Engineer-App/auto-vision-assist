@@ -5,8 +5,20 @@ import "./index.css";
 
 console.log("main.jsx executed"); // Add this line for debugging
 
-ReactDOM.createRoot(document.getElementById("root")).render(
+const root = ReactDOM.createRoot(document.getElementById("root"));
+
+root.render(
   <React.StrictMode>
     <App />
-  </React.StrictMode>,
+  </React.StrictMode>
 );
+
+// Add an error event listener to catch any unhandled errors
+window.addEventListener('error', (event) => {
+  console.error('Unhandled error:', event.error);
+});
+
+// Add an unhandled promise rejection listener
+window.addEventListener('unhandledrejection', (event) => {
+  console.error('Unhandled promise rejection:', event.reason);
+});
