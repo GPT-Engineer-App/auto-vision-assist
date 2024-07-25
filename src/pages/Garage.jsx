@@ -12,11 +12,12 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import AdPlaceholder from "@/components/AdPlaceholder";
 
 const Garage = () => {
   const [vehicles, setVehicles] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [isPro, setIsPro] = useState(false); // In a real app, this would be fetched from the user's profile
+  const [isPro, setIsPro] = useState(false);
   const [selectedVehicle, setSelectedVehicle] = useState(null);
   const [editingVehicle, setEditingVehicle] = useState(null);
   const navigate = useNavigate();
@@ -86,6 +87,12 @@ const Garage = () => {
     }
   };
 
+  const handleUpgradeToPro = () => {
+    // Implement the logic for upgrading to Pro
+    toast.success("Upgraded to Pro successfully!");
+    setIsPro(true);
+  };
+
   if (loading) {
     return <div className="text-center mt-8">Loading...</div>;
   }
@@ -103,6 +110,7 @@ const Garage = () => {
     <div className="min-h-screen bg-cover bg-center p-4" style={{backgroundImage: 'linear-gradient(0deg, rgba(0, 0, 0, 0.4) 0%, rgba(0, 0, 0, 0) 25%), url("/images/garage-background.png")'}}>
       <div className="container mx-auto bg-white/80 backdrop-blur-sm p-8 rounded-xl shadow-lg">
         <h1 className="text-3xl font-bold mb-6">Garage</h1>
+        {!isPro && <AdPlaceholder />}
         {vehicles.length === 0 ? (
           <p>No vehicles have been added yet.</p>
         ) : isPro ? (
@@ -146,7 +154,7 @@ const Garage = () => {
         <div className="mt-6">
           <Button onClick={handleAddVehicle}>Add Vehicle</Button>
           {!isPro && (
-            <Button variant="outline" className="ml-4">Upgrade to Pro</Button>
+            <Button variant="outline" className="ml-4" onClick={handleUpgradeToPro}>Upgrade to Pro</Button>
           )}
         </div>
         {selectedVehicle && (
