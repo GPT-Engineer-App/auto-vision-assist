@@ -1,9 +1,9 @@
 import { Home, LogIn, UserPlus, Car, Wrench } from "lucide-react";
-import Index from "./pages/Index.jsx";
-import Login from "./pages/Login.jsx";
-import Signup from "./pages/Signup.jsx";
-import AddVehicle from "./pages/AddVehicle.jsx";
-import GaragePage from "./pages/Garage.jsx";
+import Index from "./pages/Index";
+import Login from "./pages/Login";
+import Signup from "./pages/Signup";
+import AddVehicle from "./pages/AddVehicle";
+import GaragePage from "./pages/Garage";
 
 export const navItems = [
   {
