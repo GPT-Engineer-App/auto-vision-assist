@@ -14,15 +14,18 @@ const AuthForm = ({ isLogin }) => {
   const [password, setPassword] = useState("");
   const [username, setUsername] = useState("");
   const [isResettingPassword, setIsResettingPassword] = useState(false);
+  const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setLoading(true);
     try {
       if (isResettingPassword) {
         await sendPasswordResetEmail(auth, email);
         toast.success("Password reset email sent. Check your inbox.");
         setIsResettingPassword(false);
+        setLoading(false);
         return;
       }
 
@@ -46,6 +49,8 @@ const AuthForm = ({ isLogin }) => {
     } catch (error) {
       console.error("Authentication error:", error);
       toast.error(error.message);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -107,8 +112,8 @@ const AuthForm = ({ isLogin }) => {
           </div>
         </div>
       )}
-      <Button type="submit" className="w-full bg-[#ff6600] hover:bg-[#ff8533] text-black font-bold">
-        {isResettingPassword ? "Reset Password" : isLogin ? "Log In" : "Sign Up"}
+      <Button type="submit" className="w-full bg-[#ff6600] hover:bg-[#ff8533] text-black font-bold" disabled={loading}>
+        {loading ? "Processing..." : isResettingPassword ? "Reset Password" : isLogin ? "Log In" : "Sign Up"}
       </Button>
       <Button type="button" variant="link" onClick={togglePasswordReset} className="w-full text-[#ff6600]">
         {isResettingPassword ? "Back to Login" : "Forgot Password?"}
