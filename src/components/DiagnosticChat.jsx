@@ -63,6 +63,7 @@ const DiagnosticChat = ({ vehicleId, isPro }) => {
 
       setQueryCount((prev) => prev + 1);
     } catch (error) {
+      console.error("Error processing query:", error);
       toast.error("Error processing your query: " + error.message);
     } finally {
       setIsLoading(false);
