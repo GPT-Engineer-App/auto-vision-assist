@@ -10,6 +10,7 @@ import { purchaseProVersion, checkProPurchaseStatus } from "@/lib/inAppPurchase"
 const UserProfile = ({ isPro, setIsPro, user }) => {
   const [isProEnabled, setIsProEnabled] = useState(isPro);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
   useEffect(() => {
     const fetchUserProfile = async () => {
@@ -20,6 +21,15 @@ const UserProfile = ({ isPro, setIsPro, user }) => {
             const userData = userDoc.data();
             setIsProEnabled(userData.isPro || false);
             setIsPro(userData.isPro || false);
+          } else {
+            // If the user document doesn't exist, create it
+            await setDoc(doc(db, "users", user.uid), {
+              email: user.email,
+              isPro: false,
+              createdAt: new Date(),
+            });
+            setIsProEnabled(false);
+            setIsPro(false);
           }
           // Check if the user has purchased Pro version
           const hasPurchasedPro = await checkProPurchaseStatus();
@@ -28,10 +38,15 @@ const UserProfile = ({ isPro, setIsPro, user }) => {
           }
         } catch (error) {
           console.error("Error fetching user profile:", error);
+          setError("Failed to load user profile. Please try again later.");
           toast.error("Failed to load user profile");
+        } finally {
+          setLoading(false);
         }
+      } else {
+        setLoading(false);
+        setError("User not authenticated. Please log in.");
       }
-      setLoading(false);
     };
 
     fetchUserProfile();
@@ -70,6 +85,10 @@ const UserProfile = ({ isPro, setIsPro, user }) => {
 
   if (loading) {
     return <div>Loading profile...</div>;
+  }
+
+  if (error) {
+    return <div className="text-red-500">{error}</div>;
   }
 
   if (!user) {
