@@ -69,6 +69,12 @@ const DiagnosticChat = ({ vehicleId, isPro }) => {
     }
   };
 
+  const handlePurchaseQueries = () => {
+    // Implement the logic for purchasing additional queries
+    toast.success("Additional queries purchased successfully!");
+    setQueryCount(0); // Reset the query count or add the purchased amount
+  };
+
   return (
     <div className="space-y-4">
       <form onSubmit={handleSubmit} className="space-y-4">
@@ -89,9 +95,16 @@ const DiagnosticChat = ({ vehicleId, isPro }) => {
         </div>
       )}
       {!isPro && (
-        <p className="text-sm text-muted-foreground">
-          Queries remaining: {30 - queryCount}/30
-        </p>
+        <div className="flex justify-between items-center">
+          <p className="text-sm text-muted-foreground">
+            Queries remaining: {30 - queryCount}/30
+          </p>
+          {queryCount >= 30 && (
+            <Button onClick={handlePurchaseQueries}>
+              Purchase More Queries
+            </Button>
+          )}
+        </div>
       )}
     </div>
   );
