@@ -5,6 +5,10 @@ import "./index.css";
 
 console.log("main.jsx executed"); // Add this line for debugging
 
+// Clear localStorage and sessionStorage
+localStorage.clear();
+sessionStorage.clear();
+
 const root = ReactDOM.createRoot(document.getElementById("root"));
 
 root.render(
