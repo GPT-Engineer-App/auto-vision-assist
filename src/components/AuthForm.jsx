@@ -1,27 +1,28 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { createUserWithEmailAndPassword, signInWithEmailAndPassword } from "firebase/auth";
-import { auth } from "@/lib/firebase";
+import { createUserWithEmailAndPassword, signInWithEmailAndPassword, sendPasswordResetEmail } from "firebase/auth";
+import { auth, db } from "@/lib/firebase";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
 import { Lock, Mail, User } from "lucide-react";
+import { doc, setDoc } from "firebase/firestore";
 
 const AuthForm = ({ isLogin }) => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [username, setUsername] = useState("");
+  const [isResettingPassword, setIsResettingPassword] = useState(false);
   const navigate = useNavigate();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      // Check for generic login credentials in development environment
-      if (import.meta.env.DEV && email === "dev@example.com" && password === "devpassword") {
-        console.log("Logging in with generic credentials");
-        toast.success("Logged in with generic credentials");
-        navigate("/garage");
+      if (isResettingPassword) {
+        await sendPasswordResetEmail(auth, email);
+        toast.success("Password reset email sent. Check your inbox.");
+        setIsResettingPassword(false);
         return;
       }
 
@@ -29,7 +30,16 @@ const AuthForm = ({ isLogin }) => {
         await signInWithEmailAndPassword(auth, email, password);
         toast.success("Logged in successfully");
       } else {
-        await createUserWithEmailAndPassword(auth, email, password);
+        const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+        const user = userCredential.user;
+        
+        // Create user profile in Firestore
+        await setDoc(doc(db, "users", user.uid), {
+          username,
+          email,
+          createdAt: new Date(),
+        });
+        
         toast.success("Account created successfully");
       }
       navigate("/garage");
@@ -39,11 +49,15 @@ const AuthForm = ({ isLogin }) => {
     }
   };
 
+  const togglePasswordReset = () => {
+    setIsResettingPassword(!isResettingPassword);
+  };
+
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
-      {!isLogin && (
+      {!isLogin && !isResettingPassword && (
         <div className="space-y-2">
-          <Label htmlFor="username" className="text-gray-700">Username</Label>
+          <Label htmlFor="username" className="text-gray-300">Username</Label>
           <div className="relative">
             <User className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500" size={18} />
             <Input
@@ -54,13 +68,13 @@ const AuthForm = ({ isLogin }) => {
               onChange={(e) => setUsername(e.target.value)}
               required
               autoComplete="username"
-              className="pl-10 bg-white border-gray-300 text-gray-700 placeholder-gray-400 focus:border-blue-500 focus:ring-blue-500"
+              className="pl-10 bg-black/50 border-[#ff6600] text-[#ff6600] placeholder-[#ff6600]/50 focus:border-[#ff6600] focus:ring-[#ff6600]"
             />
           </div>
         </div>
       )}
       <div className="space-y-2">
-        <Label htmlFor="email" className="text-gray-700">Email</Label>
+        <Label htmlFor="email" className="text-gray-300">Email</Label>
         <div className="relative">
           <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500" size={18} />
           <Input
@@ -71,34 +85,34 @@ const AuthForm = ({ isLogin }) => {
             onChange={(e) => setEmail(e.target.value)}
             required
             autoComplete="email"
-            className="pl-10 bg-white border-gray-300 text-gray-700 placeholder-gray-400 focus:border-blue-500 focus:ring-blue-500"
+            className="pl-10 bg-black/50 border-[#ff6600] text-[#ff6600] placeholder-[#ff6600]/50 focus:border-[#ff6600] focus:ring-[#ff6600]"
           />
         </div>
       </div>
-      <div className="space-y-2">
-        <Label htmlFor="password" className="text-gray-700">Password</Label>
-        <div className="relative">
-          <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500" size={18} />
-          <Input
-            id="password"
-            name="password"
-            type="password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            required
-            autoComplete={isLogin ? "current-password" : "new-password"}
-            className="pl-10 bg-white border-gray-300 text-gray-700 placeholder-gray-400 focus:border-blue-500 focus:ring-blue-500"
-          />
+      {!isResettingPassword && (
+        <div className="space-y-2">
+          <Label htmlFor="password" className="text-gray-300">Password</Label>
+          <div className="relative">
+            <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500" size={18} />
+            <Input
+              id="password"
+              name="password"
+              type="password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              required
+              autoComplete={isLogin ? "current-password" : "new-password"}
+              className="pl-10 bg-black/50 border-[#ff6600] text-[#ff6600] placeholder-[#ff6600]/50 focus:border-[#ff6600] focus:ring-[#ff6600]"
+            />
+          </div>
         </div>
-      </div>
-      <Button type="submit" className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold">
-        {isLogin ? "Log In" : "Sign Up"}
-      </Button>
-      {import.meta.env.DEV && (
-        <p className="text-sm text-gray-500 mt-2">
-          Dev login: dev@example.com / devpassword
-        </p>
       )}
+      <Button type="submit" className="w-full bg-[#ff6600] hover:bg-[#ff8533] text-black font-bold">
+        {isResettingPassword ? "Reset Password" : isLogin ? "Log In" : "Sign Up"}
+      </Button>
+      <Button type="button" variant="link" onClick={togglePasswordReset} className="w-full text-[#ff6600]">
+        {isResettingPassword ? "Back to Login" : "Forgot Password?"}
+      </Button>
     </form>
   );
 };
