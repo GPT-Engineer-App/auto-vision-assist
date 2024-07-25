@@ -37,7 +37,7 @@ const DiagnosticChat = ({ vehicleId, isPro }) => {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    if (!isPro && queryCount >= 30) {
+    if (!isPro && queryCount >= 5) {
       toast.error("You have reached your query limit. Upgrade to Pro for unlimited queries.");
       return;
     }
@@ -70,12 +70,6 @@ const DiagnosticChat = ({ vehicleId, isPro }) => {
     }
   };
 
-  const handlePurchaseQueries = () => {
-    // Implement the logic for purchasing additional queries
-    toast.success("Additional queries purchased successfully!");
-    setQueryCount(0); // Reset the query count or add the purchased amount
-  };
-
   return (
     <div className="space-y-4">
       <form onSubmit={handleSubmit} className="space-y-4">
@@ -85,7 +79,7 @@ const DiagnosticChat = ({ vehicleId, isPro }) => {
           placeholder="Enter vehicle symptoms or diagnostic trouble codes..."
           className="w-full"
         />
-        <Button type="submit" disabled={!isPro && queryCount >= 30 || isLoading}>
+        <Button type="submit" disabled={!isPro && queryCount >= 5 || isLoading}>
           {isLoading ? "Generating..." : "Get Diagnosis"}
         </Button>
       </form>
@@ -98,11 +92,11 @@ const DiagnosticChat = ({ vehicleId, isPro }) => {
       {!isPro && (
         <div className="flex justify-between items-center">
           <p className="text-sm text-muted-foreground">
-            Queries remaining: {30 - queryCount}/30
+            Queries remaining: {5 - queryCount}/5
           </p>
-          {queryCount >= 30 && (
-            <Button onClick={handlePurchaseQueries}>
-              Purchase More Queries
+          {queryCount >= 5 && (
+            <Button onClick={() => toast.info("Please upgrade to Pro for unlimited queries.")}>
+              Upgrade to Pro
             </Button>
           )}
         </div>

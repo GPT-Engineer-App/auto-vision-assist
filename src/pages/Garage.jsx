@@ -13,6 +13,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import AdPlaceholder from "@/components/AdPlaceholder";
+import { purchaseProVersion } from "@/lib/inAppPurchase";
 
 const Garage = ({ isPro, setIsPro, user }) => {
   const [vehicles, setVehicles] = useState([]);
@@ -88,9 +89,14 @@ const Garage = ({ isPro, setIsPro, user }) => {
 
   const handleUpgradeToPro = async () => {
     try {
-      await updateDoc(doc(db, "users", user.uid), { isPro: true });
-      setIsPro(true);
-      toast.success("Upgraded to Pro successfully!");
+      const success = await purchaseProVersion();
+      if (success) {
+        await updateDoc(doc(db, "users", user.uid), { isPro: true });
+        setIsPro(true);
+        toast.success("Upgraded to Pro successfully!");
+      } else {
+        toast.error("Failed to upgrade to Pro. Please try again.");
+      }
     } catch (error) {
       console.error("Error upgrading to Pro:", error);
       toast.error("Failed to upgrade to Pro");
