@@ -11,10 +11,25 @@ import DTCCodes from "./pages/DTCCodes";
 import { ErrorBoundary } from "react-error-boundary";
 import ErrorFallback from "./components/ErrorFallback";
 
-const queryClient = new QueryClient();
+// Create a new QueryClient instance with cache clearing options
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      refetchOnWindowFocus: false,
+      retry: false,
+      staleTime: 0,
+    },
+  },
+});
 
 const App = () => {
   console.log("App component rendered"); // Add this line for debugging
+
+  // Clear the query cache on component mount
+  React.useEffect(() => {
+    queryClient.clear();
+  }, []);
+
   return (
     <ErrorBoundary FallbackComponent={ErrorFallback}>
       <QueryClientProvider client={queryClient}>
@@ -23,11 +38,11 @@ const App = () => {
           <Router>
             <Routes>
               <Route path="/" element={<Layout />}>
-                <Route index element={<Index />} />
-                <Route path="signup" element={<Signup />} />
-                <Route path="add-vehicle" element={<AddVehicle />} />
-                <Route path="garage" element={<Garage />} />
-                <Route path="dtc-codes" element={<DTCCodes />} />
+                <Route index element={<Index key={Date.now()} />} />
+                <Route path="signup" element={<Signup key={Date.now()} />} />
+                <Route path="add-vehicle" element={<AddVehicle key={Date.now()} />} />
+                <Route path="garage" element={<Garage key={Date.now()} />} />
+                <Route path="dtc-codes" element={<DTCCodes key={Date.now()} />} />
               </Route>
             </Routes>
           </Router>
