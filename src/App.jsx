@@ -1,3 +1,4 @@
+import React, { useEffect } from "react";
 import { Toaster } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
@@ -26,7 +27,7 @@ const App = () => {
   console.log("App component rendered"); // Add this line for debugging
 
   // Clear the query cache on component mount
-  React.useEffect(() => {
+  useEffect(() => {
     queryClient.clear();
   }, []);
 
