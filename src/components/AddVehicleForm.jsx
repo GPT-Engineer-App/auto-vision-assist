@@ -23,100 +23,46 @@ const AddVehicleForm = () => {
   const navigate = useNavigate();
 
   const manufacturers = {
-    "General Motors (GM)": ["Chevrolet", "GMC", "Buick", "Cadillac", "Oldsmobile", "Pontiac", "Saturn"],
-    "Ford Motor Company": ["Ford", "Lincoln", "Mercury", "Mazda"],
-    "Fiat Chrysler Automobiles (FCA)": ["Chrysler", "Dodge", "Jeep", "Ram", "Fiat", "Alfa Romeo"],
-    "Other": ["Mitsubishi", "Maserati"]
+    "Toyota Motor Corporation": ["Toyota", "Lexus", "Scion"],
+    "Honda Motor Co., Ltd.": ["Honda", "Acura"],
+    "Nissan Motor Co., Ltd.": ["Nissan", "Infiniti"],
   };
 
   const modelsByMakeAndYear = {
-    Chevrolet: {
-      "1996-2000": ["Camaro", "Corvette", "Impala", "Malibu", "Cavalier", "S-10", "Tahoe", "Suburban"],
-      "2001-2010": ["TrailBlazer", "Aveo", "Cobalt", "HHR", "Silverado", "Equinox", "Colorado"],
-      "2011-2023": ["Cruze", "Sonic", "Spark", "Volt", "Bolt EV", "Camaro", "Corvette", "Malibu", "Impala", "Trax", "Traverse", "Tahoe", "Suburban", "Silverado", "Colorado"],
+    Toyota: {
+      "1996-2000": ["Camry", "Corolla", "Celica", "Supra", "4Runner", "Tacoma", "Tundra", "Land Cruiser", "RAV4"],
+      "2001-2010": ["Camry", "Corolla", "Matrix", "Prius", "Highlander", "4Runner", "Tacoma", "Tundra", "Sequoia", "FJ Cruiser", "Yaris", "Venza", "RAV4"],
+      "2011-2023": ["Avalon", "Camry", "Corolla", "Prius", "Highlander", "Tacoma", "Tundra", "RAV4", "C-HR", "Mirai", "Supra", "GR Yaris", "GR86"],
     },
-    GMC: {
-      "1996-2000": ["Sierra", "Yukon", "Jimmy", "Sonoma", "Safari"],
-      "2001-2010": ["Envoy", "Canyon", "Acadia", "Terrain"],
-      "2011-2023": ["Sierra", "Yukon", "Acadia", "Terrain", "Savana"],
+    Lexus: {
+      "1996-2000": ["ES 300", "LS 400", "GS 300", "SC 400", "RX 300"],
+      "2001-2010": ["IS 300", "GS 430", "LS 430", "SC 430", "RX 330", "LX 470", "ES 330", "IS 250"],
+      "2011-2023": ["CT 200h", "ES 350", "GS 350", "LS 500", "IS 350", "RC", "RX 350", "LX 570", "NX", "UX", "LC 500"],
     },
-    Buick: {
-      "1996-2000": ["Century", "LeSabre", "Regal", "Park Avenue"],
-      "2001-2010": ["Rendezvous", "LaCrosse", "Enclave"],
-      "2011-2023": ["Verano", "Encore", "Envision", "LaCrosse", "Regal", "Enclave"],
+    Scion: {
+      "2003-2006": ["xA", "xB", "tC"],
+      "2007-2010": ["xD", "tC", "iQ"],
+      "2011-2016": ["FR-S", "iA", "iM"],
     },
-    Cadillac: {
-      "1996-2000": ["DeVille", "Seville", "Eldorado", "Escalade"],
-      "2001-2010": ["CTS", "SRX", "XLR", "DTS", "STS"],
-      "2011-2023": ["ATS", "CTS", "CT6", "XT5", "XT6", "Escalade", "CT4", "CT5"],
+    Honda: {
+      "1996-2000": ["Accord", "Civic", "Prelude", "CR-V", "Odyssey", "Passport", "Insight"],
+      "2001-2010": ["Accord", "Civic", "Element", "Fit", "Ridgeline", "S2000", "CR-Z", "Pilot", "CR-V", "Odyssey"],
+      "2011-2023": ["Accord", "Civic", "CR-V", "Odyssey", "Pilot", "Ridgeline", "HR-V", "Clarity", "Insight", "Passport"],
     },
-    Oldsmobile: {
-      "1996-2000": ["Cutlass", "Alero", "Intrigue", "Bravada"],
-      "2001-2004": ["Alero", "Silhouette", "Bravada"],
+    Acura: {
+      "1996-2000": ["Integra", "TL", "RL", "NSX"],
+      "2001-2010": ["RSX", "TSX", "MDX", "RDX", "ZDX", "TL", "RL"],
+      "2011-2023": ["ILX", "TLX", "RLX", "MDX", "RDX", "NSX"],
     },
-    Pontiac: {
-      "1996-2000": ["Grand Am", "Bonneville", "Firebird", "Sunfire"],
-      "2001-2010": ["Grand Prix", "G6", "Torrent", "Vibe", "G8"],
+    Nissan: {
+      "1996-2000": ["Altima", "Maxima", "Sentra", "Pathfinder", "Frontier", "Xterra", "300ZX", "Skyline GT-R"],
+      "2001-2010": ["Altima", "Maxima", "Sentra", "Pathfinder", "Frontier", "Murano", "Titan", "Quest", "Armada", "Versa", "Cube", "GT-R"],
+      "2011-2023": ["Leaf", "Juke", "Rogue", "Pathfinder", "Frontier", "Xterra", "370Z", "GT-R", "Kicks", "Ariya", "Altima", "Maxima", "Sentra"],
     },
-    Saturn: {
-      "1996-2000": ["S-Series", "L-Series"],
-      "2001-2010": ["Vue", "Ion", "Aura", "Outlook", "Sky"],
-    },
-    Ford: {
-      "1996-2000": ["Mustang", "Taurus", "Explorer", "F-Series", "Ranger", "Escort", "Windstar"],
-      "2001-2010": ["Focus", "Escape", "Fusion", "Edge", "Expedition", "Excursion", "Crown Victoria", "Transit Connect"],
-      "2011-2023": ["Fiesta", "EcoSport", "Mustang", "Taurus", "Explorer", "F-Series", "Ranger", "Escape", "Fusion", "Edge", "Expedition", "Transit", "Mustang Mach-E"],
-    },
-    Lincoln: {
-      "1996-2000": ["Town Car", "Navigator", "Continental"],
-      "2001-2010": ["LS", "Aviator", "Zephyr", "MKZ", "Mark LT", "MKX"],
-      "2011-2023": ["MKS", "MKT", "MKC", "Continental", "Navigator", "Nautilus", "Corsair", "Aviator"],
-    },
-    Mercury: {
-      "1996-2000": ["Grand Marquis", "Sable", "Mountaineer"],
-      "2001-2010": ["Mariner", "Milan", "Montego", "Monterey"],
-      "2011": ["Grand Marquis", "Mariner", "Milan"],
-    },
-    Mazda: {
-      "1996-2000": ["323", "Protege", "626", "MX-5 Miata", "MPV", "B-Series"],
-      "2001-2010": ["Tribute", "RX-8", "Mazda6", "Mazda3", "CX-7", "CX-9"],
-      "2011-2023": ["Mazda2", "Mazda5", "CX-3", "CX-30", "CX-5", "CX-9", "MX-5 Miata", "Mazda3", "Mazda6"],
-    },
-    Chrysler: {
-      "1996-2000": ["Cirrus", "Stratus", "Sebring", "Concorde", "LHS", "Town & Country", "Voyager", "Grand Voyager"],
-      "2001-2010": ["300M", "PT Cruiser", "Sebring", "Crossfire", "Pacifica", "Aspen"],
-      "2011-2023": ["200", "300", "Town & Country", "Pacifica", "Voyager"],
-    },
-    Dodge: {
-      "1996-2000": ["Neon", "Avenger", "Intrepid", "Durango", "Dakota", "Ram 1500", "Ram 2500", "Ram 3500"],
-      "2001-2010": ["Stratus", "Magnum", "Caliber", "Nitro", "Journey", "Viper", "Charger", "Challenger"],
-      "2011-2023": ["Dart", "Durango", "Journey", "Grand Caravan", "Charger", "Challenger"],
-    },
-    Jeep: {
-      "1996-2000": ["Cherokee", "Grand Cherokee", "Wrangler"],
-      "2001-2010": ["Liberty", "Grand Cherokee", "Wrangler"],
-      "2011-2023": ["Compass", "Patriot", "Grand Cherokee", "Wrangler", "Renegade", "Gladiator"],
-    },
-    Ram: {
-      "1996-2000": ["Ram 1500", "Ram 2500", "Ram 3500"],
-      "2001-2010": ["Ram 1500", "Ram 2500", "Ram 3500"],
-      "2011-2023": ["Ram 1500", "Ram 2500", "Ram 3500", "ProMaster", "ProMaster City"],
-    },
-    Fiat: {
-      "2011-2023": ["500", "500L", "500X", "124 Spider"],
-    },
-    "Alfa Romeo": {
-      "2014-2023": ["4C", "Giulia", "Stelvio"],
-    },
-    Mitsubishi: {
-      "1996-2000": ["Mirage", "Eclipse", "Galant", "Montero", "Diamante"],
-      "2001-2010": ["Lancer", "Outlander", "Endeavor", "Raider", "Eclipse Spyder"],
-      "2011-2023": ["i-MiEV", "Outlander Sport", "Lancer Evolution", "Outlander PHEV", "Mirage", "Eclipse Cross"],
-    },
-    Maserati: {
-      "1996-2000": ["3200 GT", "Coupé", "Spyder"],
-      "2001-2010": ["Quattroporte", "GranTurismo", "GranCabrio"],
-      "2011-2023": ["Ghibli", "Quattroporte", "Levante", "MC20"],
+    Infiniti: {
+      "1996-2000": ["I30", "Q45", "G20", "J30"],
+      "2001-2010": ["G35", "M35", "FX35", "EX35", "QX56", "Q45", "M45"],
+      "2011-2023": ["Q50", "Q60", "Q70", "QX60", "QX80", "QX50", "QX30", "QX55"],
     },
   };
 
