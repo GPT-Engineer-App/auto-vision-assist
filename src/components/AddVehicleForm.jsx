@@ -19,7 +19,7 @@ const AddVehicleForm = () => {
   const [bodyConfig, setBodyConfig] = useState("");
   const navigate = useNavigate();
 
-  const years = Array.from({ length: 2023 - 1995 + 1 }, (_, i) => (2023 - i).toString());
+  const years = Array.from({ length: 2024 - 1995 + 1 }, (_, i) => (2024 - i).toString());
 
   const { data: makes, isLoading: isLoadingMakes, error: makesError } = useQuery({
     queryKey: ['makes'],
@@ -29,9 +29,7 @@ const AddVehicleForm = () => {
         throw new Error('Failed to fetch makes');
       }
       const data = await response.json();
-      return data.Results.filter(make => 
-        ["Toyota", "Lexus", "Scion", "Honda", "Acura", "Nissan", "Infiniti", "Hyundai", "Kia", "Volkswagen", "Audi", "Subaru", "Volvo", "Jaguar", "Land Rover", "BMW", "Mini", "Mercedes-Benz", "Porsche", "Bentley", "Rolls-Royce", "Lamborghini", "Bugatti", "Aston Martin", "Lotus", "Pagani", "Koenigsegg"].includes(make.Make_Name)
-      );
+      return data.Results;
     },
   });
 
