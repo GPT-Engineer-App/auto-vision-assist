@@ -30,6 +30,18 @@ const AddVehicleForm = () => {
     "Volkswagen Group": ["Volkswagen", "Audi"],
     "Subaru Corporation": ["Subaru"],
     "Volvo Cars": ["Volvo"],
+    "Jaguar Land Rover": ["Jaguar", "Land Rover"],
+    "BMW Group": ["BMW", "Mini"],
+    "Mercedes-Benz Group": ["Mercedes-Benz"],
+    "Porsche AG": ["Porsche"],
+    "Bentley Motors Limited": ["Bentley"],
+    "Rolls-Royce Motor Cars": ["Rolls-Royce"],
+    "Automobili Lamborghini S.p.A.": ["Lamborghini"],
+    "Bugatti Automobiles S.A.S.": ["Bugatti"],
+    "Aston Martin Lagonda Global Holdings plc": ["Aston Martin"],
+    "Lotus Cars": ["Lotus"],
+    "Pagani Automobili S.p.A.": ["Pagani"],
+    "Koenigsegg Automotive AB": ["Koenigsegg"]
   };
 
   const modelsByMakeAndYear = {
@@ -97,6 +109,75 @@ const AddVehicleForm = () => {
       "1996-2000": ["850", "S70", "V70", "C70"],
       "2001-2010": ["S40", "S60", "XC90", "C30", "V50"],
       "2011-2023": ["S60", "V60", "XC60", "XC40", "XC90", "S90", "V90", "Polestar"],
+    },
+    Jaguar: {
+      "1996-2000": ["XJ (X300, X308)", "XK8", "S-Type"],
+      "2001-2010": ["XJ (X350, X358)", "XK (X100)", "XF", "X-Type"],
+      "2011-2023": ["F-Type", "XJ (X351)", "XF (2nd gen)", "XE", "I-Pace", "F-Pace", "E-Pace"],
+    },
+    "Land Rover": {
+      "1996-2000": ["Discovery (2nd gen)", "Range Rover (P38A)"],
+      "2001-2010": ["Freelander", "Range Rover (L322)", "Discovery (3rd gen)", "Range Rover Sport"],
+      "2011-2023": ["Evoque", "Discovery (4th gen)", "Range Rover (L405)", "Range Rover Sport (2nd gen)", "Velar"],
+    },
+    BMW: {
+      "1996-2000": ["3 Series (E46)", "5 Series (E39)", "7 Series (E38)", "Z3", "M3"],
+      "2001-2010": ["X5", "1 Series", "6 Series", "X3", "Z4", "M5"],
+      "2011-2023": ["i3", "i8", "4 Series", "X6", "X4", "2 Series", "8 Series", "X7", "M8"],
+    },
+    Mini: {
+      "2001-2010": ["Mini Hatch", "Mini Convertible", "Mini Clubman", "Mini Countryman"],
+      "2011-2023": ["Mini Coupé", "Mini Roadster", "Mini Paceman", "Mini Clubman (2nd gen)", "Mini Countryman (2nd gen)"],
+    },
+    "Mercedes-Benz": {
+      "1996-2000": ["C-Class (W202)", "E-Class (W210)", "S-Class (W220)", "SLK-Class"],
+      "2001-2010": ["CLK-Class", "SLR McLaren", "M-Class", "R-Class", "CLS-Class"],
+      "2011-2023": ["A-Class", "B-Class", "GLA-Class", "GLC-Class", "GLE-Class", "GLS-Class", "S-Class (W222)", "AMG GT"],
+    },
+    Porsche: {
+      "1996-2000": ["911 (996)", "Boxster", "Carrera GT"],
+      "2001-2010": ["Cayenne", "911 (997)", "Panamera"],
+      "2011-2023": ["911 (991)", "Macan", "Cayman", "918 Spyder", "911 (992)", "Taycan"],
+    },
+    Bentley: {
+      "1996-2000": ["Continental R", "Azure"],
+      "2001-2010": ["Arnage", "Continental GT", "Flying Spur"],
+      "2011-2023": ["Mulsanne", "Continental GT (2nd gen)", "Bentayga", "Continental GT (3rd gen)"],
+    },
+    "Rolls-Royce": {
+      "1996-2000": ["Silver Seraph", "Corniche"],
+      "2001-2010": ["Phantom (7th gen)", "Phantom Drophead Coupé", "Phantom Coupé"],
+      "2011-2023": ["Ghost (2nd gen)", "Wraith", "Dawn", "Cullinan", "Phantom (8th gen)"],
+    },
+    Lamborghini: {
+      "1996-2000": ["Diablo", "Murciélago"],
+      "2001-2010": ["Gallardo", "Reventón", "Estoque"],
+      "2011-2023": ["Aventador", "Huracán", "Urus"],
+    },
+    Bugatti: {
+      "1996-2000": ["EB110"],
+      "2001-2010": ["Veyron"],
+      "2011-2023": ["Chiron", "Divo", "Centodieci"],
+    },
+    "Aston Martin": {
+      "1996-2000": ["DB7", "Vantage"],
+      "2001-2010": ["DB9", "V8 Vantage", "DBS", "One-77"],
+      "2011-2023": ["Rapide", "Vanquish", "DB11", "Valkyrie", "DBX"],
+    },
+    Lotus: {
+      "1996-2000": ["Elise", "Esprit"],
+      "2001-2010": ["Exige", "Europa"],
+      "2011-2023": ["Evora", "Evija"],
+    },
+    Pagani: {
+      "1996-2000": ["Zonda C12"],
+      "2001-2010": ["Zonda S", "Zonda F"],
+      "2011-2023": ["Huayra", "Zonda Revolución", "Huayra Roadster", "Huayra BC"],
+    },
+    Koenigsegg: {
+      "1996-2000": ["CC8S"],
+      "2001-2010": ["CCR", "CCX"],
+      "2011-2023": ["Agera", "One:1", "Regera"],
     },
   };
 
