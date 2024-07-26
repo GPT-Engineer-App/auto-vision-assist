@@ -17,20 +17,34 @@ const AddVehicleForm = () => {
   const [drivetrain, setDrivetrain] = useState("");
   const [bodyConfig, setBodyConfig] = useState("");
   const [years, setYears] = useState([]);
-  const [makes, setMakes] = useState([]);
   const [models, setModels] = useState([]);
   const [engines, setEngines] = useState([]);
   const [drivetrains, setDrivetrains] = useState([]);
   const navigate = useNavigate();
+
+  const manufacturers = {
+    "General Motors (GM)": ["Chevrolet", "GMC", "Buick", "Cadillac", "Oldsmobile", "Pontiac", "Saturn"],
+    "Ford Motor Company": ["Ford", "Lincoln", "Mercury"],
+    "Fiat Chrysler Automobiles (FCA)": ["Chrysler", "Dodge", "Jeep", "Ram", "Fiat", "Alfa Romeo", "Maserati"],
+    "Toyota Motor Corporation": ["Toyota", "Lexus", "Scion"],
+    "Honda Motor Co., Ltd.": ["Honda", "Acura"],
+    "Nissan Motor Co., Ltd.": ["Nissan", "Infiniti"],
+    "Hyundai Motor Company": ["Hyundai", "Kia"],
+    "Volkswagen Group": ["Volkswagen", "Audi", "Porsche", "Bentley", "Lamborghini", "Bugatti", "SEAT", "Škoda"],
+    "BMW Group": ["BMW", "Mini", "Rolls-Royce"],
+    "Daimler AG": ["Mercedes-Benz", "Smart"],
+    "Subaru Corporation": ["Subaru"],
+    "Mazda Motor Corporation": ["Mazda"],
+    "Mitsubishi Motors Corporation": ["Mitsubishi"],
+    "Tesla, Inc.": ["Tesla"],
+    "Other Notable Brands": ["Volvo", "Jaguar", "Land Rover", "Aston Martin", "Lotus", "Pagani", "Koenigsegg"]
+  };
 
   useEffect(() => {
     // Generate years from 1996 to 2024
     const currentYear = new Date().getFullYear();
     const yearList = Array.from({ length: currentYear - 1995 }, (_, i) => (currentYear - i).toString());
     setYears(yearList);
-
-    // Fetch makes
-    fetchMakes();
   }, []);
 
   useEffect(() => {
@@ -44,17 +58,6 @@ const AddVehicleForm = () => {
       fetchVehicleDetails(year, make, model);
     }
   }, [year, make, model]);
-
-  const fetchMakes = async () => {
-    try {
-      const response = await fetch(`${API_BASE_URL}/vehicles/GetAllMakes?format=json`);
-      const data = await response.json();
-      setMakes(data.Results.map(make => make.Make_Name));
-    } catch (error) {
-      console.error("Error fetching makes:", error);
-      toast.error("Failed to fetch vehicle makes");
-    }
-  };
 
   const fetchModels = async (selectedMake) => {
     try {
@@ -134,8 +137,15 @@ const AddVehicleForm = () => {
             <SelectValue placeholder="Select make" />
           </SelectTrigger>
           <SelectContent>
-            {makes.map((m) => (
-              <SelectItem key={m} value={m}>{m}</SelectItem>
+            {Object.entries(manufacturers).map(([group, brands]) => (
+              <SelectItem key={group} value={group} disabled>
+                {group}
+                {brands.map((brand) => (
+                  <SelectItem key={brand} value={brand}>
+                    {brand}
+                  </SelectItem>
+                ))}
+              </SelectItem>
             ))}
           </SelectContent>
         </Select>
