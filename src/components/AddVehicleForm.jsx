@@ -26,6 +26,7 @@ const AddVehicleForm = () => {
     "Toyota Motor Corporation": ["Toyota", "Lexus", "Scion"],
     "Honda Motor Co., Ltd.": ["Honda", "Acura"],
     "Nissan Motor Co., Ltd.": ["Nissan", "Infiniti"],
+    "Hyundai Motor Company": ["Hyundai", "Kia"],
   };
 
   const modelsByMakeAndYear = {
@@ -63,6 +64,16 @@ const AddVehicleForm = () => {
       "1996-2000": ["I30", "Q45", "G20", "J30"],
       "2001-2010": ["G35", "M35", "FX35", "EX35", "QX56", "Q45", "M45"],
       "2011-2023": ["Q50", "Q60", "Q70", "QX60", "QX80", "QX50", "QX30", "QX55"],
+    },
+    Hyundai: {
+      "1996-2000": ["Accent", "Elantra", "Sonata", "Tiburon"],
+      "2001-2010": ["Santa Fe", "Tucson", "Azera", "Genesis", "Equus"],
+      "2011-2023": ["Veloster", "Ioniq", "Kona", "Nexo", "Palisade", "Venue", "Sonata", "Elantra", "Tucson", "Santa Fe"],
+    },
+    Kia: {
+      "1996-2000": ["Sephia", "Sportage", "Spectra"],
+      "2001-2010": ["Optima", "Sorento", "Sedona", "Rio", "Amanti"],
+      "2011-2023": ["Forte", "Soul", "Seltos", "Stinger", "Telluride", "Niro", "EV6", "K5", "Sorento", "Sportage"],
     },
   };
 
@@ -170,9 +181,16 @@ const AddVehicleForm = () => {
             <SelectValue placeholder="Select engine size" />
           </SelectTrigger>
           <SelectContent>
-            {engines.map((e) => (
-              <SelectItem key={e} value={e}>{e}</SelectItem>
-            ))}
+            <SelectItem value="1.0L">1.0L</SelectItem>
+            <SelectItem value="1.5L">1.5L</SelectItem>
+            <SelectItem value="2.0L">2.0L</SelectItem>
+            <SelectItem value="2.5L">2.5L</SelectItem>
+            <SelectItem value="3.0L">3.0L</SelectItem>
+            <SelectItem value="3.5L">3.5L</SelectItem>
+            <SelectItem value="4.0L">4.0L</SelectItem>
+            <SelectItem value="5.0L">5.0L</SelectItem>
+            <SelectItem value="6.0L">6.0L</SelectItem>
+            <SelectItem value="Electric">Electric</SelectItem>
           </SelectContent>
         </Select>
       </div>
@@ -183,9 +201,10 @@ const AddVehicleForm = () => {
             <SelectValue placeholder="Select drivetrain" />
           </SelectTrigger>
           <SelectContent>
-            {drivetrains.map((d) => (
-              <SelectItem key={d} value={d}>{d}</SelectItem>
-            ))}
+            <SelectItem value="FWD">Front-Wheel Drive (FWD)</SelectItem>
+            <SelectItem value="RWD">Rear-Wheel Drive (RWD)</SelectItem>
+            <SelectItem value="AWD">All-Wheel Drive (AWD)</SelectItem>
+            <SelectItem value="4WD">Four-Wheel Drive (4WD)</SelectItem>
           </SelectContent>
         </Select>
       </div>
