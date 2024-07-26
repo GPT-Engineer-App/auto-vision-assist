@@ -27,6 +27,9 @@ const AddVehicleForm = () => {
     "Honda Motor Co., Ltd.": ["Honda", "Acura"],
     "Nissan Motor Co., Ltd.": ["Nissan", "Infiniti"],
     "Hyundai Motor Company": ["Hyundai", "Kia"],
+    "Volkswagen Group": ["Volkswagen", "Audi"],
+    "Subaru Corporation": ["Subaru"],
+    "Volvo Cars": ["Volvo"],
   };
 
   const modelsByMakeAndYear = {
@@ -74,6 +77,26 @@ const AddVehicleForm = () => {
       "1996-2000": ["Sephia", "Sportage", "Spectra"],
       "2001-2010": ["Optima", "Sorento", "Sedona", "Rio", "Amanti"],
       "2011-2023": ["Forte", "Soul", "Seltos", "Stinger", "Telluride", "Niro", "EV6", "K5", "Sorento", "Sportage"],
+    },
+    Volkswagen: {
+      "1996-2000": ["Golf", "Jetta", "Passat", "Beetle", "Touareg"],
+      "2001-2010": ["New Beetle", "Phaeton", "Tiguan", "Eos", "Routan"],
+      "2011-2023": ["Golf", "Jetta", "Passat", "Arteon", "Atlas", "ID.4", "Tiguan", "Touareg"],
+    },
+    Audi: {
+      "1996-2000": ["A4", "A6", "A8", "TT"],
+      "2001-2010": ["A3", "A5", "Q7", "R8", "Q5"],
+      "2011-2023": ["A1", "A3", "A4", "A6", "Q3", "Q8", "e-Tron", "RS Q8"],
+    },
+    Subaru: {
+      "1996-2000": ["Impreza", "Legacy", "Forester", "Outback"],
+      "2001-2010": ["Baja", "Tribeca", "WRX", "STI"],
+      "2011-2023": ["BRZ", "Crosstrek", "Ascent", "Impreza", "Legacy", "Outback", "Forester"],
+    },
+    Volvo: {
+      "1996-2000": ["850", "S70", "V70", "C70"],
+      "2001-2010": ["S40", "S60", "XC90", "C30", "V50"],
+      "2011-2023": ["S60", "V60", "XC60", "XC40", "XC90", "S90", "V90", "Polestar"],
     },
   };
 
