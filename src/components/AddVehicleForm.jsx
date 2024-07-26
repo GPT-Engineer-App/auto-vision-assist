@@ -25,6 +25,8 @@ const AddVehicleForm = () => {
   const manufacturers = {
     "General Motors (GM)": ["Chevrolet", "GMC", "Buick", "Cadillac", "Oldsmobile", "Pontiac", "Saturn"],
     "Ford Motor Company": ["Ford", "Lincoln", "Mercury", "Mazda"],
+    "Fiat Chrysler Automobiles (FCA)": ["Chrysler", "Dodge", "Jeep", "Ram", "Fiat", "Alfa Romeo"],
+    "Other": ["Mitsubishi", "Maserati"]
   };
 
   const modelsByMakeAndYear = {
@@ -79,6 +81,42 @@ const AddVehicleForm = () => {
       "1996-2000": ["323", "Protege", "626", "MX-5 Miata", "MPV", "B-Series"],
       "2001-2010": ["Tribute", "RX-8", "Mazda6", "Mazda3", "CX-7", "CX-9"],
       "2011-2023": ["Mazda2", "Mazda5", "CX-3", "CX-30", "CX-5", "CX-9", "MX-5 Miata", "Mazda3", "Mazda6"],
+    },
+    Chrysler: {
+      "1996-2000": ["Cirrus", "Stratus", "Sebring", "Concorde", "LHS", "Town & Country", "Voyager", "Grand Voyager"],
+      "2001-2010": ["300M", "PT Cruiser", "Sebring", "Crossfire", "Pacifica", "Aspen"],
+      "2011-2023": ["200", "300", "Town & Country", "Pacifica", "Voyager"],
+    },
+    Dodge: {
+      "1996-2000": ["Neon", "Avenger", "Intrepid", "Durango", "Dakota", "Ram 1500", "Ram 2500", "Ram 3500"],
+      "2001-2010": ["Stratus", "Magnum", "Caliber", "Nitro", "Journey", "Viper", "Charger", "Challenger"],
+      "2011-2023": ["Dart", "Durango", "Journey", "Grand Caravan", "Charger", "Challenger"],
+    },
+    Jeep: {
+      "1996-2000": ["Cherokee", "Grand Cherokee", "Wrangler"],
+      "2001-2010": ["Liberty", "Grand Cherokee", "Wrangler"],
+      "2011-2023": ["Compass", "Patriot", "Grand Cherokee", "Wrangler", "Renegade", "Gladiator"],
+    },
+    Ram: {
+      "1996-2000": ["Ram 1500", "Ram 2500", "Ram 3500"],
+      "2001-2010": ["Ram 1500", "Ram 2500", "Ram 3500"],
+      "2011-2023": ["Ram 1500", "Ram 2500", "Ram 3500", "ProMaster", "ProMaster City"],
+    },
+    Fiat: {
+      "2011-2023": ["500", "500L", "500X", "124 Spider"],
+    },
+    "Alfa Romeo": {
+      "2014-2023": ["4C", "Giulia", "Stelvio"],
+    },
+    Mitsubishi: {
+      "1996-2000": ["Mirage", "Eclipse", "Galant", "Montero", "Diamante"],
+      "2001-2010": ["Lancer", "Outlander", "Endeavor", "Raider", "Eclipse Spyder"],
+      "2011-2023": ["i-MiEV", "Outlander Sport", "Lancer Evolution", "Outlander PHEV", "Mirage", "Eclipse Cross"],
+    },
+    Maserati: {
+      "1996-2000": ["3200 GT", "Coupé", "Spyder"],
+      "2001-2010": ["Quattroporte", "GranTurismo", "GranCabrio"],
+      "2011-2023": ["Ghibli", "Quattroporte", "Levante", "MC20"],
     },
   };
 
