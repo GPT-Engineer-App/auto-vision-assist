@@ -24,69 +24,85 @@ const AddVehicleForm = () => {
 
   const manufacturers = {
     "General Motors (GM)": ["Chevrolet", "GMC", "Buick", "Cadillac", "Oldsmobile", "Pontiac", "Saturn"],
-    "Ford Motor Company": ["Ford", "Lincoln", "Mercury"],
-    "Fiat Chrysler Automobiles (FCA)": ["Chrysler", "Dodge", "Jeep", "Ram", "Fiat", "Alfa Romeo", "Maserati"],
-    "Toyota Motor Corporation": ["Toyota", "Lexus", "Scion"],
-    "Honda Motor Co., Ltd.": ["Honda", "Acura"],
-    "Nissan Motor Co., Ltd.": ["Nissan", "Infiniti"],
-    "Hyundai Motor Company": ["Hyundai", "Kia"],
-    "Volkswagen Group": ["Volkswagen", "Audi", "Porsche", "Bentley", "Lamborghini", "Bugatti", "SEAT", "Škoda"],
-    "BMW Group": ["BMW", "Mini", "Rolls-Royce"],
-    "Daimler AG": ["Mercedes-Benz", "Smart"],
-    "Subaru Corporation": ["Subaru"],
-    "Mazda Motor Corporation": ["Mazda"],
-    "Mitsubishi Motors Corporation": ["Mitsubishi"],
-    "Tesla, Inc.": ["Tesla"],
-    "Other Notable Brands": ["Volvo", "Jaguar", "Land Rover", "Aston Martin", "Lotus", "Pagani", "Koenigsegg"]
+    "Ford Motor Company": ["Ford", "Lincoln", "Mercury", "Mazda"],
+  };
+
+  const modelsByMakeAndYear = {
+    Chevrolet: {
+      "1996-2000": ["Camaro", "Corvette", "Impala", "Malibu", "Cavalier", "S-10", "Tahoe", "Suburban"],
+      "2001-2010": ["TrailBlazer", "Aveo", "Cobalt", "HHR", "Silverado", "Equinox", "Colorado"],
+      "2011-2023": ["Cruze", "Sonic", "Spark", "Volt", "Bolt EV", "Camaro", "Corvette", "Malibu", "Impala", "Trax", "Traverse", "Tahoe", "Suburban", "Silverado", "Colorado"],
+    },
+    GMC: {
+      "1996-2000": ["Sierra", "Yukon", "Jimmy", "Sonoma", "Safari"],
+      "2001-2010": ["Envoy", "Canyon", "Acadia", "Terrain"],
+      "2011-2023": ["Sierra", "Yukon", "Acadia", "Terrain", "Savana"],
+    },
+    Buick: {
+      "1996-2000": ["Century", "LeSabre", "Regal", "Park Avenue"],
+      "2001-2010": ["Rendezvous", "LaCrosse", "Enclave"],
+      "2011-2023": ["Verano", "Encore", "Envision", "LaCrosse", "Regal", "Enclave"],
+    },
+    Cadillac: {
+      "1996-2000": ["DeVille", "Seville", "Eldorado", "Escalade"],
+      "2001-2010": ["CTS", "SRX", "XLR", "DTS", "STS"],
+      "2011-2023": ["ATS", "CTS", "CT6", "XT5", "XT6", "Escalade", "CT4", "CT5"],
+    },
+    Oldsmobile: {
+      "1996-2000": ["Cutlass", "Alero", "Intrigue", "Bravada"],
+      "2001-2004": ["Alero", "Silhouette", "Bravada"],
+    },
+    Pontiac: {
+      "1996-2000": ["Grand Am", "Bonneville", "Firebird", "Sunfire"],
+      "2001-2010": ["Grand Prix", "G6", "Torrent", "Vibe", "G8"],
+    },
+    Saturn: {
+      "1996-2000": ["S-Series", "L-Series"],
+      "2001-2010": ["Vue", "Ion", "Aura", "Outlook", "Sky"],
+    },
+    Ford: {
+      "1996-2000": ["Mustang", "Taurus", "Explorer", "F-Series", "Ranger", "Escort", "Windstar"],
+      "2001-2010": ["Focus", "Escape", "Fusion", "Edge", "Expedition", "Excursion", "Crown Victoria", "Transit Connect"],
+      "2011-2023": ["Fiesta", "EcoSport", "Mustang", "Taurus", "Explorer", "F-Series", "Ranger", "Escape", "Fusion", "Edge", "Expedition", "Transit", "Mustang Mach-E"],
+    },
+    Lincoln: {
+      "1996-2000": ["Town Car", "Navigator", "Continental"],
+      "2001-2010": ["LS", "Aviator", "Zephyr", "MKZ", "Mark LT", "MKX"],
+      "2011-2023": ["MKS", "MKT", "MKC", "Continental", "Navigator", "Nautilus", "Corsair", "Aviator"],
+    },
+    Mercury: {
+      "1996-2000": ["Grand Marquis", "Sable", "Mountaineer"],
+      "2001-2010": ["Mariner", "Milan", "Montego", "Monterey"],
+      "2011": ["Grand Marquis", "Mariner", "Milan"],
+    },
+    Mazda: {
+      "1996-2000": ["323", "Protege", "626", "MX-5 Miata", "MPV", "B-Series"],
+      "2001-2010": ["Tribute", "RX-8", "Mazda6", "Mazda3", "CX-7", "CX-9"],
+      "2011-2023": ["Mazda2", "Mazda5", "CX-3", "CX-30", "CX-5", "CX-9", "MX-5 Miata", "Mazda3", "Mazda6"],
+    },
   };
 
   useEffect(() => {
-    // Generate years from 1996 to 2024
-    const currentYear = new Date().getFullYear();
-    const yearList = Array.from({ length: currentYear - 1995 }, (_, i) => (currentYear - i).toString());
+    // Generate years from 1996 to 2023
+    const yearList = Array.from({ length: 2023 - 1995 }, (_, i) => (2023 - i).toString());
     setYears(yearList);
   }, []);
 
   useEffect(() => {
-    if (make) {
-      fetchModels(make);
+    if (make && year) {
+      const yearRange = getYearRange(parseInt(year));
+      const availableModels = modelsByMakeAndYear[make]?.[yearRange] || [];
+      setModels(availableModels);
+    } else {
+      setModels([]);
     }
-  }, [make]);
+  }, [make, year]);
 
-  useEffect(() => {
-    if (year && make && model) {
-      fetchVehicleDetails(year, make, model);
-    }
-  }, [year, make, model]);
-
-  const fetchModels = async (selectedMake) => {
-    try {
-      const response = await fetch(`${API_BASE_URL}/vehicles/GetModelsForMake/${selectedMake}?format=json`);
-      const data = await response.json();
-      setModels(data.Results.map(model => model.Model_Name));
-    } catch (error) {
-      console.error("Error fetching models:", error);
-      toast.error("Failed to fetch vehicle models");
-    }
-  };
-
-  const fetchVehicleDetails = async (selectedYear, selectedMake, selectedModel) => {
-    try {
-      // Using a placeholder VIN for demonstration. In a real scenario, you'd need to determine an appropriate VIN.
-      const placeholderVIN = "1GNALDEK9FZ108495";
-      const response = await fetch(`${API_BASE_URL}/vehicles/DecodeVinExtended/${placeholderVIN}?format=json&modelyear=${selectedYear}`);
-      const data = await response.json();
-      
-      // Extract engine and drivetrain information
-      const engineOptions = data.Results.filter(item => item.Variable === "Engine Configuration" || item.Variable === "Displacement (L)");
-      const drivetrainOptions = data.Results.filter(item => item.Variable === "Drive Type");
-      
-      setEngines(engineOptions.map(engine => engine.Value).filter(Boolean));
-      setDrivetrains(drivetrainOptions.map(drivetrain => drivetrain.Value).filter(Boolean));
-    } catch (error) {
-      console.error("Error fetching vehicle details:", error);
-      toast.error("Failed to fetch vehicle details");
-    }
+  const getYearRange = (year) => {
+    if (year >= 1996 && year <= 2000) return "1996-2000";
+    if (year >= 2001 && year <= 2010) return "2001-2010";
+    if (year >= 2011 && year <= 2023) return "2011-2023";
+    return "";
   };
 
   const handleSubmit = async (e) => {
