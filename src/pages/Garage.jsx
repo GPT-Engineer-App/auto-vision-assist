@@ -13,11 +13,13 @@ import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, 
 import { motion, AnimatePresence } from "framer-motion";
 import { Tooltip } from "@/components/ui/tooltip";
 import { HelpCircle } from "lucide-react";
+import OpenSightModal from "@/components/OpenSightModal";
 
 const Garage = ({ isPro, setIsPro, user }) => {
   const [vehicles, setVehicles] = useState([]);
   const [loading, setLoading] = useState(true);
   const [editingVehicle, setEditingVehicle] = useState(null);
+  const [openSightVehicle, setOpenSightVehicle] = useState(null);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -77,9 +79,12 @@ const Garage = ({ isPro, setIsPro, user }) => {
     }
   };
 
-  const handleOpenSight = (vehicleId) => {
-    // Implement the Open Sight functionality here
-    toast.info("Open Sight functionality not implemented yet");
+  const handleOpenSight = (vehicle) => {
+    if (isPro) {
+      setOpenSightVehicle(vehicle);
+    } else {
+      toast.error("Open Sight is a Pro feature. Please upgrade to access this functionality.");
+    }
   };
 
   if (loading) {
@@ -151,11 +156,9 @@ const Garage = ({ isPro, setIsPro, user }) => {
                         </AlertDialogFooter>
                       </AlertDialogContent>
                     </AlertDialog>
-                    {isPro && (
-                      <Tooltip content="Access advanced diagnostics for this vehicle">
-                        <Button onClick={() => handleOpenSight(vehicle.id)}>Open Sight</Button>
-                      </Tooltip>
-                    )}
+                    <Tooltip content={isPro ? "Access advanced diagnostics for this vehicle" : "Upgrade to Pro to access Open Sight"}>
+                      <Button onClick={() => handleOpenSight(vehicle)} disabled={!isPro}>Open Sight</Button>
+                    </Tooltip>
                   </div>
                 </CardContent>
               </Card>
@@ -177,6 +180,10 @@ const Garage = ({ isPro, setIsPro, user }) => {
         vehicle={editingVehicle}
         onClose={() => setEditingVehicle(null)}
         onUpdate={handleUpdateVehicle}
+      />
+      <OpenSightModal
+        vehicle={openSightVehicle}
+        onClose={() => setOpenSightVehicle(null)}
       />
       <Tooltip content="Need help? Click here for assistance">
         <Button variant="ghost" size="icon" className="fixed bottom-4 right-4">
