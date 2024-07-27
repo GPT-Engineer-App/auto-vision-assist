@@ -1,25 +1,22 @@
 import { useState, useEffect } from "react";
-import { collection, query, getDocs, doc, deleteDoc, updateDoc, where } from "firebase/firestore";
+import { collection, query, getDocs, doc, deleteDoc, updateDoc, where, addDoc } from "firebase/firestore";
 import { db, auth } from "@/lib/firebase";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { toast } from "sonner";
-import ProGarageView from "@/components/ProGarageView";
-import { useNavigate } from "react-router-dom";
-import DiagnosticChat from "@/components/DiagnosticChat";
-import VehicleHistory from "@/components/VehicleHistory";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import AdPlaceholder from "@/components/AdPlaceholder";
-import { purchaseProVersion } from "@/lib/inAppPurchase";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter } from "@/components/ui/dialog";
+import { toast } from "sonner";
+import { useNavigate } from "react-router-dom";
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
+import { motion, AnimatePresence } from "framer-motion";
 
 const Garage = ({ isPro, setIsPro, user }) => {
   const [vehicles, setVehicles] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [selectedVehicle, setSelectedVehicle] = useState(null);
   const [editingVehicle, setEditingVehicle] = useState(null);
+  const [isAddingVehicle, setIsAddingVehicle] = useState(false);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -33,9 +30,6 @@ const Garage = ({ isPro, setIsPro, user }) => {
         const querySnapshot = await getDocs(q);
         const vehicleData = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
         setVehicles(vehicleData);
-        if (vehicleData.length > 0) {
-          setSelectedVehicle(vehicleData[0].id);
-        }
       } catch (error) {
         toast.error("Error fetching vehicles: " + error.message);
       } finally {
@@ -52,7 +46,7 @@ const Garage = ({ isPro, setIsPro, user }) => {
     } else if (isPro && vehicles.length >= 3) {
       toast.error("Pro users can store up to three vehicles.");
     } else {
-      navigate("/add-vehicle");
+      setIsAddingVehicle(true);
     }
   };
 
@@ -73,34 +67,18 @@ const Garage = ({ isPro, setIsPro, user }) => {
   };
 
   const handleDeleteVehicle = async (vehicleId) => {
-    if (confirm("Are you sure you want to delete this vehicle?")) {
-      try {
-        await deleteDoc(doc(db, "vehicles", vehicleId));
-        setVehicles(vehicles.filter(v => v.id !== vehicleId));
-        toast.success("Vehicle deleted successfully");
-        if (selectedVehicle === vehicleId) {
-          setSelectedVehicle(vehicles.length > 1 ? vehicles[0].id : null);
-        }
-      } catch (error) {
-        toast.error("Error deleting vehicle: " + error.message);
-      }
+    try {
+      await deleteDoc(doc(db, "vehicles", vehicleId));
+      setVehicles(vehicles.filter(v => v.id !== vehicleId));
+      toast.success("Vehicle deleted successfully");
+    } catch (error) {
+      toast.error("Error deleting vehicle: " + error.message);
     }
   };
 
-  const handleUpgradeToPro = async () => {
-    try {
-      const success = await purchaseProVersion();
-      if (success) {
-        await updateDoc(doc(db, "users", user.uid), { isPro: true });
-        setIsPro(true);
-        toast.success("Upgraded to Pro successfully!");
-      } else {
-        toast.error("Failed to upgrade to Pro. Please try again.");
-      }
-    } catch (error) {
-      console.error("Error upgrading to Pro:", error);
-      toast.error("Failed to upgrade to Pro");
-    }
+  const handleOpenSight = (vehicleId) => {
+    // Implement the Open Sight functionality here
+    toast.info("Open Sight functionality not implemented yet");
   };
 
   if (loading) {
@@ -117,73 +95,74 @@ const Garage = ({ isPro, setIsPro, user }) => {
   }
 
   return (
-    <div className="min-h-screen bg-cover bg-center p-4" style={{backgroundImage: 'linear-gradient(0deg, rgba(0, 0, 0, 0.4) 0%, rgba(0, 0, 0, 0) 25%), url("/images/garage-background.png")'}}>
-      <div className="container mx-auto bg-white/80 backdrop-blur-sm p-8 rounded-xl shadow-lg">
-        <h1 className="text-3xl font-bold mb-6">Garage</h1>
-        {!isPro && <AdPlaceholder />}
-        {vehicles.length === 0 ? (
-          <p>No vehicles have been added yet.</p>
-        ) : isPro ? (
-          <ProGarageView vehicles={vehicles} />
-        ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {vehicles.map((vehicle) => (
-              <Card key={vehicle.id} className={selectedVehicle === vehicle.id ? "border-primary" : ""}>
+    <div className="container mx-auto p-4">
+      <h1 className="text-3xl font-bold mb-6">My Garage</h1>
+      <AnimatePresence>
+        <motion.div
+          className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+        >
+          {vehicles.map((vehicle) => (
+            <motion.div key={vehicle.id} layout>
+              <Card>
                 <CardHeader>
                   <CardTitle>{vehicle.year} {vehicle.make} {vehicle.model}</CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <p><strong>Engine Size:</strong> {vehicle.engineSize}</p>
+                  <img src={vehicle.image || "/images/default-car.png"} alt={`${vehicle.make} ${vehicle.model}`} className="w-full h-48 object-cover mb-4 rounded" />
+                  <p><strong>Engine:</strong> {vehicle.engineSize}</p>
                   <p><strong>Drivetrain:</strong> {vehicle.drivetrain}</p>
-                  <p><strong>Body Configuration:</strong> {vehicle.bodyConfig}</p>
+                  <p><strong>Body:</strong> {vehicle.bodyConfig}</p>
                   <div className="flex justify-between mt-4">
-                    <Button 
-                      onClick={() => setSelectedVehicle(vehicle.id)} 
-                      variant="outline" 
-                    >
-                      Select
-                    </Button>
-                    <Button 
-                      onClick={() => handleEditVehicle(vehicle)} 
-                      variant="outline"
-                    >
-                      Edit
-                    </Button>
-                    <Button 
-                      onClick={() => handleDeleteVehicle(vehicle.id)} 
-                      variant="destructive"
-                    >
-                      Delete
-                    </Button>
+                    <Button onClick={() => handleEditVehicle(vehicle)} variant="outline">Edit</Button>
+                    <AlertDialog>
+                      <AlertDialogTrigger asChild>
+                        <Button variant="destructive">Delete</Button>
+                      </AlertDialogTrigger>
+                      <AlertDialogContent>
+                        <AlertDialogHeader>
+                          <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+                          <AlertDialogDescription>
+                            This action cannot be undone. This will permanently delete your vehicle from your garage.
+                          </AlertDialogDescription>
+                        </AlertDialogHeader>
+                        <AlertDialogFooter>
+                          <AlertDialogCancel>Cancel</AlertDialogCancel>
+                          <AlertDialogAction onClick={() => handleDeleteVehicle(vehicle.id)}>Delete</AlertDialogAction>
+                        </AlertDialogFooter>
+                      </AlertDialogContent>
+                    </AlertDialog>
+                    {isPro && (
+                      <Button onClick={() => handleOpenSight(vehicle.id)}>Open Sight</Button>
+                    )}
                   </div>
                 </CardContent>
               </Card>
-            ))}
-          </div>
-        )}
-        <div className="mt-6">
-          <Button onClick={handleAddVehicle}>Add Vehicle</Button>
-          {!isPro && (
-            <Button variant="outline" className="ml-4" onClick={handleUpgradeToPro}>Upgrade to Pro</Button>
-          )}
-        </div>
-        {selectedVehicle && (
-          <div className="mt-8">
-            <h2 className="text-2xl font-bold mb-4">Diagnostic Chat</h2>
-            <DiagnosticChat vehicleId={selectedVehicle} isPro={isPro} />
-            {isPro && (
-              <>
-                <h2 className="text-2xl font-bold mt-8 mb-4">Vehicle History</h2>
-                <VehicleHistory vehicleId={selectedVehicle} />
-              </>
-            )}
-          </div>
+            </motion.div>
+          ))}
+        </motion.div>
+      </AnimatePresence>
+      <div className="mt-6">
+        <Button onClick={handleAddVehicle}>Add Vehicle</Button>
+        {!isPro && vehicles.length >= 1 && (
+          <Button variant="outline" className="ml-4" onClick={() => setIsPro(true)}>Upgrade to Pro</Button>
         )}
       </div>
       <EditVehicleDialog
         vehicle={editingVehicle}
         onClose={() => setEditingVehicle(null)}
         onUpdate={handleUpdateVehicle}
+      />
+      <AddVehicleDialog
+        isOpen={isAddingVehicle}
+        onClose={() => setIsAddingVehicle(false)}
+        onAdd={(newVehicle) => {
+          setVehicles([...vehicles, newVehicle]);
+          setIsAddingVehicle(false);
+        }}
+        userId={user.uid}
       />
     </div>
   );
@@ -285,7 +264,129 @@ const EditVehicleDialog = ({ vehicle, onClose, onUpdate }) => {
               </SelectContent>
             </Select>
           </div>
-          <Button type="submit">Update Vehicle</Button>
+          <DialogFooter>
+            <Button type="submit">Update Vehicle</Button>
+          </DialogFooter>
+        </form>
+      </DialogContent>
+    </Dialog>
+  );
+};
+
+const AddVehicleDialog = ({ isOpen, onClose, onAdd, userId }) => {
+  const [newVehicle, setNewVehicle] = useState({
+    year: "",
+    make: "",
+    model: "",
+    engineSize: "",
+    drivetrain: "",
+    bodyConfig: "",
+  });
+
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setNewVehicle(prev => ({ ...prev, [name]: value }));
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    try {
+      const docRef = await addDoc(collection(db, "vehicles"), {
+        ...newVehicle,
+        userId,
+        createdAt: new Date(),
+      });
+      onAdd({ id: docRef.id, ...newVehicle });
+      toast.success("Vehicle added successfully");
+    } catch (error) {
+      toast.error("Error adding vehicle: " + error.message);
+    }
+  };
+
+  return (
+    <Dialog open={isOpen} onOpenChange={onClose}>
+      <DialogContent>
+        <DialogHeader>
+          <DialogTitle>Add New Vehicle</DialogTitle>
+        </DialogHeader>
+        <form onSubmit={handleSubmit} className="space-y-4">
+          <div className="space-y-2">
+            <Label htmlFor="year">Year</Label>
+            <Input
+              id="year"
+              name="year"
+              type="number"
+              value={newVehicle.year}
+              onChange={handleChange}
+              required
+            />
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="make">Make</Label>
+            <Input
+              id="make"
+              name="make"
+              type="text"
+              value={newVehicle.make}
+              onChange={handleChange}
+              required
+            />
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="model">Model</Label>
+            <Input
+              id="model"
+              name="model"
+              type="text"
+              value={newVehicle.model}
+              onChange={handleChange}
+              required
+            />
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="engineSize">Engine Size</Label>
+            <Input
+              id="engineSize"
+              name="engineSize"
+              type="text"
+              value={newVehicle.engineSize}
+              onChange={handleChange}
+              required
+            />
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="drivetrain">Drivetrain</Label>
+            <Select name="drivetrain" onValueChange={(value) => handleChange({ target: { name: 'drivetrain', value } })} value={newVehicle.drivetrain}>
+              <SelectTrigger>
+                <SelectValue placeholder="Select drivetrain" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="fwd">Front-Wheel Drive</SelectItem>
+                <SelectItem value="rwd">Rear-Wheel Drive</SelectItem>
+                <SelectItem value="awd">All-Wheel Drive</SelectItem>
+                <SelectItem value="4wd">Four-Wheel Drive</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="bodyConfig">Body Configuration</Label>
+            <Select name="bodyConfig" onValueChange={(value) => handleChange({ target: { name: 'bodyConfig', value } })} value={newVehicle.bodyConfig}>
+              <SelectTrigger>
+                <SelectValue placeholder="Select body configuration" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="sedan">Sedan</SelectItem>
+                <SelectItem value="coupe">Coupe</SelectItem>
+                <SelectItem value="hatchback">Hatchback</SelectItem>
+                <SelectItem value="suv">SUV</SelectItem>
+                <SelectItem value="truck">Truck</SelectItem>
+                <SelectItem value="van">Van</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+          <DialogFooter>
+            <Button type="submit">Add Vehicle</Button>
+          </DialogFooter>
         </form>
       </DialogContent>
     </Dialog>
