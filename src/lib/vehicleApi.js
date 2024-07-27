@@ -1,10 +1,54 @@
-// This is a mock implementation. Replace with actual API calls in production.
+// This file now contains a more comprehensive list of North American vehicle makes and models
+
+const northAmericanMakes = [
+  'Acura', 'Alfa Romeo', 'Audi', 'BMW', 'Buick', 'Cadillac', 'Chevrolet', 'Chrysler', 
+  'Dodge', 'Fiat', 'Ford', 'Genesis', 'GMC', 'Honda', 'Hyundai', 'Infiniti', 'Jaguar', 
+  'Jeep', 'Kia', 'Land Rover', 'Lexus', 'Lincoln', 'Mazda', 'Mercedes-Benz', 'Mini', 
+  'Mitsubishi', 'Nissan', 'Porsche', 'Ram', 'Subaru', 'Tesla', 'Toyota', 'Volkswagen', 'Volvo'
+];
+
+const modelsByMake = {
+  'Acura': ['ILX', 'TLX', 'RDX', 'MDX', 'NSX'],
+  'Alfa Romeo': ['Giulia', 'Stelvio'],
+  'Audi': ['A3', 'A4', 'A6', 'Q3', 'Q5', 'Q7', 'e-tron'],
+  'BMW': ['3 Series', '5 Series', 'X3', 'X5', 'i3', 'i8'],
+  'Buick': ['Enclave', 'Encore', 'Envision', 'Regal'],
+  'Cadillac': ['CT4', 'CT5', 'XT4', 'XT5', 'Escalade'],
+  'Chevrolet': ['Malibu', 'Equinox', 'Traverse', 'Silverado', 'Corvette', 'Camaro', 'Bolt'],
+  'Chrysler': ['300', 'Pacifica'],
+  'Dodge': ['Challenger', 'Charger', 'Durango'],
+  'Fiat': ['500', '500X'],
+  'Ford': ['F-150', 'Escape', 'Explorer', 'Mustang', 'Edge', 'Bronco'],
+  'Genesis': ['G70', 'G80', 'G90', 'GV80'],
+  'GMC': ['Sierra', 'Terrain', 'Acadia', 'Yukon'],
+  'Honda': ['Civic', 'Accord', 'CR-V', 'Pilot', 'Odyssey'],
+  'Hyundai': ['Elantra', 'Sonata', 'Tucson', 'Santa Fe', 'Palisade'],
+  'Infiniti': ['Q50', 'Q60', 'QX50', 'QX60'],
+  'Jaguar': ['XE', 'XF', 'F-PACE', 'I-PACE'],
+  'Jeep': ['Cherokee', 'Grand Cherokee', 'Wrangler', 'Gladiator'],
+  'Kia': ['Forte', 'Optima', 'Sportage', 'Sorento', 'Telluride'],
+  'Land Rover': ['Range Rover', 'Discovery', 'Defender'],
+  'Lexus': ['IS', 'ES', 'RX', 'NX', 'GX'],
+  'Lincoln': ['Corsair', 'Nautilus', 'Aviator', 'Navigator'],
+  'Mazda': ['Mazda3', 'Mazda6', 'CX-5', 'CX-9'],
+  'Mercedes-Benz': ['C-Class', 'E-Class', 'GLC', 'GLE'],
+  'Mini': ['Cooper', 'Countryman'],
+  'Mitsubishi': ['Outlander', 'Eclipse Cross', 'Mirage'],
+  'Nissan': ['Altima', 'Maxima', 'Rogue', 'Murano', 'Leaf'],
+  'Porsche': ['911', 'Panamera', 'Cayenne', 'Macan'],
+  'Ram': ['1500', '2500', '3500', 'ProMaster'],
+  'Subaru': ['Impreza', 'Outback', 'Forester', 'Ascent'],
+  'Tesla': ['Model 3', 'Model S', 'Model X', 'Model Y'],
+  'Toyota': ['Corolla', 'Camry', 'RAV4', 'Highlander', 'Prius'],
+  'Volkswagen': ['Jetta', 'Passat', 'Tiguan', 'Atlas'],
+  'Volvo': ['S60', 'XC40', 'XC60', 'XC90']
+};
 
 export const fetchAllMakes = async () => {
   // Simulating API call
   return new Promise((resolve) => {
     setTimeout(() => {
-      resolve(['Audi', 'BMW', 'Ford', 'Honda', 'Toyota']);
+      resolve(northAmericanMakes);
     }, 500);
   });
 };
@@ -13,14 +57,7 @@ export const fetchModelsForMake = async (make) => {
   // Simulating API call
   return new Promise((resolve) => {
     setTimeout(() => {
-      const models = {
-        Audi: ['A3', 'A4', 'Q5'],
-        BMW: ['3 Series', '5 Series', 'X5'],
-        Ford: ['Fiesta', 'Focus', 'Mustang'],
-        Honda: ['Civic', 'Accord', 'CR-V'],
-        Toyota: ['Corolla', 'Camry', 'RAV4'],
-      };
-      resolve(models[make] || []);
+      resolve(modelsByMake[make] || []);
     }, 500);
   });
 };
@@ -30,8 +67,8 @@ export const decodeVin = async (year, make, model) => {
   return new Promise((resolve) => {
     setTimeout(() => {
       resolve({
-        engines: ['2.0L I4', '2.5L I4', '3.0L V6'],
-        drivetrains: ['FWD', 'RWD', 'AWD'],
+        engines: ['2.0L I4', '2.5L I4', '3.0L V6', '3.5L V6', '5.0L V8'],
+        drivetrains: ['FWD', 'RWD', 'AWD', '4WD'],
       });
     }, 500);
   });
