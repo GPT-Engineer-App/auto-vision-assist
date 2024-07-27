@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { addDoc, collection } from "firebase/firestore";
 import { db, auth } from "@/lib/firebase";
@@ -7,6 +7,8 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { toast } from "sonner";
 import { useQuery } from "@tanstack/react-query";
+import axios from "axios";
+import debounce from "lodash/debounce";
 
 const API_BASE_URL = "https://vpic.nhtsa.dot.gov/api";
 
@@ -21,59 +23,40 @@ const AddVehicleForm = () => {
 
   const years = Array.from({ length: 2024 - 1995 + 1 }, (_, i) => (2024 - i).toString());
 
-  const { data: makes, isLoading: isLoadingMakes, error: makesError } = useQuery({
-    queryKey: ['makes'],
-    queryFn: async () => {
-      try {
-        console.log("Fetching makes...");
-        const response = await fetch(`${API_BASE_URL}/vehicles/GetAllMakes?format=json`);
-        if (!response.ok) {
-          throw new Error('Failed to fetch makes');
-        }
-        const data = await response.json();
-        console.log("Makes fetched successfully:", data.Results.length);
-        return data.Results;
-      } catch (error) {
-        console.error("Error fetching makes:", error);
-        throw error;
-      }
-    },
-  });
-
-  const { data: models, isLoading: isLoadingModels, error: modelsError } = useQuery({
-    queryKey: ['models', make, year],
-    queryFn: async () => {
-      if (!make || !year) return [];
-      try {
-        console.log(`Fetching models for make: ${make}, year: ${year}`);
-        const response = await fetch(`${API_BASE_URL}/vehicles/GetModelsForMakeYear/make/${make}/modelyear/${year}?format=json`);
-        if (!response.ok) {
-          throw new Error('Failed to fetch models');
-        }
-        const data = await response.json();
-        console.log("Models fetched successfully:", data.Results.length);
-        return data.Results;
-      } catch (error) {
-        console.error("Error fetching models:", error);
-        throw error;
-      }
-    },
-    enabled: !!make && !!year,
-  });
-
-  useEffect(() => {
-    const handleVisibilityChange = () => {
-      if (!document.hidden) {
-        console.log("App visibility restored");
-      }
-    };
-
-    document.addEventListener("visibilitychange", handleVisibilityChange);
-
-    return () => {
-      document.removeEventListener("visibilitychange", handleVisibilityChange);
-    };
+  const fetchMakes = useCallback(async () => {
+    const response = await axios.get(`${API_BASE_URL}/vehicles/GetAllMakes?format=json`);
+    return response.data.Results;
   }, []);
+
+  const fetchModels = useCallback(async ({ queryKey }) => {
+    const [_, make, year] = queryKey;
+    if (!make || !year) return [];
+    const response = await axios.get(`${API_BASE_URL}/vehicles/GetModelsForMakeYear/make/${make}/modelyear/${year}?format=json`);
+    return response.data.Results;
+  }, []);
+
+  const { data: makes, isLoading: isLoadingMakes } = useQuery({
+    queryKey: ['makes'],
+    queryFn: fetchMakes,
+    staleTime: Infinity,
+  });
+
+  const { data: models, isLoading: isLoadingModels } = useQuery({
+    queryKey: ['models', make, year],
+    queryFn: fetchModels,
+    enabled: !!make && !!year,
+    staleTime: Infinity,
+  });
+
+  const debouncedSetMake = useCallback(
+    debounce((value) => setMake(value), 300),
+    []
+  );
+
+  const debouncedSetYear = useCallback(
+    debounce((value) => setYear(value), 300),
+    []
+  );
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -84,7 +67,6 @@ const AddVehicleForm = () => {
     }
 
     try {
-      console.log("Adding vehicle to Firestore...");
       const docRef = await addDoc(collection(db, "vehicles"), {
         userId: auth.currentUser.uid,
         year,
@@ -95,7 +77,6 @@ const AddVehicleForm = () => {
         bodyConfig,
         createdAt: new Date(),
       });
-      console.log("Vehicle added successfully with ID:", docRef.id);
       toast.success("Vehicle added successfully");
       navigate("/garage");
     } catch (error) {
@@ -104,14 +85,11 @@ const AddVehicleForm = () => {
     }
   };
 
-  if (isLoadingMakes) return <div>Loading makes...</div>;
-  if (makesError) return <div>Error loading makes: {makesError.message}</div>;
-
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
       <div className="space-y-2">
         <Label htmlFor="year">Year</Label>
-        <Select onValueChange={setYear} required>
+        <Select onValueChange={debouncedSetYear} required>
           <SelectTrigger id="year">
             <SelectValue placeholder="Select year" />
           </SelectTrigger>
@@ -124,14 +102,18 @@ const AddVehicleForm = () => {
       </div>
       <div className="space-y-2">
         <Label htmlFor="make">Make</Label>
-        <Select onValueChange={setMake} required>
+        <Select onValueChange={debouncedSetMake} required>
           <SelectTrigger id="make">
             <SelectValue placeholder="Select make" />
           </SelectTrigger>
           <SelectContent>
-            {makes.map((make) => (
-              <SelectItem key={make.Make_ID} value={make.Make_Name}>{make.Make_Name}</SelectItem>
-            ))}
+            {isLoadingMakes ? (
+              <SelectItem value="">Loading makes...</SelectItem>
+            ) : (
+              makes?.map((make) => (
+                <SelectItem key={make.Make_ID} value={make.Make_Name}>{make.Make_Name}</SelectItem>
+              ))
+            )}
           </SelectContent>
         </Select>
       </div>
@@ -142,12 +124,15 @@ const AddVehicleForm = () => {
             <SelectValue placeholder={isLoadingModels ? "Loading models..." : "Select model"} />
           </SelectTrigger>
           <SelectContent>
-            {models && models.map((model) => (
-              <SelectItem key={model.Model_ID} value={model.Model_Name}>{model.Model_Name}</SelectItem>
-            ))}
+            {isLoadingModels ? (
+              <SelectItem value="">Loading models...</SelectItem>
+            ) : (
+              models?.map((model) => (
+                <SelectItem key={model.Model_ID} value={model.Model_Name}>{model.Model_Name}</SelectItem>
+              ))
+            )}
           </SelectContent>
         </Select>
-        {modelsError && <p className="text-red-500">Error loading models: {modelsError.message}</p>}
       </div>
       <div className="space-y-2">
         <Label htmlFor="engineSize">Engine Size</Label>
