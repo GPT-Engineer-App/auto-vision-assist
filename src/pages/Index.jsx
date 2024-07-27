@@ -5,6 +5,9 @@ import { toast } from "sonner";
 import HolographicCarBackground from "@/components/HolographicCarBackground";
 import AuthForm from "@/components/AuthForm";
 import { auth } from "@/lib/firebase";
+import { motion } from "framer-motion";
+import { Tooltip } from "@/components/ui/tooltip";
+import { HelpCircle } from "lucide-react";
 
 const Index = () => {
   const [isLogin, setIsLogin] = useState(true);
@@ -21,28 +24,48 @@ const Index = () => {
   }, [navigate]);
 
   return (
-    <div className="relative flex flex-col min-h-screen bg-black justify-between overflow-x-hidden">
+    <div className="relative flex flex-col min-h-screen bg-background justify-between overflow-x-hidden">
       <HolographicCarBackground />
-      <div className="flex-grow z-10 flex items-center justify-center">
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5 }}
+        className="flex-grow z-10 flex items-center justify-center"
+      >
         <div className="container mx-auto px-4 sm:px-6 lg:px-8 max-w-md">
           <div className="mb-8 text-center">
-            <h1 className="text-[#ff6600] text-3xl sm:text-4xl font-bold mb-2">Auto Vision V2</h1>
-            <p className="text-gray-400">Your smart automotive companion</p>
+            <h1 className="text-primary text-3xl sm:text-4xl font-bold mb-2">Auto Vision V2</h1>
+            <p className="text-muted-foreground">Your smart automotive companion</p>
           </div>
-          <div className="bg-black/50 p-6 rounded-xl border border-[#ff6600]">
+          <motion.div
+            initial={{ scale: 0.9, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            transition={{ delay: 0.2, duration: 0.3 }}
+            className="bg-card p-6 rounded-xl border border-border shadow-lg"
+          >
             <AuthForm isLogin={isLogin} />
-            <p className="mt-4 text-center text-gray-400">
+            <p className="mt-4 text-center text-muted-foreground">
               {isLogin ? "Don't have an account?" : "Already have an account?"}
-              <Button variant="link" onClick={() => setIsLogin(!isLogin)} className="text-[#ff6600]">
+              <Button variant="link" onClick={() => setIsLogin(!isLogin)} className="text-primary">
                 {isLogin ? "Sign Up" : "Log In"}
               </Button>
             </p>
-          </div>
+          </motion.div>
+          <Tooltip content="Need help? Click here for assistance">
+            <Button variant="ghost" size="icon" className="absolute bottom-4 right-4">
+              <HelpCircle className="h-6 w-6" />
+            </Button>
+          </Tooltip>
         </div>
-      </div>
-      <footer className="border-t border-[#ff6600] bg-black/50 p-4 text-center text-[#ff6600] z-10">
+      </motion.div>
+      <motion.footer
+        initial={{ y: 50, opacity: 0 }}
+        animate={{ y: 0, opacity: 1 }}
+        transition={{ delay: 0.5, duration: 0.5 }}
+        className="border-t border-border bg-background/50 p-4 text-center text-muted-foreground z-10"
+      >
         <p>&copy; 2024 Auto Vision V2. All rights reserved.</p>
-      </footer>
+      </motion.footer>
     </div>
   );
 };
