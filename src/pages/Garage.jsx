@@ -11,6 +11,8 @@ import { toast } from "sonner";
 import { useNavigate } from "react-router-dom";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import { motion, AnimatePresence } from "framer-motion";
+import { Tooltip } from "@/components/ui/tooltip";
+import { HelpCircle } from "lucide-react";
 
 const Garage = ({ isPro, setIsPro, user }) => {
   const [vehicles, setVehicles] = useState([]);
@@ -95,7 +97,12 @@ const Garage = ({ isPro, setIsPro, user }) => {
   }
 
   return (
-    <div className="container mx-auto p-4">
+    <motion.div
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
+      className="container mx-auto p-4"
+    >
       <h1 className="text-3xl font-bold mb-6">My Garage</h1>
       <AnimatePresence>
         <motion.div
@@ -105,7 +112,14 @@ const Garage = ({ isPro, setIsPro, user }) => {
           exit={{ opacity: 0 }}
         >
           {vehicles.map((vehicle) => (
-            <motion.div key={vehicle.id} layout>
+            <motion.div
+              key={vehicle.id}
+              layout
+              initial={{ scale: 0.9, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.9, opacity: 0 }}
+              transition={{ duration: 0.3 }}
+            >
               <Card>
                 <CardHeader>
                   <CardTitle>{vehicle.year} {vehicle.make} {vehicle.model}</CardTitle>
@@ -116,11 +130,15 @@ const Garage = ({ isPro, setIsPro, user }) => {
                   <p><strong>Drivetrain:</strong> {vehicle.drivetrain}</p>
                   <p><strong>Body:</strong> {vehicle.bodyConfig}</p>
                   <div className="flex justify-between mt-4">
-                    <Button onClick={() => handleEditVehicle(vehicle)} variant="outline">Edit</Button>
+                    <Tooltip content="Edit vehicle details">
+                      <Button onClick={() => handleEditVehicle(vehicle)} variant="outline">Edit</Button>
+                    </Tooltip>
                     <AlertDialog>
-                      <AlertDialogTrigger asChild>
-                        <Button variant="destructive">Delete</Button>
-                      </AlertDialogTrigger>
+                      <Tooltip content="Remove this vehicle from your garage">
+                        <AlertDialogTrigger asChild>
+                          <Button variant="destructive">Delete</Button>
+                        </AlertDialogTrigger>
+                      </Tooltip>
                       <AlertDialogContent>
                         <AlertDialogHeader>
                           <AlertDialogTitle>Are you sure?</AlertDialogTitle>
@@ -135,7 +153,9 @@ const Garage = ({ isPro, setIsPro, user }) => {
                       </AlertDialogContent>
                     </AlertDialog>
                     {isPro && (
-                      <Button onClick={() => handleOpenSight(vehicle.id)}>Open Sight</Button>
+                      <Tooltip content="Access advanced diagnostics for this vehicle">
+                        <Button onClick={() => handleOpenSight(vehicle.id)}>Open Sight</Button>
+                      </Tooltip>
                     )}
                   </div>
                 </CardContent>
@@ -145,9 +165,13 @@ const Garage = ({ isPro, setIsPro, user }) => {
         </motion.div>
       </AnimatePresence>
       <div className="mt-6">
-        <Button onClick={handleAddVehicle}>Add Vehicle</Button>
+        <Tooltip content="Add a new vehicle to your garage">
+          <Button onClick={handleAddVehicle}>Add Vehicle</Button>
+        </Tooltip>
         {!isPro && vehicles.length >= 1 && (
-          <Button variant="outline" className="ml-4" onClick={() => setIsPro(true)}>Upgrade to Pro</Button>
+          <Tooltip content="Upgrade to Pro for more features">
+            <Button variant="outline" className="ml-4" onClick={() => setIsPro(true)}>Upgrade to Pro</Button>
+          </Tooltip>
         )}
       </div>
       <EditVehicleDialog
@@ -164,7 +188,12 @@ const Garage = ({ isPro, setIsPro, user }) => {
         }}
         userId={user.uid}
       />
-    </div>
+      <Tooltip content="Need help? Click here for assistance">
+        <Button variant="ghost" size="icon" className="fixed bottom-4 right-4">
+          <HelpCircle className="h-6 w-6" />
+        </Button>
+      </Tooltip>
+    </motion.div>
   );
 };
 
