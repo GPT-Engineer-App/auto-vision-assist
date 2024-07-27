@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { db } from "@/lib/firebase";
 import { collection, addDoc, query, where, getDocs, limit, orderBy } from "firebase/firestore";
@@ -9,22 +9,22 @@ import { generateDiagnosticResponse } from "@/lib/openai";
 
 const DiagnosticChat = ({ vehicleId, isPro }) => {
   const [input, setInput] = useState("");
+  const [queryCount, setQueryCount] = useState(0);
   const queryClient = useQueryClient();
 
   const fetchQueryCount = async () => {
     const queryCountRef = collection(db, "queryCounts");
     const q = query(
       queryCountRef,
-      where("timestamp", ">=", new Date(Date.now() - 29 * 24 * 60 * 60 * 1000))
+      where("timestamp", ">=", new Date(Date.now() - 30 * 24 * 60 * 60 * 1000))
     );
     const querySnapshot = await getDocs(q);
     return querySnapshot.size;
   };
 
-  const { data: queryCount } = useQuery({
-    queryKey: ["queryCount"],
-    queryFn: fetchQueryCount,
-  });
+  useEffect(() => {
+    fetchQueryCount().then(setQueryCount);
+  }, []);
 
   const fetchChatHistory = async () => {
     const chatRef = collection(db, "diagnosticQueries");
@@ -46,7 +46,7 @@ const DiagnosticChat = ({ vehicleId, isPro }) => {
 
   const mutation = useMutation({
     mutationFn: async ({ input }) => {
-      const aiResponse = await generateDiagnosticResponse(input);
+      const aiResponse = await generateDiagnosticResponse(input, isPro);
       await addDoc(collection(db, "diagnosticQueries"), {
         vehicleId,
         query: input,
@@ -60,7 +60,7 @@ const DiagnosticChat = ({ vehicleId, isPro }) => {
     },
     onSuccess: () => {
       queryClient.invalidateQueries(["chatHistory", vehicleId]);
-      queryClient.invalidateQueries(["queryCount"]);
+      setQueryCount(prev => prev + 1);
       setInput("");
     },
     onError: (error) => {
@@ -70,7 +70,7 @@ const DiagnosticChat = ({ vehicleId, isPro }) => {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    if (!isPro && queryCount >= 5) {
+    if (!isPro && queryCount >= 10) {
       toast.error("You have reached your query limit. Upgrade to Pro for unlimited queries.");
       return;
     }
@@ -98,16 +98,16 @@ const DiagnosticChat = ({ vehicleId, isPro }) => {
           placeholder="Enter vehicle symptoms or diagnostic trouble codes..."
           className="w-full"
         />
-        <Button type="submit" disabled={!isPro && queryCount >= 5 || mutation.isLoading}>
+        <Button type="submit" disabled={!isPro && queryCount >= 10 || mutation.isLoading}>
           {mutation.isLoading ? "Generating..." : "Get Diagnosis"}
         </Button>
       </form>
       {!isPro && (
         <div className="flex justify-between items-center">
           <p className="text-sm text-muted-foreground">
-            Queries remaining: {5 - (queryCount || 0)}/5
+            Queries remaining: {10 - queryCount}/10
           </p>
-          {queryCount >= 5 && (
+          {queryCount >= 10 && (
             <Button onClick={() => toast.info("Please upgrade to Pro for unlimited queries.")}>
               Upgrade to Pro
             </Button>

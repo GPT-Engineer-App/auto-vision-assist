@@ -1,7 +1,8 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Wrench, Gauge, Hammer } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Wrench, Gauge, Hammer, Eye } from "lucide-react";
 
-const ProGarageView = ({ vehicles }) => {
+const ProGarageView = ({ vehicles, onOpenSight }) => {
   return (
     <div className="space-y-8">
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -17,6 +18,13 @@ const ProGarageView = ({ vehicles }) => {
               <p><strong>Engine:</strong> {vehicle.engineSize}</p>
               <p><strong>Drivetrain:</strong> {vehicle.drivetrain}</p>
               <p><strong>Body:</strong> {vehicle.bodyConfig}</p>
+              <Button 
+                className="mt-4 w-full"
+                variant="outline"
+                onClick={() => onOpenSight(vehicle.id)}
+              >
+                <Eye className="mr-2 h-4 w-4" /> Open Sight
+              </Button>
             </CardContent>
           </Card>
         ))}

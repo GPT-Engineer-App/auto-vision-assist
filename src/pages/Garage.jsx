@@ -15,10 +15,12 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import AdPlaceholder from "@/components/AdPlaceholder";
 import { purchaseProVersion } from "@/lib/inAppPurchase";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
+import OpenSightView from "@/components/OpenSightView";
 
 const Garage = ({ isPro, setIsPro, user }) => {
   const [selectedVehicle, setSelectedVehicle] = useState(null);
   const [editingVehicle, setEditingVehicle] = useState(null);
+  const [showOpenSight, setShowOpenSight] = useState(false);
   const navigate = useNavigate();
   const queryClient = useQueryClient();
 
@@ -101,6 +103,11 @@ const Garage = ({ isPro, setIsPro, user }) => {
     }
   };
 
+  const handleOpenSight = (vehicleId) => {
+    setSelectedVehicle(vehicleId);
+    setShowOpenSight(true);
+  };
+
   if (isLoading) {
     return <div className="text-center mt-8">Loading...</div>;
   }
@@ -126,10 +133,10 @@ const Garage = ({ isPro, setIsPro, user }) => {
         {vehicles && vehicles.length === 0 ? (
           <p>No vehicles have been added yet.</p>
         ) : isPro ? (
-          <ProGarageView vehicles={vehicles} />
+          <ProGarageView vehicles={vehicles} onOpenSight={handleOpenSight} />
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {vehicles.map((vehicle) => (
+            {vehicles.slice(0, 1).map((vehicle) => (
               <Card key={vehicle.id} className={selectedVehicle === vehicle.id ? "border-primary" : ""}>
                 <CardHeader>
                   <CardTitle>{vehicle.year} {vehicle.make} {vehicle.model}</CardTitle>
@@ -187,6 +194,12 @@ const Garage = ({ isPro, setIsPro, user }) => {
         onClose={() => setEditingVehicle(null)}
         onUpdate={handleUpdateVehicle}
       />
+      {showOpenSight && (
+        <OpenSightView
+          vehicleId={selectedVehicle}
+          onClose={() => setShowOpenSight(false)}
+        />
+      )}
     </div>
   );
 };
