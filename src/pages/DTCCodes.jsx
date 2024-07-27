@@ -11,10 +11,13 @@ import {
 } from "@/components/ui/table";
 import { dtcCodes } from '@/lib/dtc-codes';
 import DTCAnalysisView from '@/components/DTCAnalysisView';
+import { useNavigate } from 'react-router-dom';
 
 const DTCCodes = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedDTC, setSelectedDTC] = useState(null);
+  const [dtcInput, setDtcInput] = useState('');
+  const navigate = useNavigate();
 
   const filteredCodes = useMemo(() => {
     return dtcCodes.filter(code => 
@@ -22,6 +25,12 @@ const DTCCodes = () => {
       code.description.toLowerCase().includes(searchTerm.toLowerCase())
     );
   }, [searchTerm]);
+
+  const handleAnalyze = () => {
+    if (dtcInput) {
+      navigate(`/range-finder/${dtcInput}`);
+    }
+  };
 
   // This function would be replaced with actual API calls or more complex logic
   const generateAnalysisData = (dtc) => {
@@ -67,6 +76,19 @@ const DTCCodes = () => {
             onChange={(e) => setSearchTerm(e.target.value)}
             className="flex-grow"
           />
+        </div>
+        <div className="mb-6">
+          <h2 className="text-xl font-semibold mb-4">Analyze DTC</h2>
+          <div className="flex gap-4">
+            <Input
+              type="text"
+              placeholder="Enter DTC code..."
+              value={dtcInput}
+              onChange={(e) => setDtcInput(e.target.value)}
+              className="flex-grow"
+            />
+            <Button onClick={handleAnalyze}>Analyze</Button>
+          </div>
         </div>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div>
