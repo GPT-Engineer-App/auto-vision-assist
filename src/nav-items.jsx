@@ -1,10 +1,11 @@
-import { Home, UserPlus, Car, Wrench, FileCode2, User } from "lucide-react";
+import { Home, UserPlus, Car, Wrench, FileCode2, User, Compass } from "lucide-react";
 import Index from "./pages/Index.jsx";
 import Signup from "./pages/Signup.jsx";
 import AddVehicle from "./pages/AddVehicle.jsx";
 import GaragePage from "./pages/Garage.jsx";
 import DTCCodes from "./pages/DTCCodes.jsx";
 import UserProfile from "./components/UserProfile.jsx";
+import RangeFinder from "./pages/RangeFinder.jsx";
 
 export const navItems = [
   {
@@ -36,6 +37,12 @@ export const navItems = [
     to: "/dtc-codes",
     icon: <FileCode2 className="h-4 w-4" />,
     page: <DTCCodes />,
+  },
+  {
+    title: "Range Finder",
+    to: "/range-finder/:dtc",
+    icon: <Compass className="h-4 w-4" />,
+    page: <RangeFinder />,
   },
   {
     title: "Profile",
