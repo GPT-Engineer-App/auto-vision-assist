@@ -72,7 +72,7 @@ const AddVehicleForm = () => {
     <form onSubmit={handleSubmit} className="space-y-4">
       <div className="space-y-2">
         <Label htmlFor="year">Year</Label>
-        <Select onValueChange={setYear} required>
+        <Select value={year} onValueChange={setYear} required>
           <SelectTrigger id="year">
             <SelectValue placeholder="Select year" />
           </SelectTrigger>
@@ -85,7 +85,7 @@ const AddVehicleForm = () => {
       </div>
       <div className="space-y-2">
         <Label htmlFor="make">Make</Label>
-        <Select onValueChange={setMake} required>
+        <Select value={make} onValueChange={setMake} required>
           <SelectTrigger id="make">
             <SelectValue placeholder="Select make" />
           </SelectTrigger>
@@ -98,7 +98,7 @@ const AddVehicleForm = () => {
       </div>
       <div className="space-y-2">
         <Label htmlFor="model">Model</Label>
-        <Select onValueChange={setModel} required>
+        <Select value={model} onValueChange={setModel} required>
           <SelectTrigger id="model">
             <SelectValue placeholder="Select model" />
           </SelectTrigger>
@@ -111,7 +111,7 @@ const AddVehicleForm = () => {
       </div>
       <div className="space-y-2">
         <Label htmlFor="engineSize">Engine Size</Label>
-        <Select onValueChange={setEngineSize} required>
+        <Select value={engineSize} onValueChange={setEngineSize} required>
           <SelectTrigger id="engineSize">
             <SelectValue placeholder="Select engine size" />
           </SelectTrigger>
@@ -124,7 +124,7 @@ const AddVehicleForm = () => {
       </div>
       <div className="space-y-2">
         <Label htmlFor="drivetrain">Drivetrain</Label>
-        <Select onValueChange={setDrivetrain} required>
+        <Select value={drivetrain} onValueChange={setDrivetrain} required>
           <SelectTrigger id="drivetrain">
             <SelectValue placeholder="Select drivetrain" />
           </SelectTrigger>
@@ -138,7 +138,7 @@ const AddVehicleForm = () => {
       </div>
       <div className="space-y-2">
         <Label htmlFor="bodyConfig">Body Configuration</Label>
-        <Select onValueChange={setBodyConfig} required>
+        <Select value={bodyConfig} onValueChange={setBodyConfig} required>
           <SelectTrigger id="bodyConfig">
             <SelectValue placeholder="Select body configuration" />
           </SelectTrigger>
