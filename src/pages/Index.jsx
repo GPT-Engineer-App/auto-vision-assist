@@ -6,7 +6,7 @@ import HolographicCarBackground from "@/components/HolographicCarBackground";
 import AuthForm from "@/components/AuthForm";
 import { auth } from "@/lib/firebase";
 import { motion } from "framer-motion";
-import { Tooltip } from "@/components/ui/tooltip";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { HelpCircle } from "lucide-react";
 
 const Index = () => {
@@ -51,11 +51,18 @@ const Index = () => {
               </Button>
             </p>
           </motion.div>
-          <Tooltip content="Need help? Click here for assistance">
-            <Button variant="ghost" size="icon" className="absolute bottom-4 right-4">
-              <HelpCircle className="h-6 w-6" />
-            </Button>
-          </Tooltip>
+          <TooltipProvider>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button variant="ghost" size="icon" className="absolute bottom-4 right-4">
+                  <HelpCircle className="h-6 w-6" />
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent>
+                <p>Need help? Click here for assistance</p>
+              </TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
         </div>
       </motion.div>
       <motion.footer
