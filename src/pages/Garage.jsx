@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { collection, query, getDocs, doc, deleteDoc, updateDoc, where } from "firebase/firestore";
 import { db, auth } from "@/lib/firebase";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -14,42 +14,37 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import AdPlaceholder from "@/components/AdPlaceholder";
 import { purchaseProVersion } from "@/lib/inAppPurchase";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 
 const Garage = ({ isPro, setIsPro, user }) => {
-  const [vehicles, setVehicles] = useState([]);
-  const [loading, setLoading] = useState(true);
   const [selectedVehicle, setSelectedVehicle] = useState(null);
   const [editingVehicle, setEditingVehicle] = useState(null);
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
 
-  const fetchVehicles = async () => {
-    if (!user) {
-      setLoading(false);
-      return;
-    }
-    try {
-      const q = query(collection(db, "vehicles"), where("userId", "==", user.uid));
-      const querySnapshot = await getDocs(q);
-      const vehicleData = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-      setVehicles(vehicleData);
-      if (vehicleData.length > 0) {
-        setSelectedVehicle(vehicleData[0].id);
-      }
-    } catch (error) {
-      toast.error("Error fetching vehicles: " + error.message);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  useEffect(() => {
-    fetchVehicles();
+  const fetchVehicles = useCallback(async () => {
+    if (!user) return [];
+    const q = query(collection(db, "vehicles"), where("userId", "==", user.uid));
+    const querySnapshot = await getDocs(q);
+    return querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
   }, [user]);
 
+  const { data: vehicles, isLoading, error } = useQuery({
+    queryKey: ['vehicles', user?.uid],
+    queryFn: fetchVehicles,
+    enabled: !!user,
+  });
+
+  useEffect(() => {
+    if (vehicles && vehicles.length > 0 && !selectedVehicle) {
+      setSelectedVehicle(vehicles[0].id);
+    }
+  }, [vehicles, selectedVehicle]);
+
   const handleAddVehicle = () => {
-    if (!isPro && vehicles.length >= 1) {
-      toast.error("Free users can only store one vehicle. Upgrade to Pro to add more!");
-    } else if (isPro && vehicles.length >= 3) {
+    if (!isPro && vehicles && vehicles.length >= 1) {
+      toast.error("Free users can only store one vehicle. Upgrade to Pro for unlimited vehicles!");
+    } else if (isPro && vehicles && vehicles.length >= 3) {
       toast.error("Pro users can store up to three vehicles.");
     } else {
       navigate("/add-vehicle");
@@ -64,11 +59,11 @@ const Garage = ({ isPro, setIsPro, user }) => {
     try {
       const vehicleRef = doc(db, "vehicles", updatedVehicle.id);
       await updateDoc(vehicleRef, updatedVehicle);
-      setVehicles(vehicles.map(v => v.id === updatedVehicle.id ? updatedVehicle : v));
+      queryClient.invalidateQueries(['vehicles', user?.uid]);
       toast.success("Vehicle updated successfully");
       setEditingVehicle(null);
-      fetchVehicles(); // Refresh the vehicle list
     } catch (error) {
+      console.error("Error updating vehicle:", error);
       toast.error("Error updating vehicle: " + error.message);
     }
   };
@@ -77,13 +72,13 @@ const Garage = ({ isPro, setIsPro, user }) => {
     if (confirm("Are you sure you want to delete this vehicle?")) {
       try {
         await deleteDoc(doc(db, "vehicles", vehicleId));
-        setVehicles(vehicles.filter(v => v.id !== vehicleId));
+        queryClient.invalidateQueries(['vehicles', user?.uid]);
         toast.success("Vehicle deleted successfully");
         if (selectedVehicle === vehicleId) {
           setSelectedVehicle(vehicles.length > 1 ? vehicles[0].id : null);
         }
-        fetchVehicles(); // Refresh the vehicle list
       } catch (error) {
+        console.error("Error deleting vehicle:", error);
         toast.error("Error deleting vehicle: " + error.message);
       }
     }
@@ -96,7 +91,7 @@ const Garage = ({ isPro, setIsPro, user }) => {
         await updateDoc(doc(db, "users", user.uid), { isPro: true });
         setIsPro(true);
         toast.success("Upgraded to Pro successfully!");
-        fetchVehicles(); // Refresh the vehicle list
+        queryClient.invalidateQueries(['vehicles', user?.uid]);
       } else {
         toast.error("Failed to upgrade to Pro. Please try again.");
       }
@@ -106,8 +101,12 @@ const Garage = ({ isPro, setIsPro, user }) => {
     }
   };
 
-  if (loading) {
+  if (isLoading) {
     return <div className="text-center mt-8">Loading...</div>;
+  }
+
+  if (error) {
+    return <div className="text-center mt-8 text-red-500">Error: {error.message}</div>;
   }
 
   if (!user) {
@@ -124,7 +123,7 @@ const Garage = ({ isPro, setIsPro, user }) => {
       <div className="container mx-auto bg-white/80 backdrop-blur-sm p-8 rounded-xl shadow-lg">
         <h1 className="text-3xl font-bold mb-6">Garage</h1>
         {!isPro && <AdPlaceholder />}
-        {vehicles.length === 0 ? (
+        {vehicles && vehicles.length === 0 ? (
           <p>No vehicles have been added yet.</p>
         ) : isPro ? (
           <ProGarageView vehicles={vehicles} />

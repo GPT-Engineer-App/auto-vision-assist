@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { Toaster } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
@@ -22,22 +22,23 @@ const App = () => {
   const [isPro, setIsPro] = useState(false);
   const [user, setUser] = useState(null);
 
+  const handleAuthStateChange = useCallback((currentUser) => {
+    console.log("Auth state changed:", currentUser ? "User logged in" : "User logged out");
+    setUser(currentUser);
+    if (!currentUser) {
+      setIsPro(false);
+    }
+  }, []);
+
   useEffect(() => {
     console.log("Setting up auth state listener");
-    const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
-      console.log("Auth state changed:", currentUser ? "User logged in" : "User logged out");
-      setUser(currentUser);
-      // Reset isPro when user signs out
-      if (!currentUser) {
-        setIsPro(false);
-      }
-    });
+    const unsubscribe = onAuthStateChanged(auth, handleAuthStateChange);
 
     return () => {
       console.log("Cleaning up auth state listener");
       unsubscribe();
     };
-  }, []);
+  }, [handleAuthStateChange]);
 
   useEffect(() => {
     const handleVisibilityChange = () => {
