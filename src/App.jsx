@@ -9,14 +9,23 @@ import UserProfile from "./components/UserProfile";
 import { auth } from "./lib/firebase";
 import { onAuthStateChanged } from "firebase/auth";
 
-const queryClient = new QueryClient();
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      retry: 2,
+      staleTime: 5 * 60 * 1000, // 5 minutes
+    },
+  },
+});
 
 const App = () => {
   const [isPro, setIsPro] = useState(false);
   const [user, setUser] = useState(null);
 
   useEffect(() => {
+    console.log("Setting up auth state listener");
     const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
+      console.log("Auth state changed:", currentUser ? "User logged in" : "User logged out");
       setUser(currentUser);
       // Reset isPro when user signs out
       if (!currentUser) {
@@ -24,7 +33,25 @@ const App = () => {
       }
     });
 
-    return () => unsubscribe();
+    return () => {
+      console.log("Cleaning up auth state listener");
+      unsubscribe();
+    };
+  }, []);
+
+  useEffect(() => {
+    const handleVisibilityChange = () => {
+      if (!document.hidden) {
+        console.log("App visibility restored, refreshing query cache");
+        queryClient.invalidateQueries();
+      }
+    };
+
+    document.addEventListener("visibilitychange", handleVisibilityChange);
+
+    return () => {
+      document.removeEventListener("visibilitychange", handleVisibilityChange);
+    };
   }, []);
 
   return (

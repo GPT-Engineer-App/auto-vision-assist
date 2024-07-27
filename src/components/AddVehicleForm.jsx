@@ -24,12 +24,19 @@ const AddVehicleForm = () => {
   const { data: makes, isLoading: isLoadingMakes, error: makesError } = useQuery({
     queryKey: ['makes'],
     queryFn: async () => {
-      const response = await fetch(`${API_BASE_URL}/vehicles/GetAllMakes?format=json`);
-      if (!response.ok) {
-        throw new Error('Failed to fetch makes');
+      try {
+        console.log("Fetching makes...");
+        const response = await fetch(`${API_BASE_URL}/vehicles/GetAllMakes?format=json`);
+        if (!response.ok) {
+          throw new Error('Failed to fetch makes');
+        }
+        const data = await response.json();
+        console.log("Makes fetched successfully:", data.Results.length);
+        return data.Results;
+      } catch (error) {
+        console.error("Error fetching makes:", error);
+        throw error;
       }
-      const data = await response.json();
-      return data.Results;
     },
   });
 
@@ -37,15 +44,36 @@ const AddVehicleForm = () => {
     queryKey: ['models', make, year],
     queryFn: async () => {
       if (!make || !year) return [];
-      const response = await fetch(`${API_BASE_URL}/vehicles/GetModelsForMakeYear/make/${make}/modelyear/${year}?format=json`);
-      if (!response.ok) {
-        throw new Error('Failed to fetch models');
+      try {
+        console.log(`Fetching models for make: ${make}, year: ${year}`);
+        const response = await fetch(`${API_BASE_URL}/vehicles/GetModelsForMakeYear/make/${make}/modelyear/${year}?format=json`);
+        if (!response.ok) {
+          throw new Error('Failed to fetch models');
+        }
+        const data = await response.json();
+        console.log("Models fetched successfully:", data.Results.length);
+        return data.Results;
+      } catch (error) {
+        console.error("Error fetching models:", error);
+        throw error;
       }
-      const data = await response.json();
-      return data.Results;
     },
     enabled: !!make && !!year,
   });
+
+  useEffect(() => {
+    const handleVisibilityChange = () => {
+      if (!document.hidden) {
+        console.log("App visibility restored");
+      }
+    };
+
+    document.addEventListener("visibilitychange", handleVisibilityChange);
+
+    return () => {
+      document.removeEventListener("visibilitychange", handleVisibilityChange);
+    };
+  }, []);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -56,6 +84,7 @@ const AddVehicleForm = () => {
     }
 
     try {
+      console.log("Adding vehicle to Firestore...");
       const docRef = await addDoc(collection(db, "vehicles"), {
         userId: auth.currentUser.uid,
         year,
@@ -66,9 +95,11 @@ const AddVehicleForm = () => {
         bodyConfig,
         createdAt: new Date(),
       });
+      console.log("Vehicle added successfully with ID:", docRef.id);
       toast.success("Vehicle added successfully");
       navigate("/garage");
     } catch (error) {
+      console.error("Error adding vehicle:", error);
       toast.error("Error adding vehicle: " + error.message);
     }
   };
