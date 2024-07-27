@@ -44,6 +44,25 @@ const modelsByMake = {
   'Volvo': ['S60', 'XC40', 'XC60', 'XC90']
 };
 
+const engineSizesByMakeAndModel = {
+  'Ford': {
+    'F-150': ['2.7L V6', '3.3L V6', '3.5L V6', '5.0L V8'],
+    'Mustang': ['2.3L I4', '5.0L V8'],
+    'Explorer': ['2.3L I4', '3.0L V6', '3.3L V6'],
+  },
+  'Toyota': {
+    'Camry': ['2.5L I4', '3.5L V6'],
+    'RAV4': ['2.5L I4'],
+    'Highlander': ['2.7L I4', '3.5L V6'],
+  },
+  'Honda': {
+    'Civic': ['1.5L I4', '2.0L I4'],
+    'Accord': ['1.5L I4', '2.0L I4'],
+    'CR-V': ['1.5L I4', '2.0L I4'],
+  },
+  // Add more makes and models as needed
+};
+
 export const fetchAllMakes = async () => {
   // Simulating API call
   return new Promise((resolve) => {
@@ -58,6 +77,16 @@ export const fetchModelsForMake = async (make) => {
   return new Promise((resolve) => {
     setTimeout(() => {
       resolve(modelsByMake[make] || []);
+    }, 500);
+  });
+};
+
+export const fetchEngineSizesForMakeAndModel = async (make, model) => {
+  // Simulating API call
+  return new Promise((resolve) => {
+    setTimeout(() => {
+      const engineSizes = engineSizesByMakeAndModel[make]?.[model] || ['2.0L I4', '2.5L I4', '3.0L V6', '3.5L V6', '5.0L V8'];
+      resolve(engineSizes);
     }, 500);
   });
 };

@@ -7,7 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { toast } from "sonner";
-import { fetchAllMakes, fetchModelsForMake, decodeVin } from "@/lib/vehicleApi";
+import { fetchAllMakes, fetchModelsForMake, fetchEngineSizesForMakeAndModel } from "@/lib/vehicleApi";
 
 const AddVehicleForm = () => {
   const [year, setYear] = useState("");
@@ -19,7 +19,6 @@ const AddVehicleForm = () => {
   const [makes, setMakes] = useState([]);
   const [models, setModels] = useState([]);
   const [engines, setEngines] = useState([]);
-  const [drivetrains, setDrivetrains] = useState([]);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -29,17 +28,17 @@ const AddVehicleForm = () => {
   useEffect(() => {
     if (make) {
       fetchModelsForMake(make).then(setModels).catch(console.error);
+      setModel("");
+      setEngineSize("");
     }
   }, [make]);
 
   useEffect(() => {
-    if (year && make && model) {
-      decodeVin(year, make, model).then((data) => {
-        setEngines(data.engines || []);
-        setDrivetrains(data.drivetrains || []);
-      }).catch(console.error);
+    if (make && model) {
+      fetchEngineSizesForMakeAndModel(make, model).then(setEngines).catch(console.error);
+      setEngineSize("");
     }
-  }, [year, make, model]);
+  }, [make, model]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -130,9 +129,10 @@ const AddVehicleForm = () => {
             <SelectValue placeholder="Select drivetrain" />
           </SelectTrigger>
           <SelectContent>
-            {drivetrains.map((d) => (
-              <SelectItem key={d} value={d}>{d}</SelectItem>
-            ))}
+            <SelectItem value="FWD">Front-Wheel Drive</SelectItem>
+            <SelectItem value="RWD">Rear-Wheel Drive</SelectItem>
+            <SelectItem value="AWD">All-Wheel Drive</SelectItem>
+            <SelectItem value="4WD">Four-Wheel Drive</SelectItem>
           </SelectContent>
         </Select>
       </div>
