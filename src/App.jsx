@@ -11,6 +11,7 @@ import { onAuthStateChanged } from "firebase/auth";
 import RangeFinder from "./pages/RangeFinder";
 import Login from "./pages/Login";
 import Signup from "./pages/Signup";
+import ErrorBoundary from "./components/ErrorBoundary";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -59,28 +60,34 @@ const App = () => {
   }, []);
 
   return (
-    <QueryClientProvider client={queryClient}>
-      <TooltipProvider>
-        <Toaster />
-        <Router>
-          <Routes>
-            <Route path="/" element={<Layout user={user} isPro={isPro} />}>
-              {navItems.map((item) => (
-                <Route 
-                  key={item.to} 
-                  path={item.to} 
-                  element={React.cloneElement(item.page, { isPro, setIsPro, user })}
-                />
-              ))}
-              <Route path="/profile" element={<UserProfile isPro={isPro} setIsPro={setIsPro} user={user} />} />
-              <Route path="/range-finder/:dtc" element={<RangeFinder />} />
-              <Route path="/login" element={<Login />} />
-              <Route path="/signup" element={<Signup />} />
-            </Route>
-          </Routes>
-        </Router>
-      </TooltipProvider>
-    </QueryClientProvider>
+    <ErrorBoundary>
+      <QueryClientProvider client={queryClient}>
+        <TooltipProvider>
+          <Toaster />
+          <Router>
+            <Routes>
+              <Route path="/" element={<Layout user={user} isPro={isPro} />}>
+                {navItems.map((item) => (
+                  <Route 
+                    key={item.to} 
+                    path={item.to} 
+                    element={
+                      <ErrorBoundary>
+                        {React.cloneElement(item.page, { isPro, setIsPro, user })}
+                      </ErrorBoundary>
+                    }
+                  />
+                ))}
+                <Route path="/profile" element={<ErrorBoundary><UserProfile isPro={isPro} setIsPro={setIsPro} user={user} /></ErrorBoundary>} />
+                <Route path="/range-finder/:dtc" element={<ErrorBoundary><RangeFinder /></ErrorBoundary>} />
+                <Route path="/login" element={<ErrorBoundary><Login /></ErrorBoundary>} />
+                <Route path="/signup" element={<ErrorBoundary><Signup /></ErrorBoundary>} />
+              </Route>
+            </Routes>
+          </Router>
+        </TooltipProvider>
+      </QueryClientProvider>
+    </ErrorBoundary>
   );
 };
 
