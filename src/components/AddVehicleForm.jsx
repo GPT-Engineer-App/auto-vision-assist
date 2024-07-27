@@ -21,10 +21,16 @@ const AddVehicleForm = () => {
   const [bodyConfig, setBodyConfig] = useState("");
   const navigate = useNavigate();
 
-  const years = Array.from({ length: 2024 - 1995 + 1 }, (_, i) => (2024 - i).toString());
+  const fetchYears = useCallback(async () => {
+    const response = await axios.get(`${API_BASE_URL}/vehicles/getallmakes?format=json`);
+    const years = [...new Set(response.data.Results.map(make => make.Make_Name.match(/\d{4}/)?.[0]).filter(Boolean))];
+    return years.sort((a, b) => b - a);
+  }, []);
 
-  const fetchMakes = useCallback(async () => {
-    const response = await axios.get(`${API_BASE_URL}/vehicles/GetAllMakes?format=json`);
+  const fetchMakes = useCallback(async ({ queryKey }) => {
+    const [_, year] = queryKey;
+    if (!year) return [];
+    const response = await axios.get(`${API_BASE_URL}/vehicles/getmakesformanufacturer?year=${year}&format=json`);
     return response.data.Results;
   }, []);
 
@@ -35,9 +41,16 @@ const AddVehicleForm = () => {
     return response.data.Results;
   }, []);
 
+  const { data: years, isLoading: isLoadingYears } = useQuery({
+    queryKey: ['years'],
+    queryFn: fetchYears,
+    staleTime: Infinity,
+  });
+
   const { data: makes, isLoading: isLoadingMakes } = useQuery({
-    queryKey: ['makes'],
+    queryKey: ['makes', year],
     queryFn: fetchMakes,
+    enabled: !!year,
     staleTime: Infinity,
   });
 
@@ -94,9 +107,13 @@ const AddVehicleForm = () => {
             <SelectValue placeholder="Select year" />
           </SelectTrigger>
           <SelectContent>
-            {years.map((y) => (
-              <SelectItem key={y} value={y}>{y}</SelectItem>
-            ))}
+            {isLoadingYears ? (
+              <SelectItem value="">Loading years...</SelectItem>
+            ) : (
+              years?.map((y) => (
+                <SelectItem key={y} value={y}>{y}</SelectItem>
+              ))
+            )}
           </SelectContent>
         </Select>
       </div>

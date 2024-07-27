@@ -8,6 +8,7 @@ import { navItems } from "./nav-items";
 import UserProfile from "./components/UserProfile";
 import { auth } from "./lib/firebase";
 import { onAuthStateChanged } from "firebase/auth";
+import RangeFinder from "./pages/RangeFinder";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -70,6 +71,7 @@ const App = () => {
                 />
               ))}
               <Route path="/profile" element={<UserProfile isPro={isPro} setIsPro={setIsPro} user={user} />} />
+              <Route path="/range-finder/:dtc" element={<RangeFinder />} />
             </Route>
           </Routes>
         </Router>
