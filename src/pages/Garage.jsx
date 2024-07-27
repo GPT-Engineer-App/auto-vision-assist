@@ -22,27 +22,27 @@ const Garage = ({ isPro, setIsPro, user }) => {
   const [editingVehicle, setEditingVehicle] = useState(null);
   const navigate = useNavigate();
 
-  const fetchVehicles = async () => {
-    if (!user) {
-      setLoading(false);
-      return;
-    }
-    try {
-      const q = query(collection(db, "vehicles"), where("userId", "==", user.uid));
-      const querySnapshot = await getDocs(q);
-      const vehicleData = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-      setVehicles(vehicleData);
-      if (vehicleData.length > 0) {
-        setSelectedVehicle(vehicleData[0].id);
-      }
-    } catch (error) {
-      toast.error("Error fetching vehicles: " + error.message);
-    } finally {
-      setLoading(false);
-    }
-  };
-
   useEffect(() => {
+    const fetchVehicles = async () => {
+      if (!user) {
+        setLoading(false);
+        return;
+      }
+      try {
+        const q = query(collection(db, "vehicles"), where("userId", "==", user.uid));
+        const querySnapshot = await getDocs(q);
+        const vehicleData = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+        setVehicles(vehicleData);
+        if (vehicleData.length > 0) {
+          setSelectedVehicle(vehicleData[0].id);
+        }
+      } catch (error) {
+        toast.error("Error fetching vehicles: " + error.message);
+      } finally {
+        setLoading(false);
+      }
+    };
+
     fetchVehicles();
   }, [user]);
 
@@ -67,7 +67,6 @@ const Garage = ({ isPro, setIsPro, user }) => {
       setVehicles(vehicles.map(v => v.id === updatedVehicle.id ? updatedVehicle : v));
       toast.success("Vehicle updated successfully");
       setEditingVehicle(null);
-      fetchVehicles(); // Refresh the vehicle list
     } catch (error) {
       toast.error("Error updating vehicle: " + error.message);
     }
@@ -82,7 +81,6 @@ const Garage = ({ isPro, setIsPro, user }) => {
         if (selectedVehicle === vehicleId) {
           setSelectedVehicle(vehicles.length > 1 ? vehicles[0].id : null);
         }
-        fetchVehicles(); // Refresh the vehicle list
       } catch (error) {
         toast.error("Error deleting vehicle: " + error.message);
       }
@@ -96,7 +94,6 @@ const Garage = ({ isPro, setIsPro, user }) => {
         await updateDoc(doc(db, "users", user.uid), { isPro: true });
         setIsPro(true);
         toast.success("Upgraded to Pro successfully!");
-        fetchVehicles(); // Refresh the vehicle list
       } else {
         toast.error("Failed to upgrade to Pro. Please try again.");
       }

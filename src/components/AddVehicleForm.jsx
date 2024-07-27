@@ -1,13 +1,12 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { addDoc, collection } from "firebase/firestore";
 import { db, auth } from "@/lib/firebase";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { toast } from "sonner";
-
-const API_BASE_URL = "https://vpic.nhtsa.dot.gov/api";
 
 const AddVehicleForm = () => {
   const [year, setYear] = useState("");
@@ -16,75 +15,7 @@ const AddVehicleForm = () => {
   const [engineSize, setEngineSize] = useState("");
   const [drivetrain, setDrivetrain] = useState("");
   const [bodyConfig, setBodyConfig] = useState("");
-  const [years, setYears] = useState([]);
-  const [makes, setMakes] = useState([]);
-  const [models, setModels] = useState([]);
-  const [engines, setEngines] = useState([]);
-  const [drivetrains, setDrivetrains] = useState([]);
   const navigate = useNavigate();
-
-  useEffect(() => {
-    // Generate years from 1996 to 2024
-    const currentYear = new Date().getFullYear();
-    const yearList = Array.from({ length: currentYear - 1995 }, (_, i) => (currentYear - i).toString());
-    setYears(yearList);
-
-    // Fetch makes
-    fetchMakes();
-  }, []);
-
-  useEffect(() => {
-    if (make) {
-      fetchModels(make);
-    }
-  }, [make]);
-
-  useEffect(() => {
-    if (year && make && model) {
-      fetchVehicleDetails(year, make, model);
-    }
-  }, [year, make, model]);
-
-  const fetchMakes = async () => {
-    try {
-      const response = await fetch(`${API_BASE_URL}/vehicles/GetAllMakes?format=json`);
-      const data = await response.json();
-      setMakes(data.Results.map(make => make.Make_Name));
-    } catch (error) {
-      console.error("Error fetching makes:", error);
-      toast.error("Failed to fetch vehicle makes");
-    }
-  };
-
-  const fetchModels = async (selectedMake) => {
-    try {
-      const response = await fetch(`${API_BASE_URL}/vehicles/GetModelsForMake/${selectedMake}?format=json`);
-      const data = await response.json();
-      setModels(data.Results.map(model => model.Model_Name));
-    } catch (error) {
-      console.error("Error fetching models:", error);
-      toast.error("Failed to fetch vehicle models");
-    }
-  };
-
-  const fetchVehicleDetails = async (selectedYear, selectedMake, selectedModel) => {
-    try {
-      // Using a placeholder VIN for demonstration. In a real scenario, you'd need to determine an appropriate VIN.
-      const placeholderVIN = "1GNALDEK9FZ108495";
-      const response = await fetch(`${API_BASE_URL}/vehicles/DecodeVinExtended/${placeholderVIN}?format=json&modelyear=${selectedYear}`);
-      const data = await response.json();
-      
-      // Extract engine and drivetrain information
-      const engineOptions = data.Results.filter(item => item.Variable === "Engine Configuration" || item.Variable === "Displacement (L)");
-      const drivetrainOptions = data.Results.filter(item => item.Variable === "Drive Type");
-      
-      setEngines(engineOptions.map(engine => engine.Value).filter(Boolean));
-      setDrivetrains(drivetrainOptions.map(drivetrain => drivetrain.Value).filter(Boolean));
-    } catch (error) {
-      console.error("Error fetching vehicle details:", error);
-      toast.error("Failed to fetch vehicle details");
-    }
-  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -116,73 +47,70 @@ const AddVehicleForm = () => {
     <form onSubmit={handleSubmit} className="space-y-4">
       <div className="space-y-2">
         <Label htmlFor="year">Year</Label>
-        <Select onValueChange={setYear} required>
-          <SelectTrigger id="year">
-            <SelectValue placeholder="Select year" />
-          </SelectTrigger>
-          <SelectContent>
-            {years.map((y) => (
-              <SelectItem key={y} value={y}>{y}</SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
+        <Input
+          id="year"
+          name="year"
+          type="number"
+          value={year}
+          onChange={(e) => setYear(e.target.value)}
+          required
+          autoComplete="off"
+        />
       </div>
       <div className="space-y-2">
         <Label htmlFor="make">Make</Label>
-        <Select onValueChange={setMake} required>
-          <SelectTrigger id="make">
-            <SelectValue placeholder="Select make" />
-          </SelectTrigger>
-          <SelectContent>
-            {makes.map((m) => (
-              <SelectItem key={m} value={m}>{m}</SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
+        <Input
+          id="make"
+          name="make"
+          type="text"
+          value={make}
+          onChange={(e) => setMake(e.target.value)}
+          required
+          autoComplete="off"
+        />
       </div>
       <div className="space-y-2">
         <Label htmlFor="model">Model</Label>
-        <Select onValueChange={setModel} required>
-          <SelectTrigger id="model">
-            <SelectValue placeholder="Select model" />
-          </SelectTrigger>
-          <SelectContent>
-            {models.map((m) => (
-              <SelectItem key={m} value={m}>{m}</SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
+        <Input
+          id="model"
+          name="model"
+          type="text"
+          value={model}
+          onChange={(e) => setModel(e.target.value)}
+          required
+          autoComplete="off"
+        />
       </div>
       <div className="space-y-2">
         <Label htmlFor="engineSize">Engine Size</Label>
-        <Select onValueChange={setEngineSize} required>
-          <SelectTrigger id="engineSize">
-            <SelectValue placeholder="Select engine size" />
-          </SelectTrigger>
-          <SelectContent>
-            {engines.map((e) => (
-              <SelectItem key={e} value={e}>{e}</SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
+        <Input
+          id="engineSize"
+          name="engineSize"
+          type="text"
+          value={engineSize}
+          onChange={(e) => setEngineSize(e.target.value)}
+          required
+          autoComplete="off"
+        />
       </div>
       <div className="space-y-2">
         <Label htmlFor="drivetrain">Drivetrain</Label>
         <Select onValueChange={setDrivetrain} required>
-          <SelectTrigger id="drivetrain">
+          <SelectTrigger id="drivetrain" name="drivetrain">
             <SelectValue placeholder="Select drivetrain" />
           </SelectTrigger>
           <SelectContent>
-            {drivetrains.map((d) => (
-              <SelectItem key={d} value={d}>{d}</SelectItem>
-            ))}
+            <SelectItem value="fwd">Front-Wheel Drive</SelectItem>
+            <SelectItem value="rwd">Rear-Wheel Drive</SelectItem>
+            <SelectItem value="awd">All-Wheel Drive</SelectItem>
+            <SelectItem value="4wd">Four-Wheel Drive</SelectItem>
           </SelectContent>
         </Select>
       </div>
       <div className="space-y-2">
         <Label htmlFor="bodyConfig">Body Configuration</Label>
         <Select onValueChange={setBodyConfig} required>
-          <SelectTrigger id="bodyConfig">
+          <SelectTrigger id="bodyConfig" name="bodyConfig">
             <SelectValue placeholder="Select body configuration" />
           </SelectTrigger>
           <SelectContent>

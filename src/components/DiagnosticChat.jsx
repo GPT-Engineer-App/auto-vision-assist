@@ -23,7 +23,7 @@ const DiagnosticChat = ({ vehicleId, isPro }) => {
     return querySnapshot.size;
   };
 
-  const { data: currentQueryCount, refetch: refetchQueryCount } = useQuery({
+  const { data: currentQueryCount } = useQuery({
     queryKey: ["queryCount"],
     queryFn: fetchQueryCount,
   });
@@ -61,18 +61,13 @@ const DiagnosticChat = ({ vehicleId, isPro }) => {
         timestamp: new Date(),
       });
 
-      refetchQueryCount(); // Refresh the query count
+      setQueryCount((prev) => prev + 1);
     } catch (error) {
       console.error("Error processing query:", error);
       toast.error("Error processing your query: " + error.message);
     } finally {
       setIsLoading(false);
     }
-  };
-
-  const handleClearResponse = () => {
-    setResponse("");
-    setInput("");
   };
 
   return (
@@ -92,7 +87,6 @@ const DiagnosticChat = ({ vehicleId, isPro }) => {
         <div className="bg-muted p-4 rounded-md">
           <h3 className="font-semibold mb-2">Diagnosis:</h3>
           <p>{response}</p>
-          <Button onClick={handleClearResponse} className="mt-4">Clear Response</Button>
         </div>
       )}
       {!isPro && (
