@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { addDoc, collection } from "firebase/firestore";
 import { db, auth } from "@/lib/firebase";
@@ -6,9 +6,6 @@ import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { toast } from "sonner";
-import { useQuery } from "@tanstack/react-query";
-import axios from "axios";
-import debounce from "lodash/debounce";
 
 const API_BASE_URL = "https://vpic.nhtsa.dot.gov/api";
 
@@ -19,57 +16,75 @@ const AddVehicleForm = () => {
   const [engineSize, setEngineSize] = useState("");
   const [drivetrain, setDrivetrain] = useState("");
   const [bodyConfig, setBodyConfig] = useState("");
+  const [years, setYears] = useState([]);
+  const [makes, setMakes] = useState([]);
+  const [models, setModels] = useState([]);
+  const [engines, setEngines] = useState([]);
+  const [drivetrains, setDrivetrains] = useState([]);
   const navigate = useNavigate();
 
-  const fetchYears = useCallback(async () => {
-    const response = await axios.get(`${API_BASE_URL}/vehicles/getallmakes?format=json`);
-    const years = [...new Set(response.data.Results.map(make => make.Make_Name.match(/\d{4}/)?.[0]).filter(Boolean))];
-    return years.sort((a, b) => b - a);
+  useEffect(() => {
+    // Generate years from 1996 to 2024
+    const currentYear = new Date().getFullYear();
+    const yearList = Array.from({ length: currentYear - 1995 }, (_, i) => (currentYear - i).toString());
+    setYears(yearList);
+
+    // Fetch makes
+    fetchMakes();
   }, []);
 
-  const fetchMakes = useCallback(async ({ queryKey }) => {
-    const [_, year] = queryKey;
-    if (!year) return [];
-    const response = await axios.get(`${API_BASE_URL}/vehicles/getmakesformanufacturer?year=${year}&format=json`);
-    return response.data.Results;
-  }, []);
+  useEffect(() => {
+    if (make) {
+      fetchModels(make);
+    }
+  }, [make]);
 
-  const fetchModels = useCallback(async ({ queryKey }) => {
-    const [_, make, year] = queryKey;
-    if (!make || !year) return [];
-    const response = await axios.get(`${API_BASE_URL}/vehicles/GetModelsForMakeYear/make/${make}/modelyear/${year}?format=json`);
-    return response.data.Results;
-  }, []);
+  useEffect(() => {
+    if (year && make && model) {
+      fetchVehicleDetails(year, make, model);
+    }
+  }, [year, make, model]);
 
-  const { data: years, isLoading: isLoadingYears } = useQuery({
-    queryKey: ['years'],
-    queryFn: fetchYears,
-    staleTime: Infinity,
-  });
+  const fetchMakes = async () => {
+    try {
+      const response = await fetch(`${API_BASE_URL}/vehicles/GetAllMakes?format=json`);
+      const data = await response.json();
+      setMakes(data.Results.map(make => make.Make_Name));
+    } catch (error) {
+      console.error("Error fetching makes:", error);
+      toast.error("Failed to fetch vehicle makes");
+    }
+  };
 
-  const { data: makes, isLoading: isLoadingMakes } = useQuery({
-    queryKey: ['makes', year],
-    queryFn: fetchMakes,
-    enabled: !!year,
-    staleTime: Infinity,
-  });
+  const fetchModels = async (selectedMake) => {
+    try {
+      const response = await fetch(`${API_BASE_URL}/vehicles/GetModelsForMake/${selectedMake}?format=json`);
+      const data = await response.json();
+      setModels(data.Results.map(model => model.Model_Name));
+    } catch (error) {
+      console.error("Error fetching models:", error);
+      toast.error("Failed to fetch vehicle models");
+    }
+  };
 
-  const { data: models, isLoading: isLoadingModels } = useQuery({
-    queryKey: ['models', make, year],
-    queryFn: fetchModels,
-    enabled: !!make && !!year,
-    staleTime: Infinity,
-  });
-
-  const debouncedSetMake = useCallback(
-    debounce((value) => setMake(value), 300),
-    []
-  );
-
-  const debouncedSetYear = useCallback(
-    debounce((value) => setYear(value), 300),
-    []
-  );
+  const fetchVehicleDetails = async (selectedYear, selectedMake, selectedModel) => {
+    try {
+      // Using a placeholder VIN for demonstration. In a real scenario, you'd need to determine an appropriate VIN.
+      const placeholderVIN = "1GNALDEK9FZ108495";
+      const response = await fetch(`${API_BASE_URL}/vehicles/DecodeVinExtended/${placeholderVIN}?format=json&modelyear=${selectedYear}`);
+      const data = await response.json();
+      
+      // Extract engine and drivetrain information
+      const engineOptions = data.Results.filter(item => item.Variable === "Engine Configuration" || item.Variable === "Displacement (L)");
+      const drivetrainOptions = data.Results.filter(item => item.Variable === "Drive Type");
+      
+      setEngines(engineOptions.map(engine => engine.Value).filter(Boolean));
+      setDrivetrains(drivetrainOptions.map(drivetrain => drivetrain.Value).filter(Boolean));
+    } catch (error) {
+      console.error("Error fetching vehicle details:", error);
+      toast.error("Failed to fetch vehicle details");
+    }
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -93,7 +108,6 @@ const AddVehicleForm = () => {
       toast.success("Vehicle added successfully");
       navigate("/garage");
     } catch (error) {
-      console.error("Error adding vehicle:", error);
       toast.error("Error adding vehicle: " + error.message);
     }
   };
@@ -102,52 +116,40 @@ const AddVehicleForm = () => {
     <form onSubmit={handleSubmit} className="space-y-4">
       <div className="space-y-2">
         <Label htmlFor="year">Year</Label>
-        <Select onValueChange={debouncedSetYear} required>
+        <Select onValueChange={setYear} required>
           <SelectTrigger id="year">
             <SelectValue placeholder="Select year" />
           </SelectTrigger>
           <SelectContent>
-            {isLoadingYears ? (
-              <SelectItem value="">Loading years...</SelectItem>
-            ) : (
-              years?.map((y) => (
-                <SelectItem key={y} value={y}>{y}</SelectItem>
-              ))
-            )}
+            {years.map((y) => (
+              <SelectItem key={y} value={y}>{y}</SelectItem>
+            ))}
           </SelectContent>
         </Select>
       </div>
       <div className="space-y-2">
         <Label htmlFor="make">Make</Label>
-        <Select onValueChange={debouncedSetMake} required>
+        <Select onValueChange={setMake} required>
           <SelectTrigger id="make">
             <SelectValue placeholder="Select make" />
           </SelectTrigger>
           <SelectContent>
-            {isLoadingMakes ? (
-              <SelectItem value="">Loading makes...</SelectItem>
-            ) : (
-              makes?.map((make) => (
-                <SelectItem key={make.Make_ID} value={make.Make_Name}>{make.Make_Name}</SelectItem>
-              ))
-            )}
+            {makes.map((m) => (
+              <SelectItem key={m} value={m}>{m}</SelectItem>
+            ))}
           </SelectContent>
         </Select>
       </div>
       <div className="space-y-2">
         <Label htmlFor="model">Model</Label>
-        <Select onValueChange={setModel} required disabled={!make || !year}>
+        <Select onValueChange={setModel} required>
           <SelectTrigger id="model">
-            <SelectValue placeholder={isLoadingModels ? "Loading models..." : "Select model"} />
+            <SelectValue placeholder="Select model" />
           </SelectTrigger>
           <SelectContent>
-            {isLoadingModels ? (
-              <SelectItem value="">Loading models...</SelectItem>
-            ) : (
-              models?.map((model) => (
-                <SelectItem key={model.Model_ID} value={model.Model_Name}>{model.Model_Name}</SelectItem>
-              ))
-            )}
+            {models.map((m) => (
+              <SelectItem key={m} value={m}>{m}</SelectItem>
+            ))}
           </SelectContent>
         </Select>
       </div>
@@ -158,16 +160,9 @@ const AddVehicleForm = () => {
             <SelectValue placeholder="Select engine size" />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="1.0L">1.0L</SelectItem>
-            <SelectItem value="1.5L">1.5L</SelectItem>
-            <SelectItem value="2.0L">2.0L</SelectItem>
-            <SelectItem value="2.5L">2.5L</SelectItem>
-            <SelectItem value="3.0L">3.0L</SelectItem>
-            <SelectItem value="3.5L">3.5L</SelectItem>
-            <SelectItem value="4.0L">4.0L</SelectItem>
-            <SelectItem value="5.0L">5.0L</SelectItem>
-            <SelectItem value="6.0L">6.0L</SelectItem>
-            <SelectItem value="Electric">Electric</SelectItem>
+            {engines.map((e) => (
+              <SelectItem key={e} value={e}>{e}</SelectItem>
+            ))}
           </SelectContent>
         </Select>
       </div>
@@ -178,10 +173,9 @@ const AddVehicleForm = () => {
             <SelectValue placeholder="Select drivetrain" />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="FWD">Front-Wheel Drive (FWD)</SelectItem>
-            <SelectItem value="RWD">Rear-Wheel Drive (RWD)</SelectItem>
-            <SelectItem value="AWD">All-Wheel Drive (AWD)</SelectItem>
-            <SelectItem value="4WD">Four-Wheel Drive (4WD)</SelectItem>
+            {drivetrains.map((d) => (
+              <SelectItem key={d} value={d}>{d}</SelectItem>
+            ))}
           </SelectContent>
         </Select>
       </div>

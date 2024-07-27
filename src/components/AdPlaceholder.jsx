@@ -1,13 +1,10 @@
 import React from 'react';
-import { Card, CardContent } from "@/components/ui/card";
 
 const AdPlaceholder = () => {
   return (
-    <Card className="mt-4 bg-black/50 border border-[#ff6600]">
-      <CardContent className="p-4">
-        <p className="text-[#ff6600] text-center">Advertisement Placeholder</p>
-      </CardContent>
-    </Card>
+    <div className="bg-gray-200 border border-gray-300 p-4 my-4 text-center">
+      <p className="text-gray-600">Advertisement Placeholder</p>
+    </div>
   );
 };
 

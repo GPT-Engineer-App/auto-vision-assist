@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
 import { db } from "@/lib/firebase";
-import { collection, addDoc, query, where, getDocs, limit, orderBy } from "firebase/firestore";
+import { collection, addDoc, query, where, getDocs, limit } from "firebase/firestore";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { toast } from "sonner";
@@ -9,88 +9,74 @@ import { generateDiagnosticResponse } from "@/lib/openai";
 
 const DiagnosticChat = ({ vehicleId, isPro }) => {
   const [input, setInput] = useState("");
+  const [response, setResponse] = useState("");
   const [queryCount, setQueryCount] = useState(0);
-  const queryClient = useQueryClient();
+  const [isLoading, setIsLoading] = useState(false);
 
   const fetchQueryCount = async () => {
     const queryCountRef = collection(db, "queryCounts");
     const q = query(
       queryCountRef,
-      where("timestamp", ">=", new Date(Date.now() - 30 * 24 * 60 * 60 * 1000))
+      where("timestamp", ">=", new Date(Date.now() - 29 * 24 * 60 * 60 * 1000))
     );
     const querySnapshot = await getDocs(q);
     return querySnapshot.size;
   };
 
-  useEffect(() => {
-    fetchQueryCount().then(setQueryCount);
-  }, []);
-
-  const fetchChatHistory = async () => {
-    const chatRef = collection(db, "diagnosticQueries");
-    const q = query(
-      chatRef,
-      where("vehicleId", "==", vehicleId),
-      orderBy("timestamp", "desc"),
-      limit(10)
-    );
-    const querySnapshot = await getDocs(q);
-    return querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-  };
-
-  const { data: chatHistory, isLoading: isLoadingHistory } = useQuery({
-    queryKey: ["chatHistory", vehicleId],
-    queryFn: fetchChatHistory,
-    enabled: !!vehicleId,
+  const { data: currentQueryCount, refetch: refetchQueryCount } = useQuery({
+    queryKey: ["queryCount"],
+    queryFn: fetchQueryCount,
   });
 
-  const mutation = useMutation({
-    mutationFn: async ({ input }) => {
-      const aiResponse = await generateDiagnosticResponse(input, isPro);
+  useEffect(() => {
+    if (currentQueryCount !== undefined) {
+      setQueryCount(currentQueryCount);
+    }
+  }, [currentQueryCount]);
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+
+    if (!isPro && queryCount >= 5) {
+      toast.error("You have reached your query limit. Upgrade to Pro for unlimited queries.");
+      return;
+    }
+
+    setIsLoading(true);
+
+    try {
+      const aiResponse = await generateDiagnosticResponse(input);
+      setResponse(aiResponse);
+
+      // Store query and response in Firestore
       await addDoc(collection(db, "diagnosticQueries"), {
         vehicleId,
         query: input,
         response: aiResponse,
         timestamp: new Date(),
       });
+
+      // Update query count
       await addDoc(collection(db, "queryCounts"), {
         timestamp: new Date(),
       });
-      return aiResponse;
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries(["chatHistory", vehicleId]);
-      setQueryCount(prev => prev + 1);
-      setInput("");
-    },
-    onError: (error) => {
-      toast.error("Error processing your query: " + error.message);
-    },
-  });
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    if (!isPro && queryCount >= 10) {
-      toast.error("You have reached your query limit. Upgrade to Pro for unlimited queries.");
-      return;
+      refetchQueryCount(); // Refresh the query count
+    } catch (error) {
+      console.error("Error processing query:", error);
+      toast.error("Error processing your query: " + error.message);
+    } finally {
+      setIsLoading(false);
     }
-    mutation.mutate({ input });
   };
 
-  if (isLoadingHistory) {
-    return <div>Loading chat history...</div>;
-  }
+  const handleClearResponse = () => {
+    setResponse("");
+    setInput("");
+  };
 
   return (
     <div className="space-y-4">
-      <div className="h-64 overflow-y-auto border rounded p-4">
-        {chatHistory && chatHistory.map((message) => (
-          <div key={message.id} className="mb-4">
-            <p className="font-bold">You: {message.query}</p>
-            <p>AI: {message.response}</p>
-          </div>
-        ))}
-      </div>
       <form onSubmit={handleSubmit} className="space-y-4">
         <Textarea
           value={input}
@@ -98,16 +84,23 @@ const DiagnosticChat = ({ vehicleId, isPro }) => {
           placeholder="Enter vehicle symptoms or diagnostic trouble codes..."
           className="w-full"
         />
-        <Button type="submit" disabled={!isPro && queryCount >= 10 || mutation.isLoading}>
-          {mutation.isLoading ? "Generating..." : "Get Diagnosis"}
+        <Button type="submit" disabled={!isPro && queryCount >= 5 || isLoading}>
+          {isLoading ? "Generating..." : "Get Diagnosis"}
         </Button>
       </form>
+      {response && (
+        <div className="bg-muted p-4 rounded-md">
+          <h3 className="font-semibold mb-2">Diagnosis:</h3>
+          <p>{response}</p>
+          <Button onClick={handleClearResponse} className="mt-4">Clear Response</Button>
+        </div>
+      )}
       {!isPro && (
         <div className="flex justify-between items-center">
           <p className="text-sm text-muted-foreground">
-            Queries remaining: {10 - queryCount}/10
+            Queries remaining: {5 - queryCount}/5
           </p>
-          {queryCount >= 10 && (
+          {queryCount >= 5 && (
             <Button onClick={() => toast.info("Please upgrade to Pro for unlimited queries.")}>
               Upgrade to Pro
             </Button>

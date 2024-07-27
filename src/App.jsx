@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from "react";
+import React, { useState, useEffect } from "react";
 import { Toaster } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
@@ -8,86 +8,45 @@ import { navItems } from "./nav-items";
 import UserProfile from "./components/UserProfile";
 import { auth } from "./lib/firebase";
 import { onAuthStateChanged } from "firebase/auth";
-import RangeFinder from "./pages/RangeFinder";
-import Login from "./pages/Login";
-import Signup from "./pages/Signup";
-import ErrorBoundary from "./components/ErrorBoundary";
 
-const queryClient = new QueryClient({
-  defaultOptions: {
-    queries: {
-      retry: 2,
-      staleTime: 5 * 60 * 1000, // 5 minutes
-    },
-  },
-});
+const queryClient = new QueryClient();
 
 const App = () => {
   const [isPro, setIsPro] = useState(false);
   const [user, setUser] = useState(null);
 
-  const handleAuthStateChange = useCallback((currentUser) => {
-    console.log("Auth state changed:", currentUser ? "User logged in" : "User logged out");
-    setUser(currentUser);
-    if (!currentUser) {
-      setIsPro(false);
-    }
-  }, []);
-
   useEffect(() => {
-    console.log("Setting up auth state listener");
-    const unsubscribe = onAuthStateChanged(auth, handleAuthStateChange);
-
-    return () => {
-      console.log("Cleaning up auth state listener");
-      unsubscribe();
-    };
-  }, [handleAuthStateChange]);
-
-  useEffect(() => {
-    const handleVisibilityChange = () => {
-      if (!document.hidden) {
-        console.log("App visibility restored, refreshing query cache");
-        queryClient.invalidateQueries();
+    const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
+      setUser(currentUser);
+      // Reset isPro when user signs out
+      if (!currentUser) {
+        setIsPro(false);
       }
-    };
+    });
 
-    document.addEventListener("visibilitychange", handleVisibilityChange);
-
-    return () => {
-      document.removeEventListener("visibilitychange", handleVisibilityChange);
-    };
+    return () => unsubscribe();
   }, []);
 
   return (
-    <ErrorBoundary>
-      <QueryClientProvider client={queryClient}>
-        <TooltipProvider>
-          <Toaster />
-          <Router>
-            <Routes>
-              <Route path="/" element={<Layout user={user} isPro={isPro} />}>
-                {navItems.map((item) => (
-                  <Route 
-                    key={item.to} 
-                    path={item.to} 
-                    element={
-                      <ErrorBoundary>
-                        {React.cloneElement(item.page, { isPro, setIsPro, user })}
-                      </ErrorBoundary>
-                    }
-                  />
-                ))}
-                <Route path="/profile" element={<ErrorBoundary><UserProfile isPro={isPro} setIsPro={setIsPro} user={user} /></ErrorBoundary>} />
-                <Route path="/range-finder/:dtc" element={<ErrorBoundary><RangeFinder /></ErrorBoundary>} />
-                <Route path="/login" element={<ErrorBoundary><Login /></ErrorBoundary>} />
-                <Route path="/signup" element={<ErrorBoundary><Signup /></ErrorBoundary>} />
-              </Route>
-            </Routes>
-          </Router>
-        </TooltipProvider>
-      </QueryClientProvider>
-    </ErrorBoundary>
+    <QueryClientProvider client={queryClient}>
+      <TooltipProvider>
+        <Toaster />
+        <Router>
+          <Routes>
+            <Route path="/" element={<Layout user={user} isPro={isPro} />}>
+              {navItems.map((item) => (
+                <Route 
+                  key={item.to} 
+                  path={item.to} 
+                  element={React.cloneElement(item.page, { isPro, setIsPro, user })}
+                />
+              ))}
+              <Route path="/profile" element={<UserProfile isPro={isPro} setIsPro={setIsPro} user={user} />} />
+            </Route>
+          </Routes>
+        </Router>
+      </TooltipProvider>
+    </QueryClientProvider>
   );
 };
 

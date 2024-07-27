@@ -5,13 +5,12 @@ import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
 import { auth, db } from "@/lib/firebase";
 import { doc, getDoc, setDoc } from "firebase/firestore";
-import { purchaseApp, purchaseSubscription, purchaseQueryPack, checkPurchaseStatus } from "@/lib/inAppPurchase";
+import { purchaseProVersion, checkProPurchaseStatus } from "@/lib/inAppPurchase";
 
 const UserProfile = ({ isPro, setIsPro, user }) => {
   const [isProEnabled, setIsProEnabled] = useState(isPro);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [purchaseStatus, setPurchaseStatus] = useState(null);
 
   useEffect(() => {
     const fetchUserProfile = async () => {
@@ -32,9 +31,11 @@ const UserProfile = ({ isPro, setIsPro, user }) => {
             setIsProEnabled(false);
             setIsPro(false);
           }
-          // Check purchase status
-          const status = await checkPurchaseStatus();
-          setPurchaseStatus(status);
+          // Check if the user has purchased Pro version
+          const hasPurchasedPro = await checkProPurchaseStatus();
+          if (hasPurchasedPro && !isProEnabled) {
+            await handleProUpgrade(true);
+          }
         } catch (error) {
           console.error("Error fetching user profile:", error);
           setError("Failed to load user profile. Please try again later.");
@@ -51,58 +52,32 @@ const UserProfile = ({ isPro, setIsPro, user }) => {
     fetchUserProfile();
   }, [user, setIsPro, isProEnabled]);
 
-  const handlePurchaseApp = async () => {
-    setLoading(true);
-    try {
-      const success = await purchaseApp();
-      if (success) {
-        toast.success("App purchased successfully!");
-        const newStatus = await checkPurchaseStatus();
-        setPurchaseStatus(newStatus);
-      } else {
-        toast.error("Failed to purchase app");
-      }
-    } catch (error) {
-      console.error("Error purchasing app:", error);
-      toast.error("Failed to purchase app");
-    } finally {
-      setLoading(false);
+  const handleProUpgrade = async (isPurchased = false) => {
+    if (!user) {
+      toast.error("You must be logged in to change your subscription");
+      return;
     }
-  };
 
-  const handlePurchaseSubscription = async (type) => {
     setLoading(true);
     try {
-      const success = await purchaseSubscription(type);
-      if (success) {
-        toast.success(`${type.charAt(0).toUpperCase() + type.slice(1)} subscription purchased successfully!`);
-        const newStatus = await checkPurchaseStatus();
-        setPurchaseStatus(newStatus);
-      } else {
-        toast.error("Failed to purchase subscription");
+      if (!isPurchased) {
+        // Initiate the purchase process
+        const success = await purchaseProVersion();
+        if (!success) {
+          toast.error("Pro version purchase failed");
+          setLoading(false);
+          return;
+        }
       }
-    } catch (error) {
-      console.error("Error purchasing subscription:", error);
-      toast.error("Failed to purchase subscription");
-    } finally {
-      setLoading(false);
-    }
-  };
 
-  const handlePurchaseQueryPack = async (pack) => {
-    setLoading(true);
-    try {
-      const success = await purchaseQueryPack(pack);
-      if (success) {
-        toast.success(`Query pack of ${pack} queries purchased successfully!`);
-        const newStatus = await checkPurchaseStatus();
-        setPurchaseStatus(newStatus);
-      } else {
-        toast.error("Failed to purchase query pack");
-      }
+      // Update user's pro status in Firestore
+      await setDoc(doc(db, "users", user.uid), { isPro: true }, { merge: true });
+      setIsProEnabled(true);
+      setIsPro(true);
+      toast.success("Upgraded to Pro successfully!");
     } catch (error) {
-      console.error("Error purchasing query pack:", error);
-      toast.error("Failed to purchase query pack");
+      console.error("Error updating pro status:", error);
+      toast.error("Failed to update subscription status");
     } finally {
       setLoading(false);
     }
@@ -138,44 +113,11 @@ const UserProfile = ({ isPro, setIsPro, user }) => {
           ? "You are currently on the Pro plan. Enjoy unlimited features!"
           : "Upgrade to Pro for unlimited features and no ads."}
       </p>
-      {purchaseStatus && (
-        <div>
-          <p>App Purchased: {purchaseStatus.isPurchased ? "Yes" : "No"}</p>
-          <p>Subscription: {purchaseStatus.subscriptionType || "None"}</p>
-          <p>Queries Remaining: {purchaseStatus.queryCount}</p>
-          <p>Range Finder Queries: {purchaseStatus.rangefinderQueries}</p>
-        </div>
-      )}
-      {!purchaseStatus?.isPurchased && (
-        <Button onClick={handlePurchaseApp} disabled={loading}>
-          Purchase App ($29.99)
+      {!isProEnabled && (
+        <Button onClick={() => handleProUpgrade()} disabled={loading}>
+          Upgrade to Pro
         </Button>
       )}
-      {purchaseStatus?.isPurchased && !purchaseStatus?.subscriptionType && (
-        <>
-          <Button onClick={() => handlePurchaseSubscription('monthly')} disabled={loading}>
-            Purchase Monthly Subscription ($9.99)
-          </Button>
-          <Button onClick={() => handlePurchaseSubscription('yearly')} disabled={loading}>
-            Purchase Yearly Subscription ($1,000)
-          </Button>
-        </>
-      )}
-      <div>
-        <h3>Purchase Query Packs</h3>
-        <Button onClick={() => handlePurchaseQueryPack('25')} disabled={loading}>
-          25 Queries ($5)
-        </Button>
-        <Button onClick={() => handlePurchaseQueryPack('50')} disabled={loading}>
-          50 Queries ($10)
-        </Button>
-        <Button onClick={() => handlePurchaseQueryPack('100')} disabled={loading}>
-          100 Queries ($20)
-        </Button>
-        <Button onClick={() => handlePurchaseQueryPack('500')} disabled={loading}>
-          500 Queries ($100)
-        </Button>
-      </div>
     </div>
   );
 };

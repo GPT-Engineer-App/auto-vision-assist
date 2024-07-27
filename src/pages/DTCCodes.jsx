@@ -11,13 +11,10 @@ import {
 } from "@/components/ui/table";
 import { dtcCodes } from '@/lib/dtc-codes';
 import DTCAnalysisView from '@/components/DTCAnalysisView';
-import { useNavigate } from 'react-router-dom';
 
 const DTCCodes = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedDTC, setSelectedDTC] = useState(null);
-  const [dtcInput, setDtcInput] = useState('');
-  const navigate = useNavigate();
 
   const filteredCodes = useMemo(() => {
     return dtcCodes.filter(code => 
@@ -58,12 +55,6 @@ const DTCCodes = () => {
     setSelectedDTC(dtc);
   };
 
-  const handleAnalyze = () => {
-    if (dtcInput) {
-      navigate(`/range-finder/${dtcInput}`);
-    }
-  };
-
   return (
     <div className="min-h-screen bg-gray-100 p-4">
       <div className="container mx-auto bg-white p-8 rounded-xl shadow-lg">
@@ -76,18 +67,6 @@ const DTCCodes = () => {
             onChange={(e) => setSearchTerm(e.target.value)}
             className="flex-grow"
           />
-        </div>
-        <div className="mb-6">
-          <h2 className="text-xl font-semibold mb-2">Enter DTC for Analysis</h2>
-          <div className="flex gap-2">
-            <Input
-              type="text"
-              placeholder="Enter DTC code..."
-              value={dtcInput}
-              onChange={(e) => setDtcInput(e.target.value)}
-            />
-            <Button onClick={handleAnalyze}>Analyze</Button>
-          </div>
         </div>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div>
