@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { collection, query, getDocs, doc, deleteDoc, updateDoc, where, addDoc } from "firebase/firestore";
+import { collection, query, getDocs, doc, deleteDoc, updateDoc, where } from "firebase/firestore";
 import { db, auth } from "@/lib/firebase";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -18,7 +18,6 @@ const Garage = ({ isPro, setIsPro, user }) => {
   const [vehicles, setVehicles] = useState([]);
   const [loading, setLoading] = useState(true);
   const [editingVehicle, setEditingVehicle] = useState(null);
-  const [isAddingVehicle, setIsAddingVehicle] = useState(false);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -48,7 +47,7 @@ const Garage = ({ isPro, setIsPro, user }) => {
     } else if (isPro && vehicles.length >= 3) {
       toast.error("Pro users can store up to three vehicles.");
     } else {
-      setIsAddingVehicle(true);
+      navigate("/add-vehicle");
     }
   };
 
@@ -179,15 +178,6 @@ const Garage = ({ isPro, setIsPro, user }) => {
         onClose={() => setEditingVehicle(null)}
         onUpdate={handleUpdateVehicle}
       />
-      <AddVehicleDialog
-        isOpen={isAddingVehicle}
-        onClose={() => setIsAddingVehicle(false)}
-        onAdd={(newVehicle) => {
-          setVehicles([...vehicles, newVehicle]);
-          setIsAddingVehicle(false);
-        }}
-        userId={user.uid}
-      />
       <Tooltip content="Need help? Click here for assistance">
         <Button variant="ghost" size="icon" className="fixed bottom-4 right-4">
           <HelpCircle className="h-6 w-6" />
@@ -295,126 +285,6 @@ const EditVehicleDialog = ({ vehicle, onClose, onUpdate }) => {
           </div>
           <DialogFooter>
             <Button type="submit">Update Vehicle</Button>
-          </DialogFooter>
-        </form>
-      </DialogContent>
-    </Dialog>
-  );
-};
-
-const AddVehicleDialog = ({ isOpen, onClose, onAdd, userId }) => {
-  const [newVehicle, setNewVehicle] = useState({
-    year: "",
-    make: "",
-    model: "",
-    engineSize: "",
-    drivetrain: "",
-    bodyConfig: "",
-  });
-
-  const handleChange = (e) => {
-    const { name, value } = e.target;
-    setNewVehicle(prev => ({ ...prev, [name]: value }));
-  };
-
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    try {
-      const docRef = await addDoc(collection(db, "vehicles"), {
-        ...newVehicle,
-        userId,
-        createdAt: new Date(),
-      });
-      onAdd({ id: docRef.id, ...newVehicle });
-      toast.success("Vehicle added successfully");
-    } catch (error) {
-      toast.error("Error adding vehicle: " + error.message);
-    }
-  };
-
-  return (
-    <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent>
-        <DialogHeader>
-          <DialogTitle>Add New Vehicle</DialogTitle>
-        </DialogHeader>
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div className="space-y-2">
-            <Label htmlFor="year">Year</Label>
-            <Input
-              id="year"
-              name="year"
-              type="number"
-              value={newVehicle.year}
-              onChange={handleChange}
-              required
-            />
-          </div>
-          <div className="space-y-2">
-            <Label htmlFor="make">Make</Label>
-            <Input
-              id="make"
-              name="make"
-              type="text"
-              value={newVehicle.make}
-              onChange={handleChange}
-              required
-            />
-          </div>
-          <div className="space-y-2">
-            <Label htmlFor="model">Model</Label>
-            <Input
-              id="model"
-              name="model"
-              type="text"
-              value={newVehicle.model}
-              onChange={handleChange}
-              required
-            />
-          </div>
-          <div className="space-y-2">
-            <Label htmlFor="engineSize">Engine Size</Label>
-            <Input
-              id="engineSize"
-              name="engineSize"
-              type="text"
-              value={newVehicle.engineSize}
-              onChange={handleChange}
-              required
-            />
-          </div>
-          <div className="space-y-2">
-            <Label htmlFor="drivetrain">Drivetrain</Label>
-            <Select name="drivetrain" onValueChange={(value) => handleChange({ target: { name: 'drivetrain', value } })} value={newVehicle.drivetrain}>
-              <SelectTrigger>
-                <SelectValue placeholder="Select drivetrain" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="fwd">Front-Wheel Drive</SelectItem>
-                <SelectItem value="rwd">Rear-Wheel Drive</SelectItem>
-                <SelectItem value="awd">All-Wheel Drive</SelectItem>
-                <SelectItem value="4wd">Four-Wheel Drive</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-          <div className="space-y-2">
-            <Label htmlFor="bodyConfig">Body Configuration</Label>
-            <Select name="bodyConfig" onValueChange={(value) => handleChange({ target: { name: 'bodyConfig', value } })} value={newVehicle.bodyConfig}>
-              <SelectTrigger>
-                <SelectValue placeholder="Select body configuration" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="sedan">Sedan</SelectItem>
-                <SelectItem value="coupe">Coupe</SelectItem>
-                <SelectItem value="hatchback">Hatchback</SelectItem>
-                <SelectItem value="suv">SUV</SelectItem>
-                <SelectItem value="truck">Truck</SelectItem>
-                <SelectItem value="van">Van</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-          <DialogFooter>
-            <Button type="submit">Add Vehicle</Button>
           </DialogFooter>
         </form>
       </DialogContent>
