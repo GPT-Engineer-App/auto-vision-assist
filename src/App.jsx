@@ -9,6 +9,8 @@ import UserProfile from "./components/UserProfile";
 import { auth } from "./lib/firebase";
 import { onAuthStateChanged } from "firebase/auth";
 import RangeFinder from "./pages/RangeFinder";
+import Login from "./pages/Login";
+import Signup from "./pages/Signup";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -72,6 +74,8 @@ const App = () => {
               ))}
               <Route path="/profile" element={<UserProfile isPro={isPro} setIsPro={setIsPro} user={user} />} />
               <Route path="/range-finder/:dtc" element={<RangeFinder />} />
+              <Route path="/login" element={<Login />} />
+              <Route path="/signup" element={<Signup />} />
             </Route>
           </Routes>
         </Router>
