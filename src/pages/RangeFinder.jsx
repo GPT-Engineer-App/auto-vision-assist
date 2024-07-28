@@ -22,7 +22,7 @@ const RangeFinder = ({ isPro }) => {
 
   return (
     <div className="container mx-auto p-4">
-      <h1 className="text-3xl font-bold mb-6 text-primary">Range Finder: DTC - {dtc}</h1>
+      <h1 className="text-3xl font-bold mb-6 text-primary">Range Finder: {dtc}</h1>
       
       <Tabs defaultValue="analysis" className="mb-6">
         <TabsList className="bg-secondary">
@@ -33,11 +33,11 @@ const RangeFinder = ({ isPro }) => {
           <Card className="bg-card text-card-foreground">
             <CardHeader>
               <CardTitle>DTC Analysis</CardTitle>
-              <CardDescription>Detailed analysis for {dtc}</CardDescription>
+              <CardDescription>Detailed Analysis content for DTC's</CardDescription>
             </CardHeader>
             <CardContent>
               {/* Add your DTC analysis content here */}
-              <p>Analysis content for {dtc}</p>
+              <p>Detailed Analysis content for DTC's</p>
             </CardContent>
           </Card>
         </TabsContent>
