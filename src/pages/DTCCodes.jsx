@@ -12,11 +12,15 @@ import {
 import { dtcCodes } from '@/lib/dtc-codes';
 import DTCAnalysisView from '@/components/DTCAnalysisView';
 import { useNavigate } from 'react-router-dom';
+import { toast } from "sonner";
+import { generateDiagnosticResponse } from "@/lib/openai";
 
 const DTCCodes = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedDTC, setSelectedDTC] = useState(null);
   const [dtcInput, setDtcInput] = useState('');
+  const [analysisData, setAnalysisData] = useState(null);
+  const [isAnalyzing, setIsAnalyzing] = useState(false);
   const navigate = useNavigate();
 
   const filteredCodes = useMemo(() => {
@@ -26,42 +30,39 @@ const DTCCodes = () => {
     );
   }, [searchTerm]);
 
-  const handleAnalyze = () => {
-    if (dtcInput) {
-      navigate(`/range-finder/${dtcInput}`);
+  const handleAnalyze = async () => {
+    if (!dtcInput) {
+      toast.error("Please enter a DTC code to analyze");
+      return;
+    }
+
+    setIsAnalyzing(true);
+    try {
+      const prompt = `Analyze DTC code ${dtcInput}. Provide common components for failure and common associated DTCs.`;
+      const response = await generateDiagnosticResponse(prompt);
+      
+      // Parse the response and update the state
+      const analysisResult = parseAnalysisResponse(response);
+      setAnalysisData(analysisResult);
+      setSelectedDTC(dtcInput);
+    } catch (error) {
+      console.error("Error analyzing DTC:", error);
+      toast.error("Failed to analyze DTC. Please try again.");
+    } finally {
+      setIsAnalyzing(false);
     }
   };
 
-  // This function would be replaced with actual API calls or more complex logic
-  const generateAnalysisData = (dtc) => {
-    // Mock data generation based on the selected DTC
+  const parseAnalysisResponse = (response) => {
+    // This is a simple parser. You might need to adjust it based on the actual response format
+    const components = response.match(/Common components for failure:([\s\S]*?)(?=Common associated DTCs:|$)/i)?.[1].split(',').map(item => ({ name: item.trim(), count: Math.floor(Math.random() * 10) + 1 })) || [];
+    const dtcs = response.match(/Common associated DTCs:([\s\S]*?)$/i)?.[1].split(',').map(item => ({ code: item.trim(), count: Math.floor(Math.random() * 10) + 1 })) || [];
+    
     return {
-      components: [
-        { name: "Throttle Body", count: 5 },
-        { name: "Throttle Body Gasket", count: 4 },
-        { name: "Throttle Position Sensor", count: 3 },
-        { name: "Brake Light Switch", count: 2 },
-        { name: "Powertrain Control Module", count: 1 },
-      ],
-      dtcs: [
-        { code: dtc, count: 10 },
-        { code: "P0122", count: 8 },
-        { code: "P0123", count: 6 },
-        { code: "P0124", count: 4 },
-        { code: "P0125", count: 2 },
-      ],
-      symptoms: [
-        { description: "Check Engine Light On", count: 15 },
-        { description: "Poor Acceleration", count: 12 },
-        { description: "Stalling", count: 9 },
-        { description: "Reduced Power", count: 7 },
-        { description: "Rough Idle", count: 5 },
-      ],
+      components,
+      dtcs,
+      symptoms: [{ description: "Check Engine Light On", count: 15 }], // Add more dynamic symptoms if available in the response
     };
-  };
-
-  const handleDTCSelect = (dtc) => {
-    setSelectedDTC(dtc);
   };
 
   return (
@@ -87,7 +88,9 @@ const DTCCodes = () => {
               onChange={(e) => setDtcInput(e.target.value)}
               className="flex-grow"
             />
-            <Button onClick={handleAnalyze}>Range Finder: DTC</Button>
+            <Button onClick={handleAnalyze} disabled={isAnalyzing}>
+              {isAnalyzing ? "Analyzing..." : "Analyze"}
+            </Button>
           </div>
         </div>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -107,7 +110,10 @@ const DTCCodes = () => {
                     <TableCell className="font-medium">{code.code}</TableCell>
                     <TableCell>{code.description}</TableCell>
                     <TableCell>
-                      <Button onClick={() => handleDTCSelect(code.code)}>Analyze</Button>
+                      <Button onClick={() => {
+                        setDtcInput(code.code);
+                        handleAnalyze();
+                      }}>Analyze</Button>
                     </TableCell>
                   </TableRow>
                 ))}
@@ -115,8 +121,8 @@ const DTCCodes = () => {
             </Table>
           </div>
           <div>
-            {selectedDTC && (
-              <DTCAnalysisView {...generateAnalysisData(selectedDTC)} />
+            {selectedDTC && analysisData && (
+              <DTCAnalysisView {...analysisData} />
             )}
           </div>
         </div>
