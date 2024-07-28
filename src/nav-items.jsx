@@ -39,7 +39,7 @@ export const navItems = [
     page: <DTCCodes />,
   },
   {
-    title: "Range Finder",
+    title: "Range Finder: DTC",
     to: "/range-finder/:dtc",
     icon: <Compass className="h-4 w-4" />,
     page: <RangeFinder />,

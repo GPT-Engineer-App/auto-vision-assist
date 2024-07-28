@@ -22,7 +22,7 @@ const RangeFinder = ({ isPro }) => {
 
   return (
     <div className="container mx-auto p-4">
-      <h1 className="text-3xl font-bold mb-6 text-primary">DTC Range Finder: {dtc}</h1>
+      <h1 className="text-3xl font-bold mb-6 text-primary">Range Finder: DTC - {dtc}</h1>
       
       <Tabs defaultValue="analysis" className="mb-6">
         <TabsList className="bg-secondary">
@@ -77,7 +77,7 @@ const RangeFinder = ({ isPro }) => {
           <CardTitle>Query Pack Information</CardTitle>
         </CardHeader>
         <CardContent>
-          <p>For every $20 query pack purchase, you receive 20 'Range Finder' queries.</p>
+          <p>For every $20 query pack purchase, you receive 20 'Range Finder: DTC' queries.</p>
           <p className="mt-2">Remaining queries: {remainingQueries}</p>
           <Button onClick={handlePurchaseQueryPack} className="mt-4 bg-primary text-primary-foreground hover:bg-primary/90">Purchase Query Pack</Button>
         </CardContent>
@@ -89,7 +89,7 @@ const RangeFinder = ({ isPro }) => {
             <CardTitle>Upgrade to Pro</CardTitle>
           </CardHeader>
           <CardContent>
-            <p>Upgrade to Pro for unlimited Range Finder queries and more advanced features!</p>
+            <p>Upgrade to Pro for unlimited Range Finder: DTC queries and more advanced features!</p>
             <Button className="mt-4 bg-primary text-primary-foreground hover:bg-primary/90">Upgrade to Pro</Button>
           </CardContent>
         </Card>

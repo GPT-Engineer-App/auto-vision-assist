@@ -87,7 +87,7 @@ const DTCCodes = () => {
               onChange={(e) => setDtcInput(e.target.value)}
               className="flex-grow"
             />
-            <Button onClick={handleAnalyze}>Analyze</Button>
+            <Button onClick={handleAnalyze}>Range Finder: DTC</Button>
           </div>
         </div>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
