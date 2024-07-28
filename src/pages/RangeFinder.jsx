@@ -22,7 +22,7 @@ const RangeFinder = ({ isPro }) => {
 
   return (
     <div className="container mx-auto p-4">
-      <h1 className="text-3xl font-bold mb-6 text-primary">Range Finder: {dtc}</h1>
+      <h1 className="text-3xl font-bold mb-6 text-primary">Range Finder: DTC: {dtc}</h1>
       
       <Tabs defaultValue="analysis" className="mb-6">
         <TabsList className="bg-secondary">
