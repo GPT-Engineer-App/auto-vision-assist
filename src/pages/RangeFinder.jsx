@@ -22,15 +22,15 @@ const RangeFinder = ({ isPro }) => {
 
   return (
     <div className="container mx-auto p-4">
-      <h1 className="text-3xl font-bold mb-6">Range Finder: {dtc}</h1>
+      <h1 className="text-3xl font-bold mb-6 text-primary">DTC Range Finder: {dtc}</h1>
       
       <Tabs defaultValue="analysis" className="mb-6">
-        <TabsList>
-          <TabsTrigger value="analysis">Analysis</TabsTrigger>
-          <TabsTrigger value="features">Features</TabsTrigger>
+        <TabsList className="bg-secondary">
+          <TabsTrigger value="analysis" className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">Analysis</TabsTrigger>
+          <TabsTrigger value="features" className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">Features</TabsTrigger>
         </TabsList>
         <TabsContent value="analysis">
-          <Card>
+          <Card className="bg-card text-card-foreground">
             <CardHeader>
               <CardTitle>DTC Analysis</CardTitle>
               <CardDescription>Detailed analysis for {dtc}</CardDescription>
@@ -43,7 +43,7 @@ const RangeFinder = ({ isPro }) => {
         </TabsContent>
         <TabsContent value="features">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <Card>
+            <Card className="bg-card text-card-foreground">
               <CardHeader>
                 <CardTitle>Free Features</CardTitle>
               </CardHeader>
@@ -55,7 +55,7 @@ const RangeFinder = ({ isPro }) => {
                 </ul>
               </CardContent>
             </Card>
-            <Card>
+            <Card className="bg-card text-card-foreground">
               <CardHeader>
                 <CardTitle>Pro Features</CardTitle>
               </CardHeader>
@@ -72,25 +72,25 @@ const RangeFinder = ({ isPro }) => {
         </TabsContent>
       </Tabs>
 
-      <Card className="mb-6">
+      <Card className="mb-6 bg-card text-card-foreground">
         <CardHeader>
           <CardTitle>Query Pack Information</CardTitle>
         </CardHeader>
         <CardContent>
           <p>For every $20 query pack purchase, you receive 20 'Range Finder' queries.</p>
           <p className="mt-2">Remaining queries: {remainingQueries}</p>
-          <Button onClick={handlePurchaseQueryPack} className="mt-4">Purchase Query Pack</Button>
+          <Button onClick={handlePurchaseQueryPack} className="mt-4 bg-primary text-primary-foreground hover:bg-primary/90">Purchase Query Pack</Button>
         </CardContent>
       </Card>
 
       {!isPro && (
-        <Card>
+        <Card className="bg-card text-card-foreground">
           <CardHeader>
             <CardTitle>Upgrade to Pro</CardTitle>
           </CardHeader>
           <CardContent>
             <p>Upgrade to Pro for unlimited Range Finder queries and more advanced features!</p>
-            <Button className="mt-4">Upgrade to Pro</Button>
+            <Button className="mt-4 bg-primary text-primary-foreground hover:bg-primary/90">Upgrade to Pro</Button>
           </CardContent>
         </Card>
       )}
