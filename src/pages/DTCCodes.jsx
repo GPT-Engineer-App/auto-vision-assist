@@ -71,26 +71,30 @@ const DTCCodes = () => {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div>
             <h2 className="text-xl font-semibold mb-4">DTC Codes</h2>
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead className="w-[100px]">Code</TableHead>
-                  <TableHead>Description</TableHead>
-                  <TableHead className="w-[100px]">Action</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {filteredCodes.map((code) => (
-                  <TableRow key={code.code}>
-                    <TableCell className="font-medium">{code.code}</TableCell>
-                    <TableCell>{code.description}</TableCell>
-                    <TableCell>
-                      <Button onClick={() => handleDTCSelect(code.code)}>Analyze</Button>
-                    </TableCell>
+            {filteredCodes.length > 0 ? (
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead className="w-[100px]">Code</TableHead>
+                    <TableHead>Description</TableHead>
+                    <TableHead className="w-[100px]">Action</TableHead>
                   </TableRow>
-                ))}
-              </TableBody>
-            </Table>
+                </TableHeader>
+                <TableBody>
+                  {filteredCodes.map((code) => (
+                    <TableRow key={code.code}>
+                      <TableCell className="font-medium">{code.code}</TableCell>
+                      <TableCell>{code.description}</TableCell>
+                      <TableCell>
+                        <Button onClick={() => handleDTCSelect(code.code)}>Analyze</Button>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            ) : (
+              <p className="text-gray-500">No matching DTC codes found.</p>
+            )}
           </div>
           <div>
             {selectedDTC && (
