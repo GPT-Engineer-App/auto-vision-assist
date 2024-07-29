@@ -45,8 +45,8 @@ export const searchDTCCodes = async (searchTerm) => {
     const dtcCollection = collection(db, 'dtcCodes');
     const q = query(
       dtcCollection,
-      where('code', '>=', searchTerm),
-      where('code', '<=', searchTerm + '\uf8ff')
+      where('code', '>=', searchTerm.toUpperCase()),
+      where('code', '<=', searchTerm.toUpperCase() + '\uf8ff')
     );
     const snapshot = await getDocs(q);
     return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));

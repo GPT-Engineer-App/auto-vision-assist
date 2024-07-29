@@ -44,9 +44,9 @@ const DTCCodes = () => {
 
   const handleAnalyze = async () => {
     if (dtcInput) {
-      const matchingDTC = dtcCodes.find(code => code.code === dtcInput);
-      if (matchingDTC) {
-        setDtcDescription(matchingDTC.description);
+      const results = await searchDTCCodes(dtcInput);
+      if (results.length > 0) {
+        setDtcDescription(results[0].description);
       } else {
         setDtcDescription('DTC not found');
       }
