@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import { Toaster } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { Route, BrowserRouter as Router, Routes } from "react-router-dom";
+import { Route, Routes } from "react-router-dom";
 import Layout from "./layouts/navbar"; // available: clean, navbar, sidebar
 import { navItems } from "./nav-items";
 import UserProfile from "./components/UserProfile";
@@ -35,23 +35,21 @@ const App = () => {
       <ThemeProvider defaultTheme="dark" storageKey="vite-ui-theme">
         <TooltipProvider>
           <Toaster />
-          <Router>
-            <AnimatePresence mode="wait">
+          <AnimatePresence mode="wait">
+            <Layout user={user} isPro={isPro}>
               <Routes>
-                <Route path="/" element={<Layout user={user} isPro={isPro} />}>
-                  {navItems.map((item) => (
-                    <Route 
-                      key={item.to} 
-                      path={item.to} 
-                      element={React.cloneElement(item.page, { isPro, setIsPro, user })}
-                    />
-                  ))}
-                  <Route path="/profile" element={<UserProfile isPro={isPro} setIsPro={setIsPro} user={user} />} />
-                  <Route path="/range-finder/:dtc" element={<RangeFinder isPro={isPro} />} />
-                </Route>
+                {navItems.map((item) => (
+                  <Route 
+                    key={item.to} 
+                    path={item.to} 
+                    element={React.cloneElement(item.page, { isPro, setIsPro, user })}
+                  />
+                ))}
+                <Route path="/profile" element={<UserProfile isPro={isPro} setIsPro={setIsPro} user={user} />} />
+                <Route path="/range-finder/:dtc" element={<RangeFinder isPro={isPro} />} />
               </Routes>
-            </AnimatePresence>
-          </Router>
+            </Layout>
+          </AnimatePresence>
         </TooltipProvider>
       </ThemeProvider>
     </QueryClientProvider>

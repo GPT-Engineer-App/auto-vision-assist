@@ -1,13 +1,12 @@
 import { useState } from "react";
 import { navItems } from "@/nav-items";
-import { Outlet } from "react-router-dom";
 import { DesktopNavbar } from "./_components/DesktopNavbar";
 import { MobileSheet } from "./_components/MobileSheet";
 import { UserMenu } from "./_components/UserMenu";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { motion } from "framer-motion";
 
-const Layout = ({ user, isPro }) => {
+const Layout = ({ user, isPro, children }) => {
   const [isOpen, setIsOpen] = useState(false);
 
   return (
@@ -28,7 +27,7 @@ const Layout = ({ user, isPro }) => {
         </div>
       </motion.header>
       <main className="flex-1 container py-6">
-        <Outlet />
+        {children}
       </main>
       <motion.footer
         initial={{ y: 100 }}
