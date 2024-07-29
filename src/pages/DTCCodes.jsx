@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react';
+import { useState, useEffect } from 'react';
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { 
@@ -9,19 +9,23 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { dtcCodes } from '@/lib/dtc-codes';
+import { fetchAndStoreDTCs, searchDTCCodes } from '@/lib/dtcUtils';
 import DTCAnalysisView from '@/components/DTCAnalysisView';
 
 const DTCCodes = () => {
   const [searchTerm, setSearchTerm] = useState('');
+  const [searchResult, setSearchResult] = useState(null);
   const [selectedDTC, setSelectedDTC] = useState(null);
 
-  const filteredCodes = useMemo(() => {
-    return dtcCodes.filter(code => 
-      code.code.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      code.description.toLowerCase().includes(searchTerm.toLowerCase())
-    );
-  }, [searchTerm]);
+  useEffect(() => {
+    fetchAndStoreDTCs();
+  }, []);
+
+  const handleSearch = async () => {
+    const result = await searchDTCCodes(searchTerm);
+    setSearchResult(result);
+    setSelectedDTC(result ? result.code : null);
+  };
 
   // This function would be replaced with actual API calls or more complex logic
   const generateAnalysisData = (dtc) => {
@@ -51,10 +55,6 @@ const DTCCodes = () => {
     };
   };
 
-  const handleDTCSelect = (dtc) => {
-    setSelectedDTC(dtc);
-  };
-
   return (
     <div className="min-h-screen bg-gray-100 p-4">
       <div className="container mx-auto bg-white p-8 rounded-xl shadow-lg">
@@ -67,30 +67,29 @@ const DTCCodes = () => {
             onChange={(e) => setSearchTerm(e.target.value)}
             className="flex-grow"
           />
+          <Button onClick={handleSearch}>Search</Button>
         </div>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div>
-            <h2 className="text-xl font-semibold mb-4">DTC Codes</h2>
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead className="w-[100px]">Code</TableHead>
-                  <TableHead>Description</TableHead>
-                  <TableHead className="w-[100px]">Action</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {filteredCodes.map((code) => (
-                  <TableRow key={code.code}>
-                    <TableCell className="font-medium">{code.code}</TableCell>
-                    <TableCell>{code.description}</TableCell>
-                    <TableCell>
-                      <Button onClick={() => handleDTCSelect(code.code)}>Analyze</Button>
-                    </TableCell>
+            <h2 className="text-xl font-semibold mb-4">Search Result</h2>
+            {searchResult ? (
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead className="w-[100px]">Code</TableHead>
+                    <TableHead>Description</TableHead>
                   </TableRow>
-                ))}
-              </TableBody>
-            </Table>
+                </TableHeader>
+                <TableBody>
+                  <TableRow>
+                    <TableCell className="font-medium">{searchResult.code}</TableCell>
+                    <TableCell>{searchResult.description}</TableCell>
+                  </TableRow>
+                </TableBody>
+              </Table>
+            ) : (
+              <p>No DTC code found. Please try another search.</p>
+            )}
           </div>
           <div>
             {selectedDTC && (
