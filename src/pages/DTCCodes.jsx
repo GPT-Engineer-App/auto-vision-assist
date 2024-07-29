@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react';
+import { useState, useEffect } from 'react';
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { 
@@ -9,21 +9,36 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { dtcCodes } from '@/lib/dtc-codes';
 import DTCAnalysisView from '@/components/DTCAnalysisView';
 import { useNavigate } from 'react-router-dom';
+import { getDTCCodes, searchDTCCodes } from '@/lib/dtcUtils';
 
 const DTCCodes = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedDTC, setSelectedDTC] = useState(null);
   const [dtcInput, setDtcInput] = useState('');
+  const [dtcCodes, setDtcCodes] = useState([]);
   const navigate = useNavigate();
 
-  const filteredCodes = useMemo(() => {
-    return dtcCodes.filter(code => 
-      code.code.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      code.description.toLowerCase().includes(searchTerm.toLowerCase())
-    );
+  useEffect(() => {
+    const fetchDTCCodes = async () => {
+      const codes = await getDTCCodes();
+      setDtcCodes(codes);
+    };
+    fetchDTCCodes();
+  }, []);
+
+  useEffect(() => {
+    const searchDTCs = async () => {
+      if (searchTerm) {
+        const results = await searchDTCCodes(searchTerm);
+        setDtcCodes(results);
+      } else {
+        const allCodes = await getDTCCodes();
+        setDtcCodes(allCodes);
+      }
+    };
+    searchDTCs();
   }, [searchTerm]);
 
   const handleAnalyze = () => {
@@ -102,8 +117,8 @@ const DTCCodes = () => {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {filteredCodes.map((code) => (
-                  <TableRow key={code.code}>
+                {dtcCodes.map((code) => (
+                  <TableRow key={code.id}>
                     <TableCell className="font-medium">{code.code}</TableCell>
                     <TableCell>{code.description}</TableCell>
                     <TableCell>
