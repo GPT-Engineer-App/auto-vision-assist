@@ -18,6 +18,7 @@ const DTCCodes = () => {
   const [selectedDTC, setSelectedDTC] = useState(null);
   const [dtcInput, setDtcInput] = useState('');
   const [dtcCodes, setDtcCodes] = useState([]);
+  const [dtcDescription, setDtcDescription] = useState('');
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -41,9 +42,14 @@ const DTCCodes = () => {
     searchDTCs();
   }, [searchTerm]);
 
-  const handleAnalyze = () => {
+  const handleAnalyze = async () => {
     if (dtcInput) {
-      navigate(`/range-finder/${dtcInput}`);
+      const matchingDTC = dtcCodes.find(code => code.code === dtcInput);
+      if (matchingDTC) {
+        setDtcDescription(matchingDTC.description);
+      } else {
+        setDtcDescription('DTC not found');
+      }
     }
   };
 
@@ -102,8 +108,14 @@ const DTCCodes = () => {
               onChange={(e) => setDtcInput(e.target.value)}
               className="flex-grow"
             />
-            <Button onClick={handleAnalyze}>Range Finder: DTC</Button>
+            <Button onClick={handleAnalyze}>Analyze</Button>
           </div>
+          {dtcDescription && (
+            <div className="mt-4 p-4 bg-gray-100 rounded-md">
+              <h3 className="font-semibold">DTC Description:</h3>
+              <p>{dtcDescription}</p>
+            </div>
+          )}
         </div>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div>
