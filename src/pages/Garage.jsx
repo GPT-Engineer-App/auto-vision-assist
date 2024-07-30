@@ -29,12 +29,14 @@ const Garage = ({ isPro, setIsPro, user }) => {
         return;
       }
       try {
-        const q = query(collection(db, "vehicles"), where("userId", "==", user.uid));
+        const vehiclesRef = collection(db, "vehicles");
+        const q = query(vehiclesRef, where("userId", "==", user.uid));
         const querySnapshot = await getDocs(q);
         const vehicleData = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
         setVehicles(vehicleData);
       } catch (error) {
-        toast.error("Error fetching vehicles: " + error.message);
+        console.error("Error fetching vehicles:", error);
+        toast.error("Error fetching vehicles. Please try again later.");
       } finally {
         setLoading(false);
       }
