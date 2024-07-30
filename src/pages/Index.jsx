@@ -24,7 +24,7 @@ const Index = () => {
   }, [navigate]);
 
   return (
-    <div className="relative flex flex-col min-h-screen bg-background text-foreground justify-between overflow-x-hidden">
+    <div className="relative flex flex-col min-h-screen bg-background justify-between overflow-x-hidden">
       <HolographicCarBackground />
       <motion.div
         initial={{ opacity: 0, y: 20 }}
