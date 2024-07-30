@@ -22,12 +22,18 @@ const AddVehicle = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
-    fetchAllMakes().then(setMakes).catch(console.error);
+    fetchAllMakes().then(setMakes).catch(error => {
+      console.error("Failed to fetch makes:", error);
+      toast.error("Failed to load vehicle makes. Please try again.");
+    });
   }, []);
 
   useEffect(() => {
     if (make) {
-      fetchModelsForMake(make).then(setModels).catch(console.error);
+      fetchModelsForMake(make).then(setModels).catch(error => {
+        console.error("Failed to fetch models:", error);
+        toast.error("Failed to load models for the selected make. Please try again.");
+      });
       setModel("");
       setEngineSize("");
     }
@@ -35,7 +41,10 @@ const AddVehicle = () => {
 
   useEffect(() => {
     if (year && make && model) {
-      fetchEngineSizesForMakeAndModel(year, make, model).then(setEngines).catch(console.error);
+      fetchEngineSizesForMakeAndModel(year, make, model).then(setEngines).catch(error => {
+        console.error("Failed to fetch engine sizes:", error);
+        toast.error("Failed to load engine sizes. Please try again.");
+      });
       setEngineSize("");
     }
   }, [year, make, model]);

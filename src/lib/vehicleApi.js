@@ -64,31 +64,42 @@ const engineSizesByMakeAndModel = {
 };
 
 export const fetchAllMakes = async () => {
-  // Simulating API call
-  return new Promise((resolve) => {
-    setTimeout(() => {
-      resolve(northAmericanMakes);
-    }, 500);
-  });
+  try {
+    const response = await fetch('https://api.example.com/makes');
+    if (!response.ok) {
+      throw new Error('Failed to fetch makes');
+    }
+    return await response.json();
+  } catch (error) {
+    console.error('Error fetching makes:', error);
+    return [];
+  }
 };
 
 export const fetchModelsForMake = async (make) => {
-  // Simulating API call
-  return new Promise((resolve) => {
-    setTimeout(() => {
-      resolve(modelsByMake[make] || []);
-    }, 500);
-  });
+  try {
+    const response = await fetch(`https://api.example.com/models?make=${encodeURIComponent(make)}`);
+    if (!response.ok) {
+      throw new Error('Failed to fetch models');
+    }
+    return await response.json();
+  } catch (error) {
+    console.error('Error fetching models:', error);
+    return [];
+  }
 };
 
 export const fetchEngineSizesForMakeAndModel = async (year, make, model) => {
-  // Simulating API call
-  return new Promise((resolve) => {
-    setTimeout(() => {
-      const engineSizes = engineSizesByMakeAndModel[make]?.[model] || ['2.0L I4', '2.5L I4', '3.0L V6', '3.5L V6', '5.0L V8'];
-      resolve(engineSizes);
-    }, 500);
-  });
+  try {
+    const response = await fetch(`https://api.example.com/engines?year=${year}&make=${encodeURIComponent(make)}&model=${encodeURIComponent(model)}`);
+    if (!response.ok) {
+      throw new Error('Failed to fetch engine sizes');
+    }
+    return await response.json();
+  } catch (error) {
+    console.error('Error fetching engine sizes:', error);
+    return [];
+  }
 };
 
 export const decodeVin = async (year, make, model) => {
