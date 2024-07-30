@@ -3,17 +3,11 @@ import { useNavigate } from "react-router-dom";
 import { addDoc, collection } from "firebase/firestore";
 import { db, auth } from "@/lib/firebase";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { toast } from "sonner";
-import {
-  fetchYears,
-  fetchAllMakes,
-  fetchModelsForMake,
-  fetchEngineSizes,
-  fetchDrivetrains,
-  fetchBodyConfigurations
-} from "@/lib/vehicleApi";
+import { fetchAllMakes, fetchModelsForMake, fetchEngineSizesForMakeAndModel } from "@/lib/vehicleApi";
 
 const AddVehicleForm = () => {
   const [year, setYear] = useState("");
@@ -22,24 +16,13 @@ const AddVehicleForm = () => {
   const [engineSize, setEngineSize] = useState("");
   const [drivetrain, setDrivetrain] = useState("");
   const [bodyConfig, setBodyConfig] = useState("");
-  const [years, setYears] = useState([]);
   const [makes, setMakes] = useState([]);
   const [models, setModels] = useState([]);
-  const [engineSizes, setEngineSizes] = useState([]);
-  const [drivetrains, setDrivetrains] = useState([]);
-  const [bodyConfigs, setBodyConfigs] = useState([]);
+  const [engines, setEngines] = useState([]);
   const navigate = useNavigate();
 
   useEffect(() => {
-    const fetchInitialData = async () => {
-      setYears(fetchYears());
-      const fetchedMakes = await fetchAllMakes();
-      setMakes(fetchedMakes);
-      setEngineSizes(await fetchEngineSizes());
-      setDrivetrains(await fetchDrivetrains());
-      setBodyConfigs(await fetchBodyConfigurations());
-    };
-    fetchInitialData();
+    fetchAllMakes().then(setMakes).catch(console.error);
   }, []);
 
   useEffect(() => {
@@ -49,6 +32,13 @@ const AddVehicleForm = () => {
       setEngineSize("");
     }
   }, [make]);
+
+  useEffect(() => {
+    if (year && make && model) {
+      fetchEngineSizesForMakeAndModel(year, make, model).then(setEngines).catch(console.error);
+      setEngineSize("");
+    }
+  }, [year, make, model]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -78,6 +68,8 @@ const AddVehicleForm = () => {
     }
   };
 
+  const years = Array.from({ length: 2024 - 1996 + 1 }, (_, i) => 2024 - i);
+
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
       <div className="space-y-2">
@@ -88,7 +80,7 @@ const AddVehicleForm = () => {
           </SelectTrigger>
           <SelectContent>
             {years.map((y) => (
-              <SelectItem key={y} value={y}>{y}</SelectItem>
+              <SelectItem key={y} value={y.toString()}>{y}</SelectItem>
             ))}
           </SelectContent>
         </Select>
@@ -126,7 +118,7 @@ const AddVehicleForm = () => {
             <SelectValue placeholder="Select engine size" />
           </SelectTrigger>
           <SelectContent>
-            {engineSizes.map((e) => (
+            {engines.map((e) => (
               <SelectItem key={e} value={e}>{e}</SelectItem>
             ))}
           </SelectContent>
@@ -139,9 +131,10 @@ const AddVehicleForm = () => {
             <SelectValue placeholder="Select drivetrain" />
           </SelectTrigger>
           <SelectContent>
-            {drivetrains.map((d) => (
-              <SelectItem key={d} value={d}>{d}</SelectItem>
-            ))}
+            <SelectItem value="FWD">Front-Wheel Drive</SelectItem>
+            <SelectItem value="RWD">Rear-Wheel Drive</SelectItem>
+            <SelectItem value="AWD">All-Wheel Drive</SelectItem>
+            <SelectItem value="4WD">Four-Wheel Drive</SelectItem>
           </SelectContent>
         </Select>
       </div>
@@ -152,9 +145,12 @@ const AddVehicleForm = () => {
             <SelectValue placeholder="Select body configuration" />
           </SelectTrigger>
           <SelectContent>
-            {bodyConfigs.map((b) => (
-              <SelectItem key={b} value={b}>{b}</SelectItem>
-            ))}
+            <SelectItem value="sedan">Sedan</SelectItem>
+            <SelectItem value="coupe">Coupe</SelectItem>
+            <SelectItem value="hatchback">Hatchback</SelectItem>
+            <SelectItem value="suv">SUV</SelectItem>
+            <SelectItem value="truck">Truck</SelectItem>
+            <SelectItem value="van">Van</SelectItem>
           </SelectContent>
         </Select>
       </div>
