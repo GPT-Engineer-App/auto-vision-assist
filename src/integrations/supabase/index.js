@@ -19,53 +19,59 @@ const fromSupabase = async (query) => {
 
 /* supabase integration types
 
-// EXAMPLE TYPES SECTION
-// DO NOT USE TYPESCRIPT
+### diagnostic_trouble_codes
 
-### foos
+| name            | type    | format | required |
+|-----------------|---------|--------|----------|
+| dtc_code        | varchar | string | true     |
+| description     | text    | string | false    |
+| possible_causes | text    | string | false    |
+| causes          | text    | string | false    |
+| diagnostic_aids | text    | string | false    |
+| application     | text    | string | false    |
 
-| name    | type | format | required |
-|---------|------|--------|----------|
-| id      | int8 | number | true     |
-| title   | text | string | true     |
-| date    | date | string | true     |
-
-### bars
-
-| name    | type | format | required |
-|---------|------|--------|----------|
-| id      | int8 | number | true     |
-| foo_id  | int8 | number | true     |  // foreign key to foos
-	
 */
 
-// Example hook for models
+// Hooks for diagnostic_trouble_codes table
 
-export const useFoo = ()=> useQuery({
-    queryKey: ['foos'],
-    queryFn: fromSupabase(supabase.from('foos')),
-})
-export const useAddFoo = () => {
+export const useDiagnosticTroubleCodes = () => useQuery({
+    queryKey: ['diagnostic_trouble_codes'],
+    queryFn: () => fromSupabase(supabase.from('diagnostic_trouble_codes').select('*')),
+});
+
+export const useDiagnosticTroubleCode = (dtc_code) => useQuery({
+    queryKey: ['diagnostic_trouble_codes', dtc_code],
+    queryFn: () => fromSupabase(supabase.from('diagnostic_trouble_codes').select('*').eq('dtc_code', dtc_code).single()),
+    enabled: !!dtc_code,
+});
+
+export const useAddDiagnosticTroubleCode = () => {
     const queryClient = useQueryClient();
     return useMutation({
-        mutationFn: (newFoo)=> fromSupabase(supabase.from('foos').insert([{ title: newFoo.title }])),
-        onSuccess: ()=> {
-            queryClient.invalidateQueries('foos');
+        mutationFn: (newCode) => fromSupabase(supabase.from('diagnostic_trouble_codes').insert([newCode])),
+        onSuccess: () => {
+            queryClient.invalidateQueries(['diagnostic_trouble_codes']);
         },
     });
 };
 
-export const useBar = ()=> useQuery({
-    queryKey: ['bars'],
-    queryFn: fromSupabase(supabase.from('bars')),
-})
-export const useAddBar = () => {
+export const useUpdateDiagnosticTroubleCode = () => {
     const queryClient = useQueryClient();
     return useMutation({
-        mutationFn: (newBar)=> fromSupabase(supabase.from('bars').insert([{ foo_id: newBar.foo_id }])),
-        onSuccess: ()=> {
-            queryClient.invalidateQueries('bars');
+        mutationFn: ({ dtc_code, ...updates }) => fromSupabase(supabase.from('diagnostic_trouble_codes').update(updates).eq('dtc_code', dtc_code)),
+        onSuccess: (_, { dtc_code }) => {
+            queryClient.invalidateQueries(['diagnostic_trouble_codes']);
+            queryClient.invalidateQueries(['diagnostic_trouble_codes', dtc_code]);
         },
     });
 };
 
+export const useDeleteDiagnosticTroubleCode = () => {
+    const queryClient = useQueryClient();
+    return useMutation({
+        mutationFn: (dtc_code) => fromSupabase(supabase.from('diagnostic_trouble_codes').delete().eq('dtc_code', dtc_code)),
+        onSuccess: () => {
+            queryClient.invalidateQueries(['diagnostic_trouble_codes']);
+        },
+    });
+};
