@@ -59,9 +59,11 @@ const AddVehicleForm = () => {
         bodyConfig,
         createdAt: new Date(),
       });
+      console.log("Vehicle added with ID: ", docRef.id);
       toast.success("Vehicle added successfully");
       navigate("/garage");
     } catch (error) {
+      console.error("Error adding vehicle: ", error);
       toast.error("Error adding vehicle: " + error.message);
     }
   };
