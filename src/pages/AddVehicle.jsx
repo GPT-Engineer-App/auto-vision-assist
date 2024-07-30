@@ -3,7 +3,6 @@ import { useNavigate } from "react-router-dom";
 import { addDoc, collection } from "firebase/firestore";
 import { db, auth } from "@/lib/firebase";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { toast } from "sonner";
@@ -18,6 +17,7 @@ const AddVehicle = () => {
   const [years, setYears] = useState([]);
   const [makes, setMakes] = useState([]);
   const [models, setModels] = useState([]);
+  const [engineSizes, setEngineSizes] = useState([]);
   const navigate = useNavigate();
 
   const predefinedMakes = [
@@ -28,9 +28,13 @@ const AddVehicle = () => {
     "Nissan", "Porsche", "Ram", "Rolls-Royce", "Subaru", "Tesla", "Toyota", "Volkswagen", "Volvo"
   ];
 
+  const drivetrains = ['FWD', 'RWD', 'AWD', '4WD'];
+  const bodyConfigurations = ['Sedan', 'Coupe', 'Hatchback', 'Convertible', 'Van', 'SUV', 'Truck'];
+
   useEffect(() => {
     populateYears();
     setMakes(predefinedMakes);
+    populateEngineSizes();
   }, []);
 
   const populateYears = () => {
@@ -39,29 +43,22 @@ const AddVehicle = () => {
     setYears(yearsList);
   };
 
+  const populateEngineSizes = () => {
+    const sizes = [];
+    for (let size = 1.0; size <= 12.0; size += 0.1) {
+      sizes.push(size.toFixed(1) + 'L');
+    }
+    setEngineSizes(sizes);
+  };
+
   const populateModels = async (selectedMake, selectedYear) => {
     try {
       const response = await fetch(`https://vpic.nhtsa.dot.gov/api/vehicles/GetModelsForMakeYear/make/${selectedMake}/modelyear/${selectedYear}?format=json`);
       const data = await response.json();
-      setModels(data.Results.map(model => ({ value: model.Model_ID, label: model.Model_Name })));
+      setModels(data.Results.map(model => ({ value: model.Model_Name, label: model.Model_Name })));
     } catch (error) {
       console.error('Error fetching models:', error);
       toast.error('Failed to load vehicle models');
-    }
-  };
-
-  const populateDetails = async (vin) => {
-    try {
-      const response = await fetch(`https://vpic.nhtsa.dot.gov/api/vehicles/DecodeVinValues/${vin}?format=json`);
-      const data = await response.json();
-      const results = data.Results[0];
-      
-      setEngineSize(results.EngineSize);
-      setDrivetrain(results.DriveType);
-      setBodyConfig(results.BodyClass);
-    } catch (error) {
-      console.error('Error fetching vehicle details:', error);
-      toast.error('Failed to load vehicle details');
     }
   };
 
@@ -77,13 +74,6 @@ const AddVehicle = () => {
     if (year) {
       populateModels(selectedMake, year);
     }
-  };
-
-  const handleModelChange = (selectedModel) => {
-    setModel(selectedModel);
-    // For demonstration purposes, we're using a static VIN. In a real application, you'd need to determine the VIN based on the selected year, make, and model.
-    const demoVin = '5UXWX7C5*BA';
-    populateDetails(demoVin);
   };
 
   const handleSubmit = async (e) => {
@@ -144,7 +134,7 @@ const AddVehicle = () => {
         </div>
         <div>
           <Label htmlFor="model">Model</Label>
-          <Select value={model} onValueChange={handleModelChange}>
+          <Select value={model} onValueChange={setModel}>
             <SelectTrigger id="model">
               <SelectValue placeholder="Select model" />
             </SelectTrigger>
@@ -157,15 +147,42 @@ const AddVehicle = () => {
         </div>
         <div>
           <Label htmlFor="engineSize">Engine Size</Label>
-          <Input id="engineSize" value={engineSize} readOnly />
+          <Select value={engineSize} onValueChange={setEngineSize}>
+            <SelectTrigger id="engineSize">
+              <SelectValue placeholder="Select engine size" />
+            </SelectTrigger>
+            <SelectContent>
+              {engineSizes.map((size) => (
+                <SelectItem key={size} value={size}>{size}</SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
         </div>
         <div>
           <Label htmlFor="drivetrain">Drivetrain</Label>
-          <Input id="drivetrain" value={drivetrain} readOnly />
+          <Select value={drivetrain} onValueChange={setDrivetrain}>
+            <SelectTrigger id="drivetrain">
+              <SelectValue placeholder="Select drivetrain" />
+            </SelectTrigger>
+            <SelectContent>
+              {drivetrains.map((dt) => (
+                <SelectItem key={dt} value={dt}>{dt}</SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
         </div>
         <div>
           <Label htmlFor="bodyConfig">Body Configuration</Label>
-          <Input id="bodyConfig" value={bodyConfig} readOnly />
+          <Select value={bodyConfig} onValueChange={setBodyConfig}>
+            <SelectTrigger id="bodyConfig">
+              <SelectValue placeholder="Select body configuration" />
+            </SelectTrigger>
+            <SelectContent>
+              {bodyConfigurations.map((bc) => (
+                <SelectItem key={bc} value={bc}>{bc}</SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
         </div>
         <Button type="submit">Add Vehicle</Button>
       </form>
