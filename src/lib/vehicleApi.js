@@ -81,7 +81,7 @@ export const fetchModelsForMake = async (make) => {
   });
 };
 
-export const fetchEngineSizesForMakeAndModel = async (make, model) => {
+export const fetchEngineSizesForMakeAndModel = async (year, make, model) => {
   // Simulating API call
   return new Promise((resolve) => {
     setTimeout(() => {
