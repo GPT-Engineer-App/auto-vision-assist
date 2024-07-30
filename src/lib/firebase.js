@@ -27,97 +27,37 @@ if (import.meta.env.DEV) {
   // connectFirestoreEmulator(db, "localhost", 8080);
 }
 
-/**
- * @typedef {Object} DTC
- * @property {string} code - The DTC code
- * @property {string} description - Description of the DTC
- * @property {string} possible_causes - Possible causes of the DTC
- * @property {string} diagnostic_aids - Diagnostic aids for the DTC
- * @property {string} application - Application of the DTC
- */
-
-/**
- * Fetches a DTC by its code
- * @param {string} code - The DTC code to fetch
- * @returns {Promise<DTC|null>} The DTC object or null if not found
- */
-export async function fetchDTCByCode(code) {
-  const dtcRef = collection(db, "dtc");
-  const q = query(dtcRef, where("code", "==", code));
-  const querySnapshot = await getDocs(q);
-
-  if (querySnapshot.empty) {
-    return null;
+export const addVehicle = async (vehicleData) => {
+  if (!auth.currentUser) {
+    throw new Error("User must be logged in to add a vehicle");
   }
-
-  return querySnapshot.docs[0].data();
-}
-
-/**
- * Searches DTCs by a query string
- * @param {string} searchQuery - The search query
- * @returns {Promise<DTC[]>} An array of matching DTCs
- */
-export async function searchDTCs(searchQuery) {
-  const dtcRef = collection(db, "dtc");
-  const q = query(dtcRef, 
-    where("code", ">=", searchQuery),
-    where("code", "<=", searchQuery + '\uf8ff')
-  );
-  const querySnapshot = await getDocs(q);
-
-  return querySnapshot.docs.map(doc => doc.data());
-}
-
-/**
- * Fetches all DTCs
- * @returns {Promise<DTC[]>} An array of all DTCs
- */
-export async function fetchAllDTCs() {
-  const dtcRef = collection(db, "dtc");
-  const querySnapshot = await getDocs(dtcRef);
-
-  return querySnapshot.docs.map(doc => doc.data());
-}
-
-/**
- * Adds a new DTC to the database
- * @param {DTC} dtc - The DTC object to add
- * @returns {Promise<string>} The ID of the newly added DTC
- */
-export async function addDTC(dtc) {
-  const docRef = await addDoc(collection(db, "dtc"), dtc);
-  return docRef.id;
-}
-
-/**
- * Updates an existing DTC in the database
- * @param {string} code - The code of the DTC to update
- * @param {Partial<DTC>} updates - The fields to update
- * @returns {Promise<void>}
- */
-export async function updateDTC(code, updates) {
-  const dtcRef = collection(db, "dtc");
-  const q = query(dtcRef, where("code", "==", code));
-  const querySnapshot = await getDocs(q);
-
-  if (!querySnapshot.empty) {
-    const docRef = doc(db, "dtc", querySnapshot.docs[0].id);
-    await updateDoc(docRef, updates);
+  
+  try {
+    const docRef = await addDoc(collection(db, "vehicles"), {
+      ...vehicleData,
+      userId: auth.currentUser.uid,
+      createdAt: new Date()
+    });
+    return docRef.id;
+  } catch (error) {
+    console.error("Error adding vehicle: ", error);
+    throw error;
   }
-}
+};
 
-/**
- * Deletes a DTC from the database
- * @param {string} code - The code of the DTC to delete
- * @returns {Promise<void>}
- */
-export async function deleteDTC(code) {
-  const dtcRef = collection(db, "dtc");
-  const q = query(dtcRef, where("code", "==", code));
+export const getVehicles = async (userId) => {
+  const q = query(collection(db, "vehicles"), where("userId", "==", userId));
   const querySnapshot = await getDocs(q);
+  return querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+};
 
-  if (!querySnapshot.empty) {
-    await deleteDoc(doc(db, "dtc", querySnapshot.docs[0].id));
-  }
-}
+export const updateVehicle = async (vehicleId, vehicleData) => {
+  const vehicleRef = doc(db, "vehicles", vehicleId);
+  await updateDoc(vehicleRef, vehicleData);
+};
+
+export const deleteVehicle = async (vehicleId) => {
+  await deleteDoc(doc(db, "vehicles", vehicleId));
+};
+
+// ... (rest of the file remains unchanged)
