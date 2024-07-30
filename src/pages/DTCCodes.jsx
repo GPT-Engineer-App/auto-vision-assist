@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react';
+import { useState, useEffect } from 'react';
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { 
@@ -9,9 +9,10 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { dtcCodes } from '@/lib/dtc-codes';
 import DTCAnalysisView from '@/components/DTCAnalysisView';
 import { useNavigate } from 'react-router-dom';
+import { searchDTCs, fetchAllDTCs } from '@/lib/firebase';
+import { useQuery } from '@tanstack/react-query';
 
 const DTCCodes = () => {
   const [searchTerm, setSearchTerm] = useState('');
@@ -19,12 +20,18 @@ const DTCCodes = () => {
   const [dtcInput, setDtcInput] = useState('');
   const navigate = useNavigate();
 
-  const filteredCodes = useMemo(() => {
-    return dtcCodes.filter(code => 
-      code.code.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      code.description.toLowerCase().includes(searchTerm.toLowerCase())
-    );
-  }, [searchTerm]);
+  const { data: allDTCs, isLoading: isLoadingAllDTCs } = useQuery({
+    queryKey: ['allDTCs'],
+    queryFn: fetchAllDTCs
+  });
+
+  const { data: searchResults, isLoading: isSearching } = useQuery({
+    queryKey: ['searchDTCs', searchTerm],
+    queryFn: () => searchDTCs(searchTerm),
+    enabled: searchTerm.length > 0
+  });
+
+  const filteredCodes = searchTerm ? searchResults : allDTCs;
 
   const handleAnalyze = () => {
     if (dtcInput) {
@@ -32,37 +39,13 @@ const DTCCodes = () => {
     }
   };
 
-  // This function would be replaced with actual API calls or more complex logic
-  const generateAnalysisData = (dtc) => {
-    // Mock data generation based on the selected DTC
-    return {
-      components: [
-        { name: "Throttle Body", count: 5 },
-        { name: "Throttle Body Gasket", count: 4 },
-        { name: "Throttle Position Sensor", count: 3 },
-        { name: "Brake Light Switch", count: 2 },
-        { name: "Powertrain Control Module", count: 1 },
-      ],
-      dtcs: [
-        { code: dtc, count: 10 },
-        { code: "P0122", count: 8 },
-        { code: "P0123", count: 6 },
-        { code: "P0124", count: 4 },
-        { code: "P0125", count: 2 },
-      ],
-      symptoms: [
-        { description: "Check Engine Light On", count: 15 },
-        { description: "Poor Acceleration", count: 12 },
-        { description: "Stalling", count: 9 },
-        { description: "Reduced Power", count: 7 },
-        { description: "Rough Idle", count: 5 },
-      ],
-    };
-  };
-
   const handleDTCSelect = (dtc) => {
     setSelectedDTC(dtc);
   };
+
+  if (isLoadingAllDTCs) {
+    return <div>Loading DTC codes...</div>;
+  }
 
   return (
     <div className="min-h-screen bg-gray-100 p-4">
@@ -102,12 +85,16 @@ const DTCCodes = () => {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {filteredCodes.map((code) => (
+                {isSearching ? (
+                  <TableRow>
+                    <TableCell colSpan={3} className="text-center">Searching...</TableCell>
+                  </TableRow>
+                ) : filteredCodes && filteredCodes.map((code) => (
                   <TableRow key={code.code}>
                     <TableCell className="font-medium">{code.code}</TableCell>
                     <TableCell>{code.description}</TableCell>
                     <TableCell>
-                      <Button onClick={() => handleDTCSelect(code.code)}>Analyze</Button>
+                      <Button onClick={() => handleDTCSelect(code)}>Analyze</Button>
                     </TableCell>
                   </TableRow>
                 ))}
@@ -116,7 +103,7 @@ const DTCCodes = () => {
           </div>
           <div>
             {selectedDTC && (
-              <DTCAnalysisView {...generateAnalysisData(selectedDTC)} />
+              <DTCAnalysisView dtc={selectedDTC} />
             )}
           </div>
         </div>
