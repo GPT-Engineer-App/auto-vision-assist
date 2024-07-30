@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useMemo } from 'react';
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { 
@@ -9,47 +9,26 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { dtcCodes } from '@/lib/dtc-codes';
 import DTCAnalysisView from '@/components/DTCAnalysisView';
 import { useNavigate } from 'react-router-dom';
-import { getDTCCodes, searchDTCCodes } from '@/lib/dtcUtils';
 
 const DTCCodes = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedDTC, setSelectedDTC] = useState(null);
   const [dtcInput, setDtcInput] = useState('');
-  const [dtcCodes, setDtcCodes] = useState([]);
-  const [dtcDescription, setDtcDescription] = useState('');
   const navigate = useNavigate();
 
-  useEffect(() => {
-    const fetchDTCCodes = async () => {
-      const codes = await getDTCCodes();
-      setDtcCodes(codes);
-    };
-    fetchDTCCodes();
-  }, []);
-
-  useEffect(() => {
-    const searchDTCs = async () => {
-      if (searchTerm) {
-        const results = await searchDTCCodes(searchTerm);
-        setDtcCodes(results);
-      } else {
-        const allCodes = await getDTCCodes();
-        setDtcCodes(allCodes);
-      }
-    };
-    searchDTCs();
+  const filteredCodes = useMemo(() => {
+    return dtcCodes.filter(code => 
+      code.code.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      code.description.toLowerCase().includes(searchTerm.toLowerCase())
+    );
   }, [searchTerm]);
 
-  const handleAnalyze = async () => {
+  const handleAnalyze = () => {
     if (dtcInput) {
-      const matchingDTC = dtcCodes.find(code => code.code === dtcInput);
-      if (matchingDTC) {
-        setDtcDescription(matchingDTC.description);
-      } else {
-        setDtcDescription('DTC not found');
-      }
+      navigate(`/range-finder/${dtcInput}`);
     }
   };
 
@@ -108,14 +87,8 @@ const DTCCodes = () => {
               onChange={(e) => setDtcInput(e.target.value)}
               className="flex-grow"
             />
-            <Button onClick={handleAnalyze}>Analyze</Button>
+            <Button onClick={handleAnalyze}>Range Finder: DTC</Button>
           </div>
-          {dtcDescription && (
-            <div className="mt-4 p-4 bg-gray-100 rounded-md">
-              <h3 className="font-semibold">DTC Description:</h3>
-              <p>{dtcDescription}</p>
-            </div>
-          )}
         </div>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div>
@@ -129,8 +102,8 @@ const DTCCodes = () => {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {dtcCodes.map((code) => (
-                  <TableRow key={code.id}>
+                {filteredCodes.map((code) => (
+                  <TableRow key={code.code}>
                     <TableCell className="font-medium">{code.code}</TableCell>
                     <TableCell>{code.description}</TableCell>
                     <TableCell>

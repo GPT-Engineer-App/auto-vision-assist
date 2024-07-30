@@ -11,7 +11,6 @@ import { onAuthStateChanged } from "firebase/auth";
 import RangeFinder from "./pages/RangeFinder";
 import { ThemeProvider } from "@/components/theme-provider";
 import { AnimatePresence } from "framer-motion";
-import { fetchAndStoreDTCs } from "./lib/dtcUtils";
 
 const queryClient = new QueryClient();
 
@@ -27,9 +26,6 @@ const App = () => {
         setIsPro(false);
       }
     });
-
-    // Fetch and store DTC codes when the app loads
-    fetchAndStoreDTCs();
 
     return () => unsubscribe();
   }, []);
