@@ -42,17 +42,14 @@ export const getDTCCodes = async () => {
 
 export const searchDTCCodes = async (searchTerm) => {
   try {
-    console.log('Searching for DTC code:', searchTerm); // Add logging
     const dtcCollection = collection(db, 'dtcCodes');
     const q = query(
       dtcCollection,
-      where('code', '>=', searchTerm.toUpperCase()),
-      where('code', '<=', searchTerm.toUpperCase() + '\uf8ff')
+      where('code', '>=', searchTerm),
+      where('code', '<=', searchTerm + '\uf8ff')
     );
     const snapshot = await getDocs(q);
-    const results = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-    console.log('Search results:', results); // Add logging
-    return results;
+    return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
   } catch (error) {
     console.error('Error searching DTC codes:', error);
     return [];
