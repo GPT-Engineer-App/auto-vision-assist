@@ -32,17 +32,11 @@ const fromSupabase = async (query) => {
 
 */
 
-// Hooks for diagnostic_trouble_codes table
+// Hooks for diagnostic_trouble_codes
 
 export const useDiagnosticTroubleCodes = () => useQuery({
     queryKey: ['diagnostic_trouble_codes'],
     queryFn: () => fromSupabase(supabase.from('diagnostic_trouble_codes').select('*')),
-});
-
-export const useDiagnosticTroubleCode = (dtc_code) => useQuery({
-    queryKey: ['diagnostic_trouble_codes', dtc_code],
-    queryFn: () => fromSupabase(supabase.from('diagnostic_trouble_codes').select('*').eq('dtc_code', dtc_code).single()),
-    enabled: !!dtc_code,
 });
 
 export const useAddDiagnosticTroubleCode = () => {
@@ -50,7 +44,7 @@ export const useAddDiagnosticTroubleCode = () => {
     return useMutation({
         mutationFn: (newCode) => fromSupabase(supabase.from('diagnostic_trouble_codes').insert([newCode])),
         onSuccess: () => {
-            queryClient.invalidateQueries(['diagnostic_trouble_codes']);
+            queryClient.invalidateQueries('diagnostic_trouble_codes');
         },
     });
 };
@@ -59,9 +53,8 @@ export const useUpdateDiagnosticTroubleCode = () => {
     const queryClient = useQueryClient();
     return useMutation({
         mutationFn: ({ dtc_code, ...updates }) => fromSupabase(supabase.from('diagnostic_trouble_codes').update(updates).eq('dtc_code', dtc_code)),
-        onSuccess: (_, { dtc_code }) => {
-            queryClient.invalidateQueries(['diagnostic_trouble_codes']);
-            queryClient.invalidateQueries(['diagnostic_trouble_codes', dtc_code]);
+        onSuccess: () => {
+            queryClient.invalidateQueries('diagnostic_trouble_codes');
         },
     });
 };
@@ -71,7 +64,13 @@ export const useDeleteDiagnosticTroubleCode = () => {
     return useMutation({
         mutationFn: (dtc_code) => fromSupabase(supabase.from('diagnostic_trouble_codes').delete().eq('dtc_code', dtc_code)),
         onSuccess: () => {
-            queryClient.invalidateQueries(['diagnostic_trouble_codes']);
+            queryClient.invalidateQueries('diagnostic_trouble_codes');
         },
     });
 };
+
+export const useDiagnosticTroubleCode = (dtc_code) => useQuery({
+    queryKey: ['diagnostic_trouble_codes', dtc_code],
+    queryFn: () => fromSupabase(supabase.from('diagnostic_trouble_codes').select('*').eq('dtc_code', dtc_code).single()),
+    enabled: !!dtc_code,
+});
