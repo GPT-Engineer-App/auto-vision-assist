@@ -14,14 +14,11 @@ export const fetchAndStoreDTCs = async () => {
     const dtcCollection = collection(db, 'dtcCodes');
 
     for (let i = 1; i < lines.length; i++) {
-      const [code, description, possibleCauses, diagnosticAids, application] = lines[i].split(',');
+      const [code, description] = lines[i].split(',');
       if (code && description) {
         await addDoc(dtcCollection, {
           code: code.trim(),
-          description: description.trim(),
-          possibleCauses: possibleCauses ? possibleCauses.split(';').map(cause => cause.trim()) : [],
-          diagnosticAids: diagnosticAids ? diagnosticAids.trim() : '',
-          application: application ? JSON.parse(application.trim()) : {}
+          description: description.trim()
         });
       }
     }
@@ -45,7 +42,7 @@ export const getDTCCodes = async () => {
 
 export const searchDTCCodes = async (searchTerm) => {
   try {
-    console.log('Searching for DTC code:', searchTerm);
+    console.log('Searching for DTC code:', searchTerm); // Add logging
     const dtcCollection = collection(db, 'dtcCodes');
     const q = query(
       dtcCollection,
@@ -54,7 +51,7 @@ export const searchDTCCodes = async (searchTerm) => {
     );
     const snapshot = await getDocs(q);
     const results = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-    console.log('Search results:', results);
+    console.log('Search results:', results); // Add logging
     return results;
   } catch (error) {
     console.error('Error searching DTC codes:', error);

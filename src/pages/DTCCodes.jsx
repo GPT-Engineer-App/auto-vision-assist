@@ -12,14 +12,13 @@ import {
 import DTCAnalysisView from '@/components/DTCAnalysisView';
 import { useNavigate } from 'react-router-dom';
 import { getDTCCodes, searchDTCCodes } from '@/lib/dtcUtils';
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
 const DTCCodes = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedDTC, setSelectedDTC] = useState(null);
   const [dtcInput, setDtcInput] = useState('');
   const [dtcCodes, setDtcCodes] = useState([]);
-  const [dtcDescription, setDtcDescription] = useState(null);
+  const [dtcDescription, setDtcDescription] = useState('');
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -45,20 +44,47 @@ const DTCCodes = () => {
 
   const handleAnalyze = async () => {
     if (dtcInput) {
-      console.log('Analyzing DTC:', dtcInput);
+      console.log('Analyzing DTC:', dtcInput); // Add logging
       const results = await searchDTCCodes(dtcInput);
-      console.log('Analysis results:', results);
+      console.log('Analysis results:', results); // Add logging
       if (results.length > 0) {
-        setDtcDescription(results[0]);
+        setDtcDescription(results[0].description);
       } else {
-        setDtcDescription(null);
+        setDtcDescription('DTC not found');
       }
     }
   };
 
+  // This function would be replaced with actual API calls or more complex logic
+  const generateAnalysisData = (dtc) => {
+    // Mock data generation based on the selected DTC
+    return {
+      components: [
+        { name: "Throttle Body", count: 5 },
+        { name: "Throttle Body Gasket", count: 4 },
+        { name: "Throttle Position Sensor", count: 3 },
+        { name: "Brake Light Switch", count: 2 },
+        { name: "Powertrain Control Module", count: 1 },
+      ],
+      dtcs: [
+        { code: dtc, count: 10 },
+        { code: "P0122", count: 8 },
+        { code: "P0123", count: 6 },
+        { code: "P0124", count: 4 },
+        { code: "P0125", count: 2 },
+      ],
+      symptoms: [
+        { description: "Check Engine Light On", count: 15 },
+        { description: "Poor Acceleration", count: 12 },
+        { description: "Stalling", count: 9 },
+        { description: "Reduced Power", count: 7 },
+        { description: "Rough Idle", count: 5 },
+      ],
+    };
+  };
+
   const handleDTCSelect = (dtc) => {
     setSelectedDTC(dtc);
-    setDtcDescription(dtc);
   };
 
   return (
@@ -87,29 +113,10 @@ const DTCCodes = () => {
             <Button onClick={handleAnalyze}>Analyze</Button>
           </div>
           {dtcDescription && (
-            <Card className="mt-4 p-4 bg-gray-100 rounded-md">
-              <CardHeader>
-                <CardTitle>{dtcDescription.code}</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <h3 className="font-semibold">Description:</h3>
-                <p>{dtcDescription.description}</p>
-                <h3 className="font-semibold mt-2">Possible Causes:</h3>
-                <ul className="list-disc pl-5">
-                  {dtcDescription.possibleCauses.map((cause, index) => (
-                    <li key={index}>{cause}</li>
-                  ))}
-                </ul>
-                <h3 className="font-semibold mt-2">Diagnostic Aids:</h3>
-                <p>{dtcDescription.diagnosticAids}</p>
-                <h3 className="font-semibold mt-2">Application:</h3>
-                <ul>
-                  {Object.entries(dtcDescription.application).map(([key, value]) => (
-                    <li key={key}><strong>{key}:</strong> {value}</li>
-                  ))}
-                </ul>
-              </CardContent>
-            </Card>
+            <div className="mt-4 p-4 bg-gray-100 rounded-md">
+              <h3 className="font-semibold">DTC Description:</h3>
+              <p>{dtcDescription}</p>
+            </div>
           )}
         </div>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -129,7 +136,7 @@ const DTCCodes = () => {
                     <TableCell className="font-medium">{code.code}</TableCell>
                     <TableCell>{code.description}</TableCell>
                     <TableCell>
-                      <Button onClick={() => handleDTCSelect(code)}>Analyze</Button>
+                      <Button onClick={() => handleDTCSelect(code.code)}>Analyze</Button>
                     </TableCell>
                   </TableRow>
                 ))}
@@ -138,7 +145,7 @@ const DTCCodes = () => {
           </div>
           <div>
             {selectedDTC && (
-              <DTCAnalysisView dtc={selectedDTC} />
+              <DTCAnalysisView {...generateAnalysisData(selectedDTC)} />
             )}
           </div>
         </div>
