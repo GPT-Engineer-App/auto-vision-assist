@@ -34,11 +34,11 @@ const AddVehicle = () => {
   }, [make]);
 
   useEffect(() => {
-    if (make && model) {
-      fetchEngineSizesForMakeAndModel(make, model).then(setEngines).catch(console.error);
+    if (year && make && model) {
+      fetchEngineSizesForMakeAndModel(year, make, model).then(setEngines).catch(console.error);
       setEngineSize("");
     }
-  }, [make, model]);
+  }, [year, make, model]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
