@@ -15,6 +15,7 @@ const AddVehicle = () => {
   const [engineSize, setEngineSize] = useState("");
   const [drivetrain, setDrivetrain] = useState("");
   const [bodyConfig, setBodyConfig] = useState("");
+  const [years, setYears] = useState([]);
   const [makes, setMakes] = useState([]);
   const [models, setModels] = useState([]);
   const [engines, setEngines] = useState([]);
@@ -29,8 +30,8 @@ const AddVehicle = () => {
 
   const populateYears = () => {
     const currentYear = new Date().getFullYear();
-    const years = Array.from({ length: currentYear - 1899 }, (_, i) => currentYear - i);
-    setYears(years);
+    const yearsList = Array.from({ length: currentYear - 1899 }, (_, i) => currentYear - i);
+    setYears(yearsList);
   };
 
   const populateMakes = async () => {
