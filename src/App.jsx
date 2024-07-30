@@ -2,8 +2,8 @@ import React, { useState, useEffect } from "react";
 import { Toaster } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { Route, BrowserRouter as Router, Routes } from "react-router-dom";
-import Layout from "./layouts/navbar"; // available: clean, navbar, sidebar
+import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import Layout from "./layouts/navbar";
 import { navItems } from "./nav-items";
 import UserProfile from "./components/UserProfile";
 import { auth } from "./lib/firebase";
@@ -21,7 +21,6 @@ const App = () => {
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
       setUser(currentUser);
-      // Reset isPro when user signs out
       if (!currentUser) {
         setIsPro(false);
       }
