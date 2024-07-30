@@ -3,92 +3,43 @@ import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
-import { auth, db } from "@/lib/firebase";
-import { doc, getDoc, setDoc } from "firebase/firestore";
-import { purchaseProVersion, checkProPurchaseStatus } from "@/lib/inAppPurchase";
+import { useAuth } from "@/integrations/supabase/auth";
+import { useUser, useUpdateUser } from "@/integrations/supabase";
 
-const UserProfile = ({ isPro, setIsPro, user }) => {
-  const [isProEnabled, setIsProEnabled] = useState(isPro);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
+const UserProfile = () => {
+  const { user } = useAuth();
+  const { data: userData, isLoading, error } = useUser(user?.id);
+  const updateUser = useUpdateUser();
+  const [isProEnabled, setIsProEnabled] = useState(false);
 
   useEffect(() => {
-    const fetchUserProfile = async () => {
-      if (user) {
-        try {
-          const userDoc = await getDoc(doc(db, "users", user.uid));
-          if (userDoc.exists()) {
-            const userData = userDoc.data();
-            setIsProEnabled(userData.isPro || false);
-            setIsPro(userData.isPro || false);
-          } else {
-            // If the user document doesn't exist, create it
-            await setDoc(doc(db, "users", user.uid), {
-              email: user.email,
-              isPro: false,
-              createdAt: new Date(),
-            });
-            setIsProEnabled(false);
-            setIsPro(false);
-          }
-          // Check if the user has purchased Pro version
-          const hasPurchasedPro = await checkProPurchaseStatus();
-          if (hasPurchasedPro && !isProEnabled) {
-            await handleProUpgrade(true);
-          }
-        } catch (error) {
-          console.error("Error fetching user profile:", error);
-          setError("Failed to load user profile. Please try again later.");
-          toast.error("Failed to load user profile");
-        } finally {
-          setLoading(false);
-        }
-      } else {
-        setLoading(false);
-        setError("User not authenticated. Please log in.");
-      }
-    };
+    if (userData) {
+      setIsProEnabled(userData.is_pro);
+    }
+  }, [userData]);
 
-    fetchUserProfile();
-  }, [user, setIsPro, isProEnabled]);
-
-  const handleProUpgrade = async (isPurchased = false) => {
+  const handleProUpgrade = async () => {
     if (!user) {
       toast.error("You must be logged in to change your subscription");
       return;
     }
 
-    setLoading(true);
     try {
-      if (!isPurchased) {
-        // Initiate the purchase process
-        const success = await purchaseProVersion();
-        if (!success) {
-          toast.error("Pro version purchase failed");
-          setLoading(false);
-          return;
-        }
-      }
-
-      // Update user's pro status in Firestore
-      await setDoc(doc(db, "users", user.uid), { isPro: true }, { merge: true });
+      await updateUser.mutateAsync({ id: user.id, is_pro: true });
       setIsProEnabled(true);
-      setIsPro(true);
       toast.success("Upgraded to Pro successfully!");
     } catch (error) {
       console.error("Error updating pro status:", error);
       toast.error("Failed to update subscription status");
-    } finally {
-      setLoading(false);
     }
   };
 
-  if (loading) {
+  if (isLoading) {
     return <div>Loading profile...</div>;
   }
 
   if (error) {
-    return <div className="text-red-500">{error}</div>;
+    return <div className="text-red-500">Error loading profile: {error.message}</div>;
   }
 
   if (!user) {
@@ -114,7 +65,7 @@ const UserProfile = ({ isPro, setIsPro, user }) => {
           : "Upgrade to Pro for unlimited features and no ads."}
       </p>
       {!isProEnabled && (
-        <Button onClick={() => handleProUpgrade()} disabled={loading}>
+        <Button onClick={handleProUpgrade} disabled={updateUser.isLoading}>
           Upgrade to Pro
         </Button>
       )}
