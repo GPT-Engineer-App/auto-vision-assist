@@ -25,6 +25,7 @@ const Index = () => {
 
   return (
     <div className="relative flex flex-col min-h-screen bg-background justify-between overflow-x-hidden">
+      {/* Render the HolographicCarBackground component */}
       <HolographicCarBackground />
       <motion.div
         initial={{ opacity: 0, y: 20 }}
@@ -65,6 +66,7 @@ const Index = () => {
           </TooltipProvider>
         </div>
       </motion.div>
+      {/* Render the footer */}
       <motion.footer
         initial={{ y: 50, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
