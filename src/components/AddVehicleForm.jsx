@@ -19,6 +19,7 @@ const AddVehicleForm = () => {
   const [makes, setMakes] = useState([]);
   const [models, setModels] = useState([]);
   const [engines, setEngines] = useState([]);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -42,9 +43,11 @@ const AddVehicleForm = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setIsSubmitting(true);
 
     if (!auth.currentUser) {
       toast.error("You must be logged in to add a vehicle");
+      setIsSubmitting(false);
       return;
     }
 
@@ -64,7 +67,13 @@ const AddVehicleForm = () => {
       navigate("/garage");
     } catch (error) {
       console.error("Error adding vehicle: ", error);
-      toast.error("Error adding vehicle: " + error.message);
+      if (error.code === "permission-denied") {
+        toast.error("Permission denied. Please make sure you're logged in and try again.");
+      } else {
+        toast.error("Error adding vehicle: " + error.message);
+      }
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -154,7 +163,9 @@ const AddVehicleForm = () => {
           </SelectContent>
         </Select>
       </div>
-      <Button type="submit" className="w-full">Add Vehicle</Button>
+      <Button type="submit" className="w-full" disabled={isSubmitting}>
+        {isSubmitting ? "Adding Vehicle..." : "Add Vehicle"}
+      </Button>
     </form>
   );
 };
