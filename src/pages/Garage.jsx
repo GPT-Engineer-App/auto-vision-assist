@@ -1,25 +1,27 @@
-import { useState, useEffect } from "react";
-import { collection, query, getDocs, doc, deleteDoc, updateDoc, where } from "firebase/firestore";
-import { db, auth } from "@/lib/firebase";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import React, { useState, useEffect } from 'react';
+import { collection, addDoc, getDocs, updateDoc, deleteDoc, doc, query, where } from 'firebase/firestore';
+import { auth, db } from '@/lib/firebase';
+import { onAuthStateChanged } from 'firebase/auth';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter } from "@/components/ui/dialog";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { toast } from "sonner";
 import { useNavigate } from "react-router-dom";
-import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import { motion, AnimatePresence } from "framer-motion";
-import { Tooltip } from "@/components/ui/tooltip";
-import { HelpCircle } from "lucide-react";
-import OpenSightModal from "@/components/OpenSightModal";
 
 const Garage = ({ isPro, setIsPro, user }) => {
   const [vehicles, setVehicles] = useState([]);
+  const [vehicleData, setVehicleData] = useState({
+    year: '',
+    make: '',
+    model: '',
+    engineSize: '',
+    drivetrain: '',
+    bodyConfig: '',
+    mileage: ''
+  });
   const [loading, setLoading] = useState(true);
-  const [editingVehicle, setEditingVehicle] = useState(null);
-  const [openSightVehicle, setOpenSightVehicle] = useState(null);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -31,8 +33,8 @@ const Garage = ({ isPro, setIsPro, user }) => {
       try {
         const q = query(collection(db, "vehicles"), where("userId", "==", user.uid));
         const querySnapshot = await getDocs(q);
-        const vehicleData = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-        setVehicles(vehicleData);
+        const vehicleList = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+        setVehicles(vehicleList);
       } catch (error) {
         toast.error("Error fetching vehicles: " + error.message);
       } finally {
@@ -43,47 +45,56 @@ const Garage = ({ isPro, setIsPro, user }) => {
     fetchVehicles();
   }, [user]);
 
-  const handleAddVehicle = () => {
-    if (!isPro && vehicles.length >= 1) {
-      toast.error("Free users can only store one vehicle. Upgrade to Pro to add more!");
-    } else if (isPro && vehicles.length >= 3) {
-      toast.error("Pro users can store up to three vehicles.");
-    } else {
-      navigate("/add-vehicle");
+  const handleChange = (name, value) => {
+    setVehicleData({ ...vehicleData, [name]: value });
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    if (!user) {
+      toast.error("You must be logged in to add a vehicle");
+      return;
     }
-  };
 
-  const handleEditVehicle = (vehicle) => {
-    setEditingVehicle(vehicle);
-  };
-
-  const handleUpdateVehicle = async (updatedVehicle) => {
     try {
-      const vehicleRef = doc(db, "vehicles", updatedVehicle.id);
-      await updateDoc(vehicleRef, updatedVehicle);
-      setVehicles(vehicles.map(v => v.id === updatedVehicle.id ? updatedVehicle : v));
-      toast.success("Vehicle updated successfully");
-      setEditingVehicle(null);
+      if (vehicleData.id) {
+        const vehicleRef = doc(db, "vehicles", vehicleData.id);
+        await updateDoc(vehicleRef, vehicleData);
+        toast.success("Vehicle updated successfully");
+      } else {
+        await addDoc(collection(db, "vehicles"), {
+          ...vehicleData,
+          userId: user.uid,
+          createdAt: new Date(),
+        });
+        toast.success("Vehicle added successfully");
+      }
+      setVehicleData({
+        year: '',
+        make: '',
+        model: '',
+        engineSize: '',
+        drivetrain: '',
+        bodyConfig: '',
+        mileage: ''
+      });
+      // Refresh the vehicles list
+      const q = query(collection(db, "vehicles"), where("userId", "==", user.uid));
+      const querySnapshot = await getDocs(q);
+      const updatedVehicles = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+      setVehicles(updatedVehicles);
     } catch (error) {
-      toast.error("Error updating vehicle: " + error.message);
+      toast.error("Error saving vehicle: " + error.message);
     }
   };
 
-  const handleDeleteVehicle = async (vehicleId) => {
+  const handleDelete = async (id) => {
     try {
-      await deleteDoc(doc(db, "vehicles", vehicleId));
-      setVehicles(vehicles.filter(v => v.id !== vehicleId));
+      await deleteDoc(doc(db, "vehicles", id));
+      setVehicles(vehicles.filter(vehicle => vehicle.id !== id));
       toast.success("Vehicle deleted successfully");
     } catch (error) {
       toast.error("Error deleting vehicle: " + error.message);
-    }
-  };
-
-  const handleOpenSight = (vehicle) => {
-    if (isPro) {
-      setOpenSightVehicle(vehicle);
-    } else {
-      toast.error("Open Sight is a Pro feature. Please upgrade to access this functionality.");
     }
   };
 
@@ -108,6 +119,78 @@ const Garage = ({ isPro, setIsPro, user }) => {
       className="container mx-auto p-4"
     >
       <h1 className="text-3xl font-bold mb-6">My Garage</h1>
+      <Card className="mb-6">
+        <CardHeader>
+          <CardTitle>{vehicleData.id ? 'Edit Vehicle' : 'Add New Vehicle'}</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <form onSubmit={handleSubmit} className="space-y-4">
+            <Input
+              name="year"
+              value={vehicleData.year}
+              onChange={(e) => handleChange('year', e.target.value)}
+              placeholder="Year"
+            />
+            <Input
+              name="make"
+              value={vehicleData.make}
+              onChange={(e) => handleChange('make', e.target.value)}
+              placeholder="Make"
+            />
+            <Input
+              name="model"
+              value={vehicleData.model}
+              onChange={(e) => handleChange('model', e.target.value)}
+              placeholder="Model"
+            />
+            <Input
+              name="engineSize"
+              value={vehicleData.engineSize}
+              onChange={(e) => handleChange('engineSize', e.target.value)}
+              placeholder="Engine Size"
+            />
+            <Select
+              name="drivetrain"
+              value={vehicleData.drivetrain}
+              onValueChange={(value) => handleChange('drivetrain', value)}
+            >
+              <SelectTrigger>
+                <SelectValue placeholder="Select Drivetrain" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="RWD">RWD</SelectItem>
+                <SelectItem value="FWD">FWD</SelectItem>
+                <SelectItem value="AWD">AWD</SelectItem>
+                <SelectItem value="4WD">Four Wheel Drive</SelectItem>
+              </SelectContent>
+            </Select>
+            <Select
+              name="bodyConfig"
+              value={vehicleData.bodyConfig}
+              onValueChange={(value) => handleChange('bodyConfig', value)}
+            >
+              <SelectTrigger>
+                <SelectValue placeholder="Select Body Type" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="Sedan">Sedan</SelectItem>
+                <SelectItem value="Coupe">Coupe</SelectItem>
+                <SelectItem value="Convertible">Convertible</SelectItem>
+                <SelectItem value="Van">Van</SelectItem>
+                <SelectItem value="SUV">SUV</SelectItem>
+                <SelectItem value="Truck">Truck</SelectItem>
+              </SelectContent>
+            </Select>
+            <Input
+              name="mileage"
+              value={vehicleData.mileage}
+              onChange={(e) => handleChange('mileage', e.target.value)}
+              placeholder="Mileage"
+            />
+            <Button type="submit">{vehicleData.id ? 'Update Vehicle' : 'Add Vehicle'}</Button>
+          </form>
+        </CardContent>
+      </Card>
       <AnimatePresence>
         <motion.div
           className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4"
@@ -129,36 +212,13 @@ const Garage = ({ isPro, setIsPro, user }) => {
                   <CardTitle>{vehicle.year} {vehicle.make} {vehicle.model}</CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <img src={vehicle.image || "/images/default-car.png"} alt={`${vehicle.make} ${vehicle.model}`} className="w-full h-48 object-cover mb-4 rounded" />
                   <p><strong>Engine:</strong> {vehicle.engineSize}</p>
                   <p><strong>Drivetrain:</strong> {vehicle.drivetrain}</p>
                   <p><strong>Body:</strong> {vehicle.bodyConfig}</p>
+                  <p><strong>Mileage:</strong> {vehicle.mileage}</p>
                   <div className="flex justify-between mt-4">
-                    <Tooltip content="Edit vehicle details">
-                      <Button onClick={() => handleEditVehicle(vehicle)} variant="outline">Edit</Button>
-                    </Tooltip>
-                    <AlertDialog>
-                      <Tooltip content="Remove this vehicle from your garage">
-                        <AlertDialogTrigger asChild>
-                          <Button variant="destructive">Delete</Button>
-                        </AlertDialogTrigger>
-                      </Tooltip>
-                      <AlertDialogContent>
-                        <AlertDialogHeader>
-                          <AlertDialogTitle>Are you sure?</AlertDialogTitle>
-                          <AlertDialogDescription>
-                            This action cannot be undone. This will permanently delete your vehicle from your garage.
-                          </AlertDialogDescription>
-                        </AlertDialogHeader>
-                        <AlertDialogFooter>
-                          <AlertDialogCancel>Cancel</AlertDialogCancel>
-                          <AlertDialogAction onClick={() => handleDeleteVehicle(vehicle.id)}>Delete</AlertDialogAction>
-                        </AlertDialogFooter>
-                      </AlertDialogContent>
-                    </AlertDialog>
-                    <Tooltip content={isPro ? "Access advanced diagnostics for this vehicle" : "Upgrade to Pro to access Open Sight"}>
-                      <Button onClick={() => handleOpenSight(vehicle)} disabled={!isPro}>Open Sight</Button>
-                    </Tooltip>
+                    <Button onClick={() => setVehicleData(vehicle)} variant="outline">Edit</Button>
+                    <Button onClick={() => handleDelete(vehicle.id)} variant="destructive">Delete</Button>
                   </div>
                 </CardContent>
               </Card>
@@ -166,136 +226,7 @@ const Garage = ({ isPro, setIsPro, user }) => {
           ))}
         </motion.div>
       </AnimatePresence>
-      <div className="mt-6">
-        <Tooltip content="Add a new vehicle to your garage">
-          <Button onClick={handleAddVehicle}>Add Vehicle</Button>
-        </Tooltip>
-        {!isPro && vehicles.length >= 1 && (
-          <Tooltip content="Upgrade to Pro for more features">
-            <Button variant="outline" className="ml-4" onClick={() => setIsPro(true)}>Upgrade to Pro</Button>
-          </Tooltip>
-        )}
-      </div>
-      <EditVehicleDialog
-        vehicle={editingVehicle}
-        onClose={() => setEditingVehicle(null)}
-        onUpdate={handleUpdateVehicle}
-      />
-      <OpenSightModal
-        vehicle={openSightVehicle}
-        onClose={() => setOpenSightVehicle(null)}
-      />
-      <Tooltip content="Need help? Click here for assistance">
-        <Button variant="ghost" size="icon" className="fixed bottom-4 right-4">
-          <HelpCircle className="h-6 w-6" />
-        </Button>
-      </Tooltip>
     </motion.div>
-  );
-};
-
-const EditVehicleDialog = ({ vehicle, onClose, onUpdate }) => {
-  const [editedVehicle, setEditedVehicle] = useState(vehicle);
-
-  const handleChange = (e) => {
-    const { name, value } = e.target;
-    setEditedVehicle(prev => ({ ...prev, [name]: value }));
-  };
-
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    onUpdate(editedVehicle);
-  };
-
-  if (!vehicle) return null;
-
-  return (
-    <Dialog open={!!vehicle} onOpenChange={onClose}>
-      <DialogContent>
-        <DialogHeader>
-          <DialogTitle>Edit Vehicle</DialogTitle>
-        </DialogHeader>
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div className="space-y-2">
-            <Label htmlFor="year">Year</Label>
-            <Input
-              id="year"
-              name="year"
-              type="number"
-              value={editedVehicle.year}
-              onChange={handleChange}
-              required
-            />
-          </div>
-          <div className="space-y-2">
-            <Label htmlFor="make">Make</Label>
-            <Input
-              id="make"
-              name="make"
-              type="text"
-              value={editedVehicle.make}
-              onChange={handleChange}
-              required
-            />
-          </div>
-          <div className="space-y-2">
-            <Label htmlFor="model">Model</Label>
-            <Input
-              id="model"
-              name="model"
-              type="text"
-              value={editedVehicle.model}
-              onChange={handleChange}
-              required
-            />
-          </div>
-          <div className="space-y-2">
-            <Label htmlFor="engineSize">Engine Size</Label>
-            <Input
-              id="engineSize"
-              name="engineSize"
-              type="text"
-              value={editedVehicle.engineSize}
-              onChange={handleChange}
-              required
-            />
-          </div>
-          <div className="space-y-2">
-            <Label htmlFor="drivetrain">Drivetrain</Label>
-            <Select name="drivetrain" onValueChange={(value) => handleChange({ target: { name: 'drivetrain', value } })} value={editedVehicle.drivetrain}>
-              <SelectTrigger>
-                <SelectValue placeholder="Select drivetrain" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="fwd">Front-Wheel Drive</SelectItem>
-                <SelectItem value="rwd">Rear-Wheel Drive</SelectItem>
-                <SelectItem value="awd">All-Wheel Drive</SelectItem>
-                <SelectItem value="4wd">Four-Wheel Drive</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-          <div className="space-y-2">
-            <Label htmlFor="bodyConfig">Body Configuration</Label>
-            <Select name="bodyConfig" onValueChange={(value) => handleChange({ target: { name: 'bodyConfig', value } })} value={editedVehicle.bodyConfig}>
-              <SelectTrigger>
-                <SelectValue placeholder="Select body configuration" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="sedan">Sedan</SelectItem>
-                <SelectItem value="coupe">Coupe</SelectItem>
-                <SelectItem value="hatchback">Hatchback</SelectItem>
-                <SelectItem value="suv">SUV</SelectItem>
-                <SelectItem value="truck">Truck</SelectItem>
-                <SelectItem value="van">Van</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-          <DialogFooter>
-            <Button type="submit">Update Vehicle</Button>
-          </DialogFooter>
-        </form>
-      </DialogContent>
-    </Dialog>
   );
 };
 
