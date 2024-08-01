@@ -4,8 +4,6 @@ import { db, auth } from "@/lib/firebase";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
-import { generateDiagnosticResponse } from "@/lib/openai";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter } from "@/components/ui/dialog";
@@ -23,33 +21,6 @@ const Garage = ({ isPro, setIsPro, user }) => {
   const [editingVehicle, setEditingVehicle] = useState(null);
   const [openSightVehicle, setOpenSightVehicle] = useState(null);
   const navigate = useNavigate();
-
-  const handleDiagnosticInputChange = (vehicleId, input) => {
-    setVehicles(vehicles.map(v => 
-      v.id === vehicleId ? { ...v, diagnosticInput: input } : v
-    ));
-  };
-
-  const handleDiagnose = async (vehicle) => {
-    if (!vehicle.diagnosticInput) return;
-
-    try {
-      const prompt = `Vehicle: ${vehicle.year} ${vehicle.make} ${vehicle.model}
-Mileage: ${vehicle.mileage}
-Symptoms/DTCs: ${vehicle.diagnosticInput}
-
-Please provide the most likely cause and correction for the given symptoms and/or DTCs.`;
-
-      const diagnosis = await generateDiagnosticResponse(prompt);
-
-      setVehicles(vehicles.map(v =>
-        v.id === vehicle.id ? { ...v, diagnosis } : v
-      ));
-    } catch (error) {
-      console.error("Error generating diagnosis:", error);
-      toast.error("Failed to generate diagnosis. Please try again.");
-    }
-  };
 
   useEffect(() => {
     const fetchVehicles = async () => {
@@ -165,26 +136,6 @@ Please provide the most likely cause and correction for the given symptoms and/o
                   <p><strong>Drivetrain:</strong> {vehicle.drivetrain}</p>
                   <p><strong>Body:</strong> {vehicle.bodyConfig}</p>
                   <p><strong>Mileage:</strong> {vehicle.mileage?.toLocaleString() || 'N/A'} miles</p>
-                  <div className="mt-4 space-y-2">
-                    <Textarea
-                      placeholder="Enter symptoms and/or DTC codes..."
-                      value={vehicle.diagnosticInput || ''}
-                      onChange={(e) => handleDiagnosticInputChange(vehicle.id, e.target.value)}
-                    />
-                    <Button 
-                      onClick={() => handleDiagnose(vehicle)} 
-                      disabled={!vehicle.diagnosticInput}
-                      className="w-full"
-                    >
-                      Diagnose
-                    </Button>
-                    {vehicle.diagnosis && (
-                      <div className="mt-2 p-2 bg-secondary rounded-md">
-                        <h4 className="font-semibold">Diagnosis:</h4>
-                        <p>{vehicle.diagnosis}</p>
-                      </div>
-                    )}
-                  </div>
                   <div className="flex justify-between mt-4">
                     <Tooltip content="Edit vehicle details">
                       <Button onClick={() => handleEditVehicle(vehicle)} variant="outline">Edit</Button>
