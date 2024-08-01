@@ -318,9 +318,14 @@ const EditVehicleDialog = ({ vehicle, onClose, onUpdate }) => {
             <Input
               id="mileage"
               name="mileage"
-              type="number"
-              value={editedVehicle.mileage}
-              onChange={handleChange}
+              type="text"
+              value={editedVehicle.mileage?.toLocaleString()}
+              onChange={(e) => {
+                const value = e.target.value.replace(/,/g, '');
+                if (/^\d*$/.test(value)) {
+                  handleChange({ target: { name: 'mileage', value: parseInt(value, 10) || 0 } });
+                }
+              }}
               required
             />
           </div>
