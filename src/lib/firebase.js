@@ -121,3 +121,26 @@ export async function deleteDTC(code) {
     await deleteDoc(doc(db, "dtc", querySnapshot.docs[0].id));
   }
 }
+
+/**
+ * Adds a new vehicle to the database
+ * @param {Object} vehicle - The vehicle object to add
+ * @returns {Promise<string>} The ID of the newly added vehicle
+ */
+export async function addVehicle(vehicle) {
+  const docRef = await addDoc(collection(db, "vehicles"), vehicle);
+  return docRef.id;
+}
+
+/**
+ * Fetches all vehicles for a user
+ * @param {string} userId - The ID of the user
+ * @returns {Promise<Object[]>} An array of vehicle objects
+ */
+export async function fetchVehiclesForUser(userId) {
+  const vehiclesRef = collection(db, "vehicles");
+  const q = query(vehiclesRef, where("userId", "==", userId));
+  const querySnapshot = await getDocs(q);
+
+  return querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+}
