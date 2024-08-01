@@ -275,10 +275,10 @@ const EditVehicleDialog = ({ vehicle, onClose, onUpdate }) => {
                 <SelectValue placeholder="Select drivetrain" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="fwd">Front-Wheel Drive</SelectItem>
-                <SelectItem value="rwd">Rear-Wheel Drive</SelectItem>
-                <SelectItem value="awd">All-Wheel Drive</SelectItem>
-                <SelectItem value="4wd">Four-Wheel Drive</SelectItem>
+                <SelectItem value="FWD">Front-Wheel Drive</SelectItem>
+                <SelectItem value="RWD">Rear-Wheel Drive</SelectItem>
+                <SelectItem value="AWD">All-Wheel Drive</SelectItem>
+                <SelectItem value="4WD">Four-Wheel Drive</SelectItem>
               </SelectContent>
             </Select>
           </div>
@@ -297,6 +297,31 @@ const EditVehicleDialog = ({ vehicle, onClose, onUpdate }) => {
                 <SelectItem value="van">Van</SelectItem>
               </SelectContent>
             </Select>
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="fuelType">Fuel Type</Label>
+            <Select name="fuelType" onValueChange={(value) => handleChange({ target: { name: 'fuelType', value } })} value={editedVehicle.fuelType}>
+              <SelectTrigger>
+                <SelectValue placeholder="Select fuel type" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="gas">Gas</SelectItem>
+                <SelectItem value="diesel">Diesel</SelectItem>
+                <SelectItem value="electric">Electric</SelectItem>
+                <SelectItem value="hybrid">Hybrid</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="mileage">Mileage</Label>
+            <Input
+              id="mileage"
+              name="mileage"
+              type="number"
+              value={editedVehicle.mileage}
+              onChange={handleChange}
+              required
+            />
           </div>
           <DialogFooter>
             <Button type="submit">Update Vehicle</Button>
