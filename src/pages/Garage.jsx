@@ -54,17 +54,19 @@ const Garage = ({ isPro, setIsPro, user }) => {
   };
 
   const handleEditVehicle = (vehicle) => {
-    setEditingVehicle(vehicle);
+    setEditingVehicle({ ...vehicle });
   };
 
   const handleUpdateVehicle = async (updatedVehicle) => {
     try {
-      const vehicleRef = doc(db, "vehicles", updatedVehicle.id);
-      await updateDoc(vehicleRef, updatedVehicle);
-      setVehicles(vehicles.map(v => v.id === updatedVehicle.id ? updatedVehicle : v));
+      const { id, ...vehicleData } = updatedVehicle;
+      const vehicleRef = doc(db, "vehicles", id);
+      await updateDoc(vehicleRef, vehicleData);
+      setVehicles(vehicles.map(v => v.id === id ? updatedVehicle : v));
       toast.success("Vehicle updated successfully");
       setEditingVehicle(null);
     } catch (error) {
+      console.error("Error updating vehicle:", error);
       toast.error("Error updating vehicle: " + error.message);
     }
   };
@@ -195,7 +197,13 @@ const Garage = ({ isPro, setIsPro, user }) => {
 };
 
 const EditVehicleDialog = ({ vehicle, onClose, onUpdate }) => {
-  const [editedVehicle, setEditedVehicle] = useState(vehicle);
+  const [editedVehicle, setEditedVehicle] = useState(null);
+
+  useEffect(() => {
+    if (vehicle) {
+      setEditedVehicle({ ...vehicle });
+    }
+  }, [vehicle]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -207,7 +215,7 @@ const EditVehicleDialog = ({ vehicle, onClose, onUpdate }) => {
     onUpdate(editedVehicle);
   };
 
-  if (!vehicle) return null;
+  if (!editedVehicle) return null;
 
   return (
     <Dialog open={!!vehicle} onOpenChange={onClose}>
