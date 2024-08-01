@@ -15,42 +15,54 @@ import { Tooltip } from "@/components/ui/tooltip";
 import { HelpCircle } from "lucide-react";
 import OpenSightModal from "@/components/OpenSightModal";
 import { generateDiagnosticResponse } from "@/lib/openai";
+import { onAuthStateChanged } from "firebase/auth";
 
-const Garage = ({ isPro, setIsPro, user }) => {
+const Garage = ({ isPro, setIsPro }) => {
   const [vehicles, setVehicles] = useState([]);
   const [loading, setLoading] = useState(true);
   const [editingVehicle, setEditingVehicle] = useState(null);
   const [openSightVehicle, setOpenSightVehicle] = useState(null);
   const [diagnosisInputs, setDiagnosisInputs] = useState({});
   const [diagnosisResults, setDiagnosisResults] = useState({});
+  const [user, setUser] = useState(null);
   const navigate = useNavigate();
 
   useEffect(() => {
-    const fetchVehicles = async () => {
-      if (!user) {
-        setLoading(false);
-        return;
-      }
-      try {
-        const q = query(collection(db, "vehicles"), where("userId", "==", user.uid));
-        const querySnapshot = await getDocs(q);
-        const vehicleData = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-        setVehicles(vehicleData);
-        // Initialize diagnosis inputs for each vehicle
-        const initialInputs = {};
-        vehicleData.forEach(vehicle => {
-          initialInputs[vehicle.id] = "";
-        });
-        setDiagnosisInputs(initialInputs);
-      } catch (error) {
-        toast.error("Error fetching vehicles: " + error.message);
-      } finally {
+    console.log("Garage component mounted");
+    const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
+      console.log("Auth state changed:", currentUser);
+      setUser(currentUser);
+      if (currentUser) {
+        fetchVehicles(currentUser.uid);
+      } else {
         setLoading(false);
       }
-    };
+    });
 
-    fetchVehicles();
-  }, [user]);
+    return () => unsubscribe();
+  }, []);
+
+  const fetchVehicles = async (userId) => {
+    console.log("Fetching vehicles for user:", userId);
+    try {
+      const q = query(collection(db, "vehicles"), where("userId", "==", userId));
+      const querySnapshot = await getDocs(q);
+      const vehicleData = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+      console.log("Fetched vehicles:", vehicleData);
+      setVehicles(vehicleData);
+      // Initialize diagnosis inputs for each vehicle
+      const initialInputs = {};
+      vehicleData.forEach(vehicle => {
+        initialInputs[vehicle.id] = "";
+      });
+      setDiagnosisInputs(initialInputs);
+    } catch (error) {
+      console.error("Error fetching vehicles:", error);
+      toast.error("Error fetching vehicles: " + error.message);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const handleAddVehicle = () => {
     if (!isPro && vehicles.length >= 1) {
@@ -86,6 +98,7 @@ const Garage = ({ isPro, setIsPro, user }) => {
       setVehicles(vehicles.filter(v => v.id !== vehicleId));
       toast.success("Vehicle deleted successfully");
     } catch (error) {
+      console.error("Error deleting vehicle:", error);
       toast.error("Error deleting vehicle: " + error.message);
     }
   };
