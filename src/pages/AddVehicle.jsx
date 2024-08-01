@@ -10,15 +10,13 @@ import { toast } from "sonner";
 const AddVehicle = () => {
   const [year, setYear] = useState("");
   const [make, setMake] = useState("");
-  const [modelCategory, setModelCategory] = useState("");
-  const [modelVariant, setModelVariant] = useState("");
+  const [model, setModel] = useState("");
   const [engineSize, setEngineSize] = useState("");
   const [drivetrain, setDrivetrain] = useState("");
   const [bodyConfig, setBodyConfig] = useState("");
   const [years, setYears] = useState([]);
   const [makes, setMakes] = useState([]);
-  const [modelCategories, setModelCategories] = useState([]);
-  const [modelVariants, setModelVariants] = useState([]);
+  const [models, setModels] = useState([]);
   const [engineSizes, setEngineSizes] = useState([]);
   const navigate = useNavigate();
 
@@ -53,49 +51,29 @@ const AddVehicle = () => {
     setEngineSizes(sizes);
   };
 
-  const populateModelCategories = async (selectedMake, selectedYear) => {
+  const populateModels = async (selectedMake, selectedYear) => {
     try {
-      const response = await fetch(`https://vpic.nhtsa.dot.gov/api/vehicles/GetMakesForVehicleType/car?format=json`);
+      const response = await fetch(`https://vpic.nhtsa.dot.gov/api/vehicles/GetModelsForMakeYear/make/${selectedMake}/modelyear/${selectedYear}?format=json`);
       const data = await response.json();
-      const categories = data.Results.filter(make => make.MakeName.toLowerCase() === selectedMake.toLowerCase())
-        .map(make => make.VehicleTypeName);
-      setModelCategories(Array.from(new Set(categories)));
+      const modelsList = data.Results.map(model => model.Model_Name);
+      setModels(Array.from(new Set(modelsList)));
     } catch (error) {
-      console.error('Error fetching model categories:', error);
-      toast.error('Failed to load model categories');
-    }
-  };
-
-  const populateModelVariants = async (selectedMake, selectedYear, selectedCategory) => {
-    try {
-      const response = await fetch(`https://vpic.nhtsa.dot.gov/api/vehicles/GetModelsForMakeYear/make/${selectedMake}/modelyear/${selectedYear}/vehicleType/${selectedCategory}?format=json`);
-      const data = await response.json();
-      const variants = data.Results.map(model => model.Model_Name);
-      setModelVariants(variants);
-    } catch (error) {
-      console.error('Error fetching model variants:', error);
-      toast.error('Failed to load model variants');
+      console.error('Error fetching models:', error);
+      toast.error('Failed to load models');
     }
   };
 
   const handleYearChange = (selectedYear) => {
     setYear(selectedYear);
     if (make) {
-      populateModelCategories(make, selectedYear);
+      populateModels(make, selectedYear);
     }
   };
 
   const handleMakeChange = (selectedMake) => {
     setMake(selectedMake);
     if (year) {
-      populateModelCategories(selectedMake, year);
-    }
-  };
-
-  const handleModelCategoryChange = (selectedCategory) => {
-    setModelCategory(selectedCategory);
-    if (year && make) {
-      populateModelVariants(make, year, selectedCategory);
+      populateModels(selectedMake, year);
     }
   };
 
@@ -113,7 +91,7 @@ const AddVehicle = () => {
         userId: auth.currentUser.uid,
         year,
         make,
-        model: modelVariant,
+        model,
         engineSize,
         drivetrain,
         bodyConfig,
@@ -162,27 +140,14 @@ const AddVehicle = () => {
           </Select>
         </div>
         <div>
-          <Label htmlFor="modelCategory">Model Category</Label>
-          <Select value={modelCategory} onValueChange={handleModelCategoryChange}>
-            <SelectTrigger id="modelCategory">
-              <SelectValue placeholder="Select model category" />
+          <Label htmlFor="model">Model</Label>
+          <Select value={model} onValueChange={setModel}>
+            <SelectTrigger id="model">
+              <SelectValue placeholder="Select model" />
             </SelectTrigger>
             <SelectContent>
-              {modelCategories.map((category) => (
-                <SelectItem key={category} value={category}>{category}</SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </div>
-        <div>
-          <Label htmlFor="modelVariant">Model Variant</Label>
-          <Select value={modelVariant} onValueChange={setModelVariant}>
-            <SelectTrigger id="modelVariant">
-              <SelectValue placeholder="Select model variant" />
-            </SelectTrigger>
-            <SelectContent>
-              {modelVariants.map((variant) => (
-                <SelectItem key={variant} value={variant}>{variant}</SelectItem>
+              {models.map((m) => (
+                <SelectItem key={m} value={m}>{m}</SelectItem>
               ))}
             </SelectContent>
           </Select>
