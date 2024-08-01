@@ -135,6 +135,7 @@ const Garage = ({ isPro, setIsPro, user }) => {
                   <p><strong>Engine:</strong> {vehicle.engineSize}</p>
                   <p><strong>Drivetrain:</strong> {vehicle.drivetrain}</p>
                   <p><strong>Body:</strong> {vehicle.bodyConfig}</p>
+                  <p><strong>Mileage:</strong> {vehicle.mileage?.toLocaleString() || 'N/A'} miles</p>
                   <div className="flex justify-between mt-4">
                     <Tooltip content="Edit vehicle details">
                       <Button onClick={() => handleEditVehicle(vehicle)} variant="outline">Edit</Button>
