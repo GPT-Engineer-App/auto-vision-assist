@@ -18,6 +18,9 @@ export const auth = getAuth(app);
 export const db = getFirestore(app);
 export const analytics = getAnalytics(app);
 
+// Initialize Firebase with the config
+initializeApp(firebaseConfig);
+
 if (import.meta.env.DEV) {
   // Use emulators in development mode
   // Uncomment these lines if you're using Firebase emulators

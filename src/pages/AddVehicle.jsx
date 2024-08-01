@@ -55,10 +55,11 @@ const AddVehicle = () => {
 
   const populateModelCategories = async (selectedMake, selectedYear) => {
     try {
-      const response = await fetch(`https://vpic.nhtsa.dot.gov/api/vehicles/GetModelsForMakeYear/make/${selectedMake}/modelyear/${selectedYear}?format=json`);
+      const response = await fetch(`https://vpic.nhtsa.dot.gov/api/vehicles/GetMakesForVehicleType/car?format=json`);
       const data = await response.json();
-      const categories = new Set(data.Results.map(model => model.Model_Name.split(' ')[0]));
-      setModelCategories(Array.from(categories));
+      const categories = data.Results.filter(make => make.MakeName.toLowerCase() === selectedMake.toLowerCase())
+        .map(make => make.VehicleTypeName);
+      setModelCategories(Array.from(new Set(categories)));
     } catch (error) {
       console.error('Error fetching model categories:', error);
       toast.error('Failed to load model categories');
@@ -67,10 +68,9 @@ const AddVehicle = () => {
 
   const populateModelVariants = async (selectedMake, selectedYear, selectedCategory) => {
     try {
-      const response = await fetch(`https://vpic.nhtsa.dot.gov/api/vehicles/GetModelsForMakeYear/make/${selectedMake}/modelyear/${selectedYear}?format=json`);
+      const response = await fetch(`https://vpic.nhtsa.dot.gov/api/vehicles/GetModelsForMakeYear/make/${selectedMake}/modelyear/${selectedYear}/vehicleType/${selectedCategory}?format=json`);
       const data = await response.json();
-      const variants = data.Results.filter(model => model.Model_Name.startsWith(selectedCategory))
-        .map(model => model.Model_Name);
+      const variants = data.Results.map(model => model.Model_Name);
       setModelVariants(variants);
     } catch (error) {
       console.error('Error fetching model variants:', error);
@@ -108,7 +108,8 @@ const AddVehicle = () => {
     }
 
     try {
-      const docRef = await addDoc(collection(db, "vehicles"), {
+      const vehiclesRef = collection(db, "vehicles");
+      await addDoc(vehiclesRef, {
         userId: auth.currentUser.uid,
         year,
         make,
@@ -121,7 +122,12 @@ const AddVehicle = () => {
       toast.success("Vehicle added successfully");
       navigate("/garage");
     } catch (error) {
-      toast.error("Error adding vehicle: " + error.message);
+      console.error("Error adding vehicle:", error);
+      if (error.code === "permission-denied") {
+        toast.error("Permission denied. Please make sure you're logged in and try again.");
+      } else {
+        toast.error("Error adding vehicle: " + error.message);
+      }
     }
   };
 
