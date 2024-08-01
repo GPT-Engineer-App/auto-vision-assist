@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { addDoc, collection } from "firebase/firestore";
 import { db, auth } from "@/lib/firebase";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { toast } from "sonner";
@@ -14,6 +15,8 @@ const AddVehicle = () => {
   const [engineSize, setEngineSize] = useState("");
   const [drivetrain, setDrivetrain] = useState("");
   const [bodyConfig, setBodyConfig] = useState("");
+  const [fuelType, setFuelType] = useState("");
+  const [mileage, setMileage] = useState("");
   const [years, setYears] = useState([]);
   const [makes, setMakes] = useState([]);
   const [models, setModels] = useState([]);
@@ -95,6 +98,8 @@ const AddVehicle = () => {
         engineSize,
         drivetrain,
         bodyConfig,
+        fuelType,
+        mileage: Number(mileage),
         createdAt: new Date(),
       });
       toast.success("Vehicle added successfully");
@@ -190,6 +195,28 @@ const AddVehicle = () => {
               ))}
             </SelectContent>
           </Select>
+        </div>
+        <div>
+          <Label htmlFor="fuelType">Fuel Type</Label>
+          <Select value={fuelType} onValueChange={setFuelType}>
+            <SelectTrigger id="fuelType">
+              <SelectValue placeholder="Select fuel type" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="gas">Gas</SelectItem>
+              <SelectItem value="diesel">Diesel</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+        <div>
+          <Label htmlFor="mileage">Mileage</Label>
+          <Input
+            id="mileage"
+            type="number"
+            value={mileage}
+            onChange={(e) => setMileage(e.target.value)}
+            placeholder="Enter vehicle mileage"
+          />
         </div>
         <Button type="submit">Add Vehicle</Button>
       </form>
