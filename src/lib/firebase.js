@@ -6,6 +6,7 @@ import { getAnalytics } from "firebase/analytics";
 const firebaseConfig = {
   apiKey: "AIzaSyBaMsvZCdwFLWgTUZsTZlScUzDNc_WvyCQ",
   authDomain: "auto-vision-pro-v2.firebaseapp.com",
+  databaseURL: "https://auto-vision-pro-v2-default-rtdb.firebaseio.com",
   projectId: "auto-vision-pro-v2",
   storageBucket: "auto-vision-pro-v2.appspot.com",
   messagingSenderId: "933665969916",
