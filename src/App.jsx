@@ -6,9 +6,8 @@ import { Route, BrowserRouter as Router, Routes } from "react-router-dom";
 import Layout from "./layouts/navbar"; // available: clean, navbar, sidebar
 import { navItems } from "./nav-items";
 import UserProfile from "./components/UserProfile";
-import { auth, db } from "./lib/firebase";
+import { auth } from "./lib/firebase";
 import { onAuthStateChanged } from "firebase/auth";
-import { doc, getDoc, setDoc } from "firebase/firestore";
 import RangeFinder from "./pages/RangeFinder";
 import { ThemeProvider } from "@/components/theme-provider";
 import { AnimatePresence } from "framer-motion";
@@ -18,44 +17,18 @@ const queryClient = new QueryClient();
 const App = () => {
   const [isPro, setIsPro] = useState(false);
   const [user, setUser] = useState(null);
-  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
-      if (currentUser) {
-        setUser(currentUser);
-        try {
-          const userDocRef = doc(db, "users", currentUser.uid);
-          const userDocSnap = await getDoc(userDocRef);
-          if (userDocSnap.exists()) {
-            const userData = userDocSnap.data();
-            setIsPro(userData.isPro || false);
-          } else {
-            console.log("No user document found. Creating a new one.");
-            // Create a new user document if it doesn't exist
-            await setDoc(userDocRef, {
-              email: currentUser.email,
-              isPro: false,
-              createdAt: new Date()
-            });
-          }
-        } catch (error) {
-          console.error("Error fetching user data:", error);
-          // Handle the error gracefully, perhaps set a default state or show an error message
-        }
-      } else {
-        setUser(null);
+    const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
+      setUser(currentUser);
+      // Reset isPro when user signs out
+      if (!currentUser) {
         setIsPro(false);
       }
-      setLoading(false);
     });
 
     return () => unsubscribe();
   }, []);
-
-  if (loading) {
-    return <div>Loading...</div>;
-  }
 
   return (
     <QueryClientProvider client={queryClient}>

@@ -19,10 +19,9 @@ const UserProfile = ({ isPro, setIsPro, user }) => {
         try {
           setLoading(true);
           setError(null);
-          const userDocRef = doc(db, "users", user.uid);
-          const userDocSnap = await getDoc(userDocRef);
-          if (userDocSnap.exists()) {
-            const userData = userDocSnap.data();
+          const userDoc = await getDoc(doc(db, "users", user.uid));
+          if (userDoc.exists()) {
+            const userData = userDoc.data();
             setUserData(userData);
             setIsProEnabled(userData.isPro || false);
             setIsPro(userData.isPro || false);
@@ -33,7 +32,7 @@ const UserProfile = ({ isPro, setIsPro, user }) => {
               isPro: false,
               createdAt: new Date(),
             };
-            await setDoc(userDocRef, newUserData);
+            await setDoc(doc(db, "users", user.uid), newUserData);
             setUserData(newUserData);
             setIsProEnabled(false);
             setIsPro(false);
@@ -78,8 +77,7 @@ const UserProfile = ({ isPro, setIsPro, user }) => {
       }
 
       // Update user's pro status in Firestore
-      const userDocRef = doc(db, "users", user.uid);
-      await setDoc(userDocRef, { isPro: true }, { merge: true });
+      await setDoc(doc(db, "users", user.uid), { isPro: true }, { merge: true });
       setIsProEnabled(true);
       setIsPro(true);
       toast.success("Upgraded to Pro successfully!");
