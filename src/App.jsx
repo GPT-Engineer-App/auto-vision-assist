@@ -8,7 +8,7 @@ import { navItems } from "./nav-items";
 import UserProfile from "./components/UserProfile";
 import { auth, db } from "./lib/firebase";
 import { onAuthStateChanged } from "firebase/auth";
-import { doc, getDoc } from "firebase/firestore";
+import { doc, getDoc, setDoc } from "firebase/firestore";
 import RangeFinder from "./pages/RangeFinder";
 import { ThemeProvider } from "@/components/theme-provider";
 import { AnimatePresence } from "framer-motion";
@@ -25,13 +25,23 @@ const App = () => {
       if (currentUser) {
         setUser(currentUser);
         try {
-          const userDoc = await getDoc(doc(db, "users", currentUser.uid));
-          if (userDoc.exists()) {
-            const userData = userDoc.data();
+          const userDocRef = doc(db, "users", currentUser.uid);
+          const userDocSnap = await getDoc(userDocRef);
+          if (userDocSnap.exists()) {
+            const userData = userDocSnap.data();
             setIsPro(userData.isPro || false);
+          } else {
+            console.log("No user document found. Creating a new one.");
+            // Create a new user document if it doesn't exist
+            await setDoc(userDocRef, {
+              email: currentUser.email,
+              isPro: false,
+              createdAt: new Date()
+            });
           }
         } catch (error) {
           console.error("Error fetching user data:", error);
+          // Handle the error gracefully, perhaps set a default state or show an error message
         }
       } else {
         setUser(null);
