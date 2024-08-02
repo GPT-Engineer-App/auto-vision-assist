@@ -1,7 +1,8 @@
 import { useState, useEffect } from "react";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Loader2 } from "lucide-react";
+import { VisuallyHidden } from "@radix-ui/react-visually-hidden";
 
 const OpenSightModal = ({ vehicle, onClose }) => {
   const [faultyComponents, setFaultyComponents] = useState([]);
@@ -30,8 +31,11 @@ const OpenSightModal = ({ vehicle, onClose }) => {
   return (
     <Dialog open={!!vehicle} onOpenChange={onClose}>
       <DialogContent className="sm:max-w-[425px]">
+        <VisuallyHidden>
+          <DialogTitle>Open Sight Analysis</DialogTitle>
+        </VisuallyHidden>
         <DialogHeader>
-          <DialogTitle>Open Sight Analysis: {vehicle.year} {vehicle.make} {vehicle.model}</DialogTitle>
+          <h2 className="text-lg font-semibold">Open Sight Analysis: {vehicle.year} {vehicle.make} {vehicle.model}</h2>
         </DialogHeader>
         {loading ? (
           <div className="flex justify-center items-center h-40">
