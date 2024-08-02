@@ -3,9 +3,8 @@ import { Toaster } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { Route, BrowserRouter as Router, Routes } from "react-router-dom";
-import Layout from "./layouts/navbar"; // available: clean, navbar, sidebar
+import Layout from "./layouts/navbar";
 import { navItems } from "./nav-items";
-import UserProfile from "./components/UserProfile";
 import { auth } from "./lib/firebase";
 import { onAuthStateChanged } from "firebase/auth";
 import RangeFinder from "./pages/RangeFinder";
@@ -21,7 +20,6 @@ const App = () => {
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
       setUser(currentUser);
-      // Reset isPro when user signs out
       if (!currentUser) {
         setIsPro(false);
       }
@@ -46,7 +44,6 @@ const App = () => {
                       element={React.cloneElement(item.page, { isPro, setIsPro, user })}
                     />
                   ))}
-                  <Route path="/profile" element={<UserProfile isPro={isPro} setIsPro={setIsPro} user={user} />} />
                   <Route path="/range-finder/:dtc" element={<RangeFinder isPro={isPro} />} />
                 </Route>
               </Routes>

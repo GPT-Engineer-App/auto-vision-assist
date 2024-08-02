@@ -16,7 +16,7 @@ const Index = () => {
   useEffect(() => {
     const unsubscribe = auth.onAuthStateChanged((user) => {
       if (user) {
-        navigate("/garage");
+        navigate("/");
       }
     });
 
