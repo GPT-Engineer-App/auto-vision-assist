@@ -21,29 +21,6 @@ export const analytics = getAnalytics(app);
 // Initialize Firebase with the config
 initializeApp(firebaseConfig);
 
-if (import.meta.env.DEV) {
-  // Use emulators in development mode
-  // Uncomment these lines if you're using Firebase emulators
-  // import { connectAuthEmulator } from "firebase/auth";
-  // import { connectFirestoreEmulator } from "firebase/firestore";
-  // connectAuthEmulator(auth, "http://localhost:9099");
-  // connectFirestoreEmulator(db, "localhost", 8080);
-}
-
-/**
- * @typedef {Object} DTC
- * @property {string} code - The DTC code
- * @property {string} description - Description of the DTC
- * @property {string} possible_causes - Possible causes of the DTC
- * @property {string} diagnostic_aids - Diagnostic aids for the DTC
- * @property {string} application - Application of the DTC
- */
-
-/**
- * Fetches a DTC by its code
- * @param {string} code - The DTC code to fetch
- * @returns {Promise<DTC|null>} The DTC object or null if not found
- */
 export async function fetchDTCByCode(code) {
   const dtcRef = collection(db, "dtc");
   const q = query(dtcRef, where("code", "==", code));
@@ -56,11 +33,6 @@ export async function fetchDTCByCode(code) {
   return querySnapshot.docs[0].data();
 }
 
-/**
- * Searches DTCs by a query string
- * @param {string} searchQuery - The search query
- * @returns {Promise<DTC[]>} An array of matching DTCs
- */
 export async function searchDTCs(searchQuery) {
   const dtcRef = collection(db, "dtc");
   const q = query(dtcRef, 
@@ -72,10 +44,6 @@ export async function searchDTCs(searchQuery) {
   return querySnapshot.docs.map(doc => doc.data());
 }
 
-/**
- * Fetches all DTCs
- * @returns {Promise<DTC[]>} An array of all DTCs
- */
 export async function fetchAllDTCs() {
   const dtcRef = collection(db, "dtc");
   const querySnapshot = await getDocs(dtcRef);
@@ -83,22 +51,11 @@ export async function fetchAllDTCs() {
   return querySnapshot.docs.map(doc => doc.data());
 }
 
-/**
- * Adds a new DTC to the database
- * @param {DTC} dtc - The DTC object to add
- * @returns {Promise<string>} The ID of the newly added DTC
- */
 export async function addDTC(dtc) {
   const docRef = await addDoc(collection(db, "dtc"), dtc);
   return docRef.id;
 }
 
-/**
- * Updates an existing DTC in the database
- * @param {string} code - The code of the DTC to update
- * @param {Partial<DTC>} updates - The fields to update
- * @returns {Promise<void>}
- */
 export async function updateDTC(code, updates) {
   const dtcRef = collection(db, "dtc");
   const q = query(dtcRef, where("code", "==", code));
@@ -110,11 +67,6 @@ export async function updateDTC(code, updates) {
   }
 }
 
-/**
- * Deletes a DTC from the database
- * @param {string} code - The code of the DTC to delete
- * @returns {Promise<void>}
- */
 export async function deleteDTC(code) {
   const dtcRef = collection(db, "dtc");
   const q = query(dtcRef, where("code", "==", code));
@@ -125,21 +77,11 @@ export async function deleteDTC(code) {
   }
 }
 
-/**
- * Adds a new vehicle to the database
- * @param {Object} vehicle - The vehicle object to add
- * @returns {Promise<string>} The ID of the newly added vehicle
- */
 export async function addVehicle(vehicle) {
   const docRef = await addDoc(collection(db, "vehicles"), vehicle);
   return docRef.id;
 }
 
-/**
- * Fetches all vehicles for a user
- * @param {string} userId - The ID of the user
- * @returns {Promise<Object[]>} An array of vehicle objects
- */
 export async function fetchVehiclesForUser(userId) {
   const vehiclesRef = collection(db, "vehicles");
   const q = query(vehiclesRef, where("userId", "==", userId));
