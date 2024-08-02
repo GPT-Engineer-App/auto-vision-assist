@@ -8,7 +8,7 @@ import { navItems } from "./nav-items";
 import UserProfile from "./components/UserProfile";
 import { auth, db } from "./lib/firebase";
 import { onAuthStateChanged } from "firebase/auth";
-import { doc, getDoc } from "firebase/firestore";
+import { doc, getDoc, setDoc } from "firebase/firestore";
 import RangeFinder from "./pages/RangeFinder";
 import { ThemeProvider } from "@/components/theme-provider";
 import { AnimatePresence } from "framer-motion";
