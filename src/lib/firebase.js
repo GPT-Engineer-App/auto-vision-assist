@@ -4,13 +4,14 @@ import { getFirestore, collection, addDoc, query, where, getDocs, doc, deleteDoc
 import { getAnalytics } from "firebase/analytics";
 
 const firebaseConfig = {
-  apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
-  authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN,
-  projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID,
-  storageBucket: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET,
-  messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID,
-  appId: import.meta.env.VITE_FIREBASE_APP_ID,
-  measurementId: import.meta.env.VITE_FIREBASE_MEASUREMENT_ID
+  apiKey: "AIzaSyBaMsvZCdwFLWgTUZsTZlScUzDNc_WvyCQ",
+  authDomain: "auto-vision-pro-v2.firebaseapp.com",
+  databaseURL: "https://auto-vision-pro-v2-default-rtdb.firebaseio.com",
+  projectId: "auto-vision-pro-v2",
+  storageBucket: "auto-vision-pro-v2.appspot.com",
+  messagingSenderId: "933665969916",
+  appId: "1:933665969916:web:e17792bd261905ea102979",
+  measurementId: "G-DTT5BB21FZ"
 };
 
 const app = initializeApp(firebaseConfig);
