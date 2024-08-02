@@ -11,40 +11,55 @@ import { toast } from "sonner";
 import { useNavigate } from "react-router-dom";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import { motion, AnimatePresence } from "framer-motion";
-import { Tooltip } from "@/components/ui/tooltip";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { HelpCircle } from "lucide-react";
 import OpenSightModal from "@/components/OpenSightModal";
 
 const Garage = ({ isPro, setIsPro, user }) => {
   const [vehicles, setVehicles] = useState([]);
+  const [userProfile, setUserProfile] = useState(null);
   const [loading, setLoading] = useState(true);
   const [editingVehicle, setEditingVehicle] = useState(null);
   const [openSightVehicle, setOpenSightVehicle] = useState(null);
   const navigate = useNavigate();
 
   useEffect(() => {
-    const fetchVehicles = async () => {
+    const fetchData = async () => {
       if (!user) {
-        console.log("User not authenticated, skipping vehicle fetch");
+        console.log("User not authenticated, skipping data fetch");
         setLoading(false);
         return;
       }
       try {
-        console.log("Fetching vehicles for user:", user.uid);
-        const q = query(collection(db, "vehicles"), where("userId", "==", user.uid));
-        const querySnapshot = await getDocs(q);
-        const vehicleData = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+        console.log("Fetching data for user:", user.uid);
+
+        // Fetch user profile
+        const userProfileQuery = query(collection(db, "users"), where("userId", "==", user.uid));
+        const userProfileSnapshot = await getDocs(userProfileQuery);
+        if (!userProfileSnapshot.empty) {
+          const userProfileData = userProfileSnapshot.docs[0].data();
+          console.log("User profile data:", userProfileData);
+          setUserProfile(userProfileData);
+        } else {
+          console.error("User profile not found");
+          toast.error("User profile not found. Please try again later.");
+        }
+
+        // Fetch vehicles
+        const vehiclesQuery = query(collection(db, "vehicles"), where("userId", "==", user.uid));
+        const vehiclesSnapshot = await getDocs(vehiclesQuery);
+        const vehicleData = vehiclesSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
         console.log("Fetched vehicles:", vehicleData);
         setVehicles(vehicleData);
       } catch (error) {
-        console.error("Error fetching vehicles:", error);
-        toast.error("Error fetching vehicles: " + error.message);
+        console.error("Error fetching data:", error);
+        toast.error("Error fetching data: " + error.message);
       } finally {
         setLoading(false);
       }
     };
 
-    fetchVehicles();
+    fetchData();
   }, [user]);
 
   const handleAddVehicle = () => {
@@ -115,6 +130,12 @@ const Garage = ({ isPro, setIsPro, user }) => {
       className="container mx-auto p-4"
     >
       <h1 className="text-3xl font-bold mb-6">My Garage</h1>
+      {userProfile && (
+        <div className="mb-6">
+          <h2 className="text-xl font-semibold mb-2">Welcome, {userProfile.username || userProfile.email}</h2>
+          <p>Membership: {isPro ? "Pro" : "Free"}</p>
+        </div>
+      )}
       <AnimatePresence>
         <motion.div
           className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4"
@@ -142,15 +163,29 @@ const Garage = ({ isPro, setIsPro, user }) => {
                   <p><strong>Body:</strong> {vehicle.bodyConfig}</p>
                   <p><strong>Mileage:</strong> {vehicle.mileage?.toLocaleString() || 'N/A'} miles</p>
                   <div className="flex justify-between mt-4">
-                    <Tooltip content="Edit vehicle details">
-                      <Button onClick={() => handleEditVehicle(vehicle)} variant="outline">Edit</Button>
-                    </Tooltip>
-                    <AlertDialog>
-                      <Tooltip content="Remove this vehicle from your garage">
-                        <AlertDialogTrigger asChild>
-                          <Button variant="destructive">Delete</Button>
-                        </AlertDialogTrigger>
+                    <TooltipProvider>
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <Button onClick={() => handleEditVehicle(vehicle)} variant="outline">Edit</Button>
+                        </TooltipTrigger>
+                        <TooltipContent>
+                          <p>Edit vehicle details</p>
+                        </TooltipContent>
                       </Tooltip>
+                    </TooltipProvider>
+                    <AlertDialog>
+                      <TooltipProvider>
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <AlertDialogTrigger asChild>
+                              <Button variant="destructive">Delete</Button>
+                            </AlertDialogTrigger>
+                          </TooltipTrigger>
+                          <TooltipContent>
+                            <p>Remove this vehicle from your garage</p>
+                          </TooltipContent>
+                        </Tooltip>
+                      </TooltipProvider>
                       <AlertDialogContent>
                         <AlertDialogHeader>
                           <AlertDialogTitle>Are you sure?</AlertDialogTitle>
@@ -164,9 +199,16 @@ const Garage = ({ isPro, setIsPro, user }) => {
                         </AlertDialogFooter>
                       </AlertDialogContent>
                     </AlertDialog>
-                    <Tooltip content={isPro ? "Access advanced diagnostics for this vehicle" : "Upgrade to Pro to access Open Sight"}>
-                      <Button onClick={() => handleOpenSight(vehicle)} disabled={!isPro}>Open Sight</Button>
-                    </Tooltip>
+                    <TooltipProvider>
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <Button onClick={() => handleOpenSight(vehicle)} disabled={!isPro}>Open Sight</Button>
+                        </TooltipTrigger>
+                        <TooltipContent>
+                          <p>{isPro ? "Access advanced diagnostics for this vehicle" : "Upgrade to Pro to access Open Sight"}</p>
+                        </TooltipContent>
+                      </Tooltip>
+                    </TooltipProvider>
                   </div>
                 </CardContent>
               </Card>
@@ -175,13 +217,27 @@ const Garage = ({ isPro, setIsPro, user }) => {
         </motion.div>
       </AnimatePresence>
       <div className="mt-6">
-        <Tooltip content="Add a new vehicle to your garage">
-          <Button onClick={handleAddVehicle}>Add Vehicle</Button>
-        </Tooltip>
-        {!isPro && vehicles.length >= 1 && (
-          <Tooltip content="Upgrade to Pro for more features">
-            <Button variant="outline" className="ml-4" onClick={() => setIsPro(true)}>Upgrade to Pro</Button>
+        <TooltipProvider>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button onClick={handleAddVehicle}>Add Vehicle</Button>
+            </TooltipTrigger>
+            <TooltipContent>
+              <p>Add a new vehicle to your garage</p>
+            </TooltipContent>
           </Tooltip>
+        </TooltipProvider>
+        {!isPro && vehicles.length >= 1 && (
+          <TooltipProvider>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button variant="outline" className="ml-4" onClick={() => setIsPro(true)}>Upgrade to Pro</Button>
+              </TooltipTrigger>
+              <TooltipContent>
+                <p>Upgrade to Pro for more features</p>
+              </TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
         )}
       </div>
       <EditVehicleDialog
@@ -193,11 +249,18 @@ const Garage = ({ isPro, setIsPro, user }) => {
         vehicle={openSightVehicle}
         onClose={() => setOpenSightVehicle(null)}
       />
-      <Tooltip content="Need help? Click here for assistance">
-        <Button variant="ghost" size="icon" className="fixed bottom-4 right-4">
-          <HelpCircle className="h-6 w-6" />
-        </Button>
-      </Tooltip>
+      <TooltipProvider>
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <Button variant="ghost" size="icon" className="fixed bottom-4 right-4">
+              <HelpCircle className="h-6 w-6" />
+            </Button>
+          </TooltipTrigger>
+          <TooltipContent>
+            <p>Need help? Click here for assistance</p>
+          </TooltipContent>
+        </Tooltip>
+      </TooltipProvider>
     </motion.div>
   );
 };

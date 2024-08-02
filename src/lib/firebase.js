@@ -147,3 +147,21 @@ export async function fetchVehiclesForUser(userId) {
 
   return querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
 }
+
+/**
+ * Fetches user profile data
+ * @param {string} userId - The ID of the user
+ * @returns {Promise<Object|null>} The user profile data or null if not found
+ */
+export async function fetchUserProfile(userId) {
+  try {
+    const userDoc = await getDoc(doc(db, "users", userId));
+    if (userDoc.exists()) {
+      return userDoc.data();
+    }
+    return null;
+  } catch (error) {
+    console.error("Error fetching user profile:", error);
+    throw error;
+  }
+}
