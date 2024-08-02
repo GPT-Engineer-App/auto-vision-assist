@@ -11,29 +11,23 @@ const UserProfile = ({ isPro, setIsPro, user }) => {
   const [isProEnabled, setIsProEnabled] = useState(isPro);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [userData, setUserData] = useState(null);
 
   useEffect(() => {
     const fetchUserProfile = async () => {
       if (user) {
         try {
-          setLoading(true);
-          setError(null);
           const userDoc = await getDoc(doc(db, "users", user.uid));
           if (userDoc.exists()) {
             const userData = userDoc.data();
-            setUserData(userData);
             setIsProEnabled(userData.isPro || false);
             setIsPro(userData.isPro || false);
           } else {
             // If the user document doesn't exist, create it
-            const newUserData = {
+            await setDoc(doc(db, "users", user.uid), {
               email: user.email,
               isPro: false,
               createdAt: new Date(),
-            };
-            await setDoc(doc(db, "users", user.uid), newUserData);
-            setUserData(newUserData);
+            });
             setIsProEnabled(false);
             setIsPro(false);
           }
@@ -104,7 +98,7 @@ const UserProfile = ({ isPro, setIsPro, user }) => {
   return (
     <div className="space-y-4">
       <h2 className="text-2xl font-bold">User Profile</h2>
-      <p>Email: {userData?.email}</p>
+      <p>Email: {user.email}</p>
       <div className="flex items-center space-x-2">
         <Switch
           id="pro-mode"
