@@ -56,7 +56,7 @@ export const UserMenu = ({ user, isPro }) => {
         <DropdownMenuItem onClick={() => navigate("/profile")}>
           Profile
         </DropdownMenuItem>
-        <DropdownMenuItem onClick={() => navigate("/")}>
+        <DropdownMenuItem onClick={() => navigate("/garage")}>
           Garage
         </DropdownMenuItem>
         <DropdownMenuItem onClick={() => navigate("/dtc-codes")}>
