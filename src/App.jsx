@@ -10,6 +10,7 @@ import { onAuthStateChanged } from "firebase/auth";
 import RangeFinder from "./pages/RangeFinder";
 import { ThemeProvider } from "@/components/theme-provider";
 import { AnimatePresence } from "framer-motion";
+import Profile from "./pages/Profile";
 
 const queryClient = new QueryClient();
 
@@ -45,6 +46,7 @@ const App = () => {
                     />
                   ))}
                   <Route path="/range-finder/:dtc" element={<RangeFinder isPro={isPro} />} />
+                  <Route path="/profile" element={<Profile />} />
                 </Route>
               </Routes>
             </AnimatePresence>

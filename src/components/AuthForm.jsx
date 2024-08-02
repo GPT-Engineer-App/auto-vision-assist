@@ -32,6 +32,7 @@ const AuthForm = ({ isLogin }) => {
       if (isLogin) {
         await signInWithEmailAndPassword(auth, email, password);
         toast.success("Logged in successfully");
+        navigate("/garage");
       } else {
         const userCredential = await createUserWithEmailAndPassword(auth, email, password);
         const user = userCredential.user;
@@ -44,8 +45,8 @@ const AuthForm = ({ isLogin }) => {
         });
         
         toast.success("Account created successfully");
+        navigate("/garage");
       }
-      navigate("/garage");
     } catch (error) {
       console.error("Authentication error:", error);
       toast.error(error.message);

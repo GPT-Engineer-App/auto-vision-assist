@@ -16,12 +16,20 @@ const Index = () => {
   useEffect(() => {
     const unsubscribe = auth.onAuthStateChanged((user) => {
       if (user) {
-        navigate("/");
+        navigate("/garage");
       }
     });
 
     return () => unsubscribe();
   }, [navigate]);
+
+  const handleAuthAction = () => {
+    if (isLogin) {
+      navigate("/login");
+    } else {
+      navigate("/signup");
+    }
+  };
 
   return (
     <div className="relative flex flex-col min-h-screen bg-background justify-between overflow-x-hidden">
@@ -50,6 +58,9 @@ const Index = () => {
                 {isLogin ? "Sign Up" : "Log In"}
               </Button>
             </p>
+            <Button onClick={handleAuthAction} className="w-full mt-4">
+              {isLogin ? "Go to Login" : "Go to Sign Up"}
+            </Button>
           </motion.div>
           <TooltipProvider>
             <Tooltip>
