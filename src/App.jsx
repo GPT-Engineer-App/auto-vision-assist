@@ -3,7 +3,7 @@ import { Toaster } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { Route, BrowserRouter as Router, Routes } from "react-router-dom";
-import Layout from "./layouts/navbar"; // available: clean, navbar, sidebar
+import Layout from "./layouts/navbar";
 import { navItems } from "./nav-items";
 import UserProfile from "./components/UserProfile";
 import { auth } from "./lib/firebase";
@@ -21,7 +21,6 @@ const App = () => {
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
       setUser(currentUser);
-      // Reset isPro when user signs out
       if (!currentUser) {
         setIsPro(false);
       }
@@ -37,8 +36,8 @@ const App = () => {
           <Toaster />
           <Router>
             <AnimatePresence mode="wait">
-              <Routes>
-                <Route path="/" element={<Layout user={user} isPro={isPro} />}>
+              <Layout user={user} isPro={isPro}>
+                <Routes>
                   {navItems.map((item) => (
                     <Route 
                       key={item.to} 
@@ -48,8 +47,8 @@ const App = () => {
                   ))}
                   <Route path="/profile" element={<UserProfile isPro={isPro} setIsPro={setIsPro} user={user} />} />
                   <Route path="/range-finder/:dtc" element={<RangeFinder isPro={isPro} />} />
-                </Route>
-              </Routes>
+                </Routes>
+              </Layout>
             </AnimatePresence>
           </Router>
         </TooltipProvider>
