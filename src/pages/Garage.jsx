@@ -115,11 +115,7 @@ const Garage = ({ isPro, setIsPro, user }) => {
       return;
     }
     try {
-      const prompt = `Vehicle: ${vehicle.year} ${vehicle.make} ${vehicle.model}
-Engine: ${vehicle.engineSize}
-Drivetrain: ${vehicle.drivetrain}
-Symptoms/DTCs: ${input}
-Please provide a detailed diagnosis based on this information. Include potential causes, recommended diagnostic steps, and possible repair solutions.`;
+      const prompt = `Vehicle: ${vehicle.year} ${vehicle.make} ${vehicle.model}\nEngine: ${vehicle.engineSize}\nDrivetrain: ${vehicle.drivetrain}\nSymptoms/DTCs: ${input}\nPlease provide a diagnosis based on this information.`;
       const diagnosis = await generateDiagnosticResponse(prompt);
       setDiagnosisResults(prev => ({ ...prev, [vehicleId]: diagnosis }));
     } catch (error) {

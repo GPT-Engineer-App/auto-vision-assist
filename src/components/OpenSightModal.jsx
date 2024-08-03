@@ -1,27 +1,28 @@
 import { useState, useEffect } from "react";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Loader2 } from "lucide-react";
 import { VisuallyHidden } from "@radix-ui/react-visually-hidden";
-import { generateOpenSightAnalysis } from "@/lib/openai";
 
 const OpenSightModal = ({ vehicle, onClose }) => {
-  const [analysis, setAnalysis] = useState("");
+  const [faultyComponents, setFaultyComponents] = useState([]);
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     if (vehicle) {
       setLoading(true);
-      generateOpenSightAnalysis(vehicle)
-        .then((result) => {
-          setAnalysis(result);
-          setLoading(false);
-        })
-        .catch((error) => {
-          console.error("Error generating Open Sight analysis:", error);
-          setAnalysis("Failed to generate analysis. Please try again.");
-          setLoading(false);
-        });
+      // Simulating an API call to fetch faulty components
+      setTimeout(() => {
+        const mockFaultyComponents = [
+          { name: "Alternator", probability: 0.8 },
+          { name: "Battery", probability: 0.6 },
+          { name: "Starter Motor", probability: 0.4 },
+          { name: "Fuel Pump", probability: 0.3 },
+          { name: "Spark Plugs", probability: 0.2 },
+        ];
+        setFaultyComponents(mockFaultyComponents);
+        setLoading(false);
+      }, 2000);
     }
   }, [vehicle]);
 
@@ -29,7 +30,7 @@ const OpenSightModal = ({ vehicle, onClose }) => {
 
   return (
     <Dialog open={!!vehicle} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-[600px]">
+      <DialogContent className="sm:max-w-[425px]">
         <VisuallyHidden>
           <DialogTitle>Open Sight Analysis</DialogTitle>
         </VisuallyHidden>
@@ -42,7 +43,17 @@ const OpenSightModal = ({ vehicle, onClose }) => {
           </div>
         ) : (
           <div className="py-4">
-            <p className="whitespace-pre-wrap">{analysis}</p>
+            <h3 className="text-lg font-semibold mb-2">Likely Faulty Components:</h3>
+            <ul className="space-y-2">
+              {faultyComponents.map((component, index) => (
+                <li key={index} className="flex justify-between items-center">
+                  <span>{component.name}</span>
+                  <span className="text-sm font-medium bg-blue-100 text-blue-800 py-1 px-2 rounded-full">
+                    {(component.probability * 100).toFixed(0)}%
+                  </span>
+                </li>
+              ))}
+            </ul>
           </div>
         )}
         <div className="mt-4 flex justify-end">
