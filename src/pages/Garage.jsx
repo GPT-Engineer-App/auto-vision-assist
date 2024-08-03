@@ -15,6 +15,7 @@ import { Tooltip } from "@/components/ui/tooltip";
 import { HelpCircle } from "lucide-react";
 import OpenSightModal from "@/components/OpenSightModal";
 import { generateDiagnosticResponse } from "@/lib/openai";
+import DTCModal from "@/components/DTCModal";
 
 const Garage = ({ isPro, setIsPro, user }) => {
   const [vehicles, setVehicles] = useState([]);
@@ -23,6 +24,7 @@ const Garage = ({ isPro, setIsPro, user }) => {
   const [openSightVehicle, setOpenSightVehicle] = useState(null);
   const [diagnosisInputs, setDiagnosisInputs] = useState({});
   const [diagnosisResults, setDiagnosisResults] = useState({});
+  const [isDTCModalOpen, setIsDTCModalOpen] = useState(false);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -145,6 +147,10 @@ const Garage = ({ isPro, setIsPro, user }) => {
       className="container mx-auto p-4"
     >
       <h1 className="text-3xl font-bold mb-6">My Garage</h1>
+      <div className="flex justify-between mb-6">
+        <Button onClick={() => navigate("/range-finder")}>Range Finder</Button>
+        <Button onClick={() => setIsDTCModalOpen(true)}>DTC Code Reference</Button>
+      </div>
       <AnimatePresence>
         <motion.div
           className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4"
@@ -240,6 +246,7 @@ const Garage = ({ isPro, setIsPro, user }) => {
         vehicle={openSightVehicle}
         onClose={() => setOpenSightVehicle(null)}
       />
+      <DTCModal isOpen={isDTCModalOpen} onClose={() => setIsDTCModalOpen(false)} />
       <Tooltip content="Need help? Click here for assistance">
         <Button variant="ghost" size="icon" className="fixed bottom-4 right-4">
           <HelpCircle className="h-6 w-6" />
