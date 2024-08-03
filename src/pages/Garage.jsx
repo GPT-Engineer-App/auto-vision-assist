@@ -14,6 +14,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { Tooltip } from "@/components/ui/tooltip";
 import { HelpCircle } from "lucide-react";
 import OpenSightModal from "@/components/OpenSightModal";
+import DTCModal from "@/components/DTCModal";
 import { generateDiagnosticResponse } from "@/lib/openai";
 
 const Garage = ({ isPro, setIsPro, user }) => {
@@ -21,6 +22,7 @@ const Garage = ({ isPro, setIsPro, user }) => {
   const [loading, setLoading] = useState(true);
   const [editingVehicle, setEditingVehicle] = useState(null);
   const [openSightVehicle, setOpenSightVehicle] = useState(null);
+  const [isDTCModalOpen, setIsDTCModalOpen] = useState(false);
   const [diagnosisInputs, setDiagnosisInputs] = useState({});
   const [diagnosisResults, setDiagnosisResults] = useState({});
   const navigate = useNavigate();
@@ -42,7 +44,7 @@ const Garage = ({ isPro, setIsPro, user }) => {
         // Initialize diagnosis inputs for each vehicle
         const initialInputs = {};
         vehicleData.forEach(vehicle => {
-          initialInputs[vehicle.id] = "";
+          initialInputs[vehicle.id] = '';
         });
         setDiagnosisInputs(initialInputs);
       } catch (error) {
@@ -107,17 +109,17 @@ const Garage = ({ isPro, setIsPro, user }) => {
     setDiagnosisInputs(prev => ({ ...prev, [vehicleId]: value }));
   };
 
-  const handleDiagnose = async (vehicleId) => {
-    const vehicle = vehicles.find(v => v.id === vehicleId);
-    const input = diagnosisInputs[vehicleId];
+  const handleDiagnose = async (vehicle) => {
+    const input = diagnosisInputs[vehicle.id];
     if (!input) {
       toast.error("Please enter symptoms or DTCs before diagnosing.");
       return;
     }
+
     try {
-      const prompt = `Vehicle: ${vehicle.year} ${vehicle.make} ${vehicle.model}\nEngine: ${vehicle.engineSize}\nDrivetrain: ${vehicle.drivetrain}\nSymptoms/DTCs: ${input}\nPlease provide a diagnosis based on this information.`;
-      const diagnosis = await generateDiagnosticResponse(prompt);
-      setDiagnosisResults(prev => ({ ...prev, [vehicleId]: diagnosis }));
+      const prompt = `Vehicle: ${vehicle.year} ${vehicle.make} ${vehicle.model} with ${vehicle.engineSize} engine. Symptoms/DTCs: ${input}. Please provide a diagnostic analysis.`;
+      const response = await generateDiagnosticResponse(prompt);
+      setDiagnosisResults(prev => ({ ...prev, [vehicle.id]: response }));
     } catch (error) {
       console.error("Error generating diagnosis:", error);
       toast.error("Failed to generate diagnosis. Please try again.");
@@ -145,6 +147,10 @@ const Garage = ({ isPro, setIsPro, user }) => {
       className="container mx-auto p-4"
     >
       <h1 className="text-3xl font-bold mb-6">My Garage</h1>
+      <div className="flex justify-between mb-6">
+        <Button onClick={() => navigate("/range-finder")}>Range Finder</Button>
+        <Button onClick={() => setIsDTCModalOpen(true)}>DTC Code Reference</Button>
+      </div>
       <AnimatePresence>
         <motion.div
           className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4"
@@ -175,15 +181,15 @@ const Garage = ({ isPro, setIsPro, user }) => {
                     <Label htmlFor={`diagnosis-input-${vehicle.id}`}>Enter symptoms or DTCs:</Label>
                     <Input
                       id={`diagnosis-input-${vehicle.id}`}
-                      value={diagnosisInputs[vehicle.id] || ""}
+                      value={diagnosisInputs[vehicle.id] || ''}
                       onChange={(e) => handleDiagnosisInputChange(vehicle.id, e.target.value)}
-                      placeholder="e.g., Check Engine Light, P0300, rough idle"
+                      placeholder="e.g., Check Engine Light, P0300"
                       className="mb-2"
                     />
-                    <Button onClick={() => handleDiagnose(vehicle.id)} className="w-full mb-2">Diagnose</Button>
+                    <Button onClick={() => handleDiagnose(vehicle)} className="w-full mb-2">Diagnose</Button>
                     {diagnosisResults[vehicle.id] && (
                       <div className="bg-muted p-2 rounded-md mt-2">
-                        <strong>Diagnosis:</strong>
+                        <h4 className="font-semibold">Diagnosis:</h4>
                         <p>{diagnosisResults[vehicle.id]}</p>
                       </div>
                     )}
@@ -240,6 +246,7 @@ const Garage = ({ isPro, setIsPro, user }) => {
         vehicle={openSightVehicle}
         onClose={() => setOpenSightVehicle(null)}
       />
+      <DTCModal isOpen={isDTCModalOpen} onClose={() => setIsDTCModalOpen(false)} />
       <Tooltip content="Need help? Click here for assistance">
         <Button variant="ghost" size="icon" className="fixed bottom-4 right-4">
           <HelpCircle className="h-6 w-6" />
@@ -348,20 +355,6 @@ const EditVehicleDialog = ({ vehicle, onClose, onUpdate }) => {
                 <SelectItem value="suv">SUV</SelectItem>
                 <SelectItem value="truck">Truck</SelectItem>
                 <SelectItem value="van">Van</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-          <div className="space-y-2">
-            <Label htmlFor="fuelType">Fuel Type</Label>
-            <Select name="fuelType" onValueChange={(value) => handleChange({ target: { name: 'fuelType', value } })} value={editedVehicle.fuelType}>
-              <SelectTrigger>
-                <SelectValue placeholder="Select fuel type" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="gas">Gas</SelectItem>
-                <SelectItem value="diesel">Diesel</SelectItem>
-                <SelectItem value="electric">Electric</SelectItem>
-                <SelectItem value="hybrid">Hybrid</SelectItem>
               </SelectContent>
             </Select>
           </div>
