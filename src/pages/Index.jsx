@@ -2,7 +2,6 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
-import HolographicCarBackground from "@/components/HolographicCarBackground";
 import AuthForm from "@/components/AuthForm";
 import { auth } from "@/lib/firebase";
 import { motion } from "framer-motion";
@@ -24,8 +23,7 @@ const Index = () => {
   }, [navigate]);
 
   return (
-    <div className="relative flex flex-col min-h-screen bg-background justify-between overflow-x-hidden">
-      <HolographicCarBackground />
+    <div className="relative flex flex-col min-h-screen bg-background justify-between">
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
