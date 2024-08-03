@@ -7,7 +7,6 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { toast } from "sonner";
-import { fetchAllMakes, fetchModelsForMake, fetchEngineSizesForMakeAndModel } from "@/lib/vehicleApi";
 
 const AddVehicle = () => {
   const [year, setYear] = useState("");
@@ -18,43 +17,80 @@ const AddVehicle = () => {
   const [bodyConfig, setBodyConfig] = useState("");
   const [fuelType, setFuelType] = useState("");
   const [mileage, setMileage] = useState("");
+  const [years, setYears] = useState([]);
   const [makes, setMakes] = useState([]);
   const [models, setModels] = useState([]);
-  const [engines, setEngines] = useState([]);
-  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [engineSizes, setEngineSizes] = useState([]);
   const navigate = useNavigate();
 
+  const predefinedMakes = [
+    "Acura", "Alfa Romeo", "Aston Martin", "Audi", "Bentley", "BMW", "Buick", "Cadillac",
+    "Chevrolet", "Chrysler", "Dodge", "Ferrari", "Fiat", "Ford", "Genesis", "GMC", "Honda",
+    "Hyundai", "Infiniti", "Jaguar", "Jeep", "Kia", "Lamborghini", "Land Rover", "Lexus",
+    "Lincoln", "Lotus", "Maserati", "Mazda", "McLaren", "Mercedes-Benz", "Mini", "Mitsubishi",
+    "Nissan", "Porsche", "Ram", "Rolls-Royce", "Subaru", "Tesla", "Toyota", "Volkswagen", "Volvo"
+  ];
+
+  const drivetrains = ['FWD', 'RWD', 'AWD', '4WD'];
+  const bodyConfigurations = ['Sedan', 'Coupe', 'Hatchback', 'Convertible', 'Van', 'SUV', 'Truck'];
+
   useEffect(() => {
-    fetchAllMakes().then(setMakes).catch(console.error);
+    populateYears();
+    setMakes(predefinedMakes);
+    populateEngineSizes();
   }, []);
 
-  useEffect(() => {
-    if (make) {
-      fetchModelsForMake(make).then(setModels).catch(console.error);
-      setModel("");
-      setEngineSize("");
-    }
-  }, [make]);
+  const populateYears = () => {
+    const currentYear = new Date().getFullYear();
+    const yearsList = Array.from({ length: currentYear - 1899 }, (_, i) => currentYear - i);
+    setYears(yearsList);
+  };
 
-  useEffect(() => {
-    if (year && make && model) {
-      fetchEngineSizesForMakeAndModel(year, make, model).then(setEngines).catch(console.error);
-      setEngineSize("");
+  const populateEngineSizes = () => {
+    const sizes = [];
+    for (let size = 1.0; size <= 12.0; size += 0.1) {
+      sizes.push(size.toFixed(1) + 'L');
     }
-  }, [year, make, model]);
+    setEngineSizes(sizes);
+  };
+
+  const populateModels = async (selectedMake, selectedYear) => {
+    try {
+      const response = await fetch(`https://vpic.nhtsa.dot.gov/api/vehicles/GetModelsForMakeYear/make/${selectedMake}/modelyear/${selectedYear}?format=json`);
+      const data = await response.json();
+      const modelsList = data.Results.map(model => model.Model_Name);
+      setModels(Array.from(new Set(modelsList)));
+    } catch (error) {
+      console.error('Error fetching models:', error);
+      toast.error('Failed to load models');
+    }
+  };
+
+  const handleYearChange = (selectedYear) => {
+    setYear(selectedYear);
+    if (make) {
+      populateModels(make, selectedYear);
+    }
+  };
+
+  const handleMakeChange = (selectedMake) => {
+    setMake(selectedMake);
+    if (year) {
+      populateModels(selectedMake, year);
+    }
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setIsSubmitting(true);
 
     if (!auth.currentUser) {
       toast.error("You must be logged in to add a vehicle");
-      setIsSubmitting(false);
       return;
     }
 
     try {
-      const docRef = await addDoc(collection(db, "vehicles"), {
+      const vehiclesRef = collection(db, "vehicles");
+      await addDoc(vehiclesRef, {
         userId: auth.currentUser.uid,
         year,
         make,
@@ -66,33 +102,25 @@ const AddVehicle = () => {
         mileage: Number(mileage),
         createdAt: new Date(),
       });
-      console.log("Vehicle added with ID: ", docRef.id);
       toast.success("Vehicle added successfully");
       navigate("/garage");
     } catch (error) {
-      console.error("Error adding vehicle: ", error);
+      console.error("Error adding vehicle:", error);
       if (error.code === "permission-denied") {
         toast.error("Permission denied. Please make sure you're logged in and try again.");
       } else {
         toast.error("Error adding vehicle: " + error.message);
       }
-    } finally {
-      setIsSubmitting(false);
     }
   };
-
-  const years = Array.from({ length: 2024 - 1900 + 1 }, (_, i) => 2024 - i);
-  const drivetrains = ['FWD', 'RWD', 'AWD', '4WD'];
-  const bodyConfigurations = ['Sedan', 'Coupe', 'Hatchback', 'SUV', 'Truck', 'Van'];
-  const fuelTypes = ['Gasoline', 'Diesel', 'Electric', 'Hybrid'];
 
   return (
     <div className="container mx-auto p-4">
       <h1 className="text-3xl font-bold mb-6">Add a New Vehicle</h1>
       <form onSubmit={handleSubmit} className="space-y-4">
-        <div className="space-y-2">
+        <div>
           <Label htmlFor="year">Year</Label>
-          <Select value={year} onValueChange={setYear} required>
+          <Select value={year} onValueChange={handleYearChange}>
             <SelectTrigger id="year">
               <SelectValue placeholder="Select year" />
             </SelectTrigger>
@@ -103,9 +131,9 @@ const AddVehicle = () => {
             </SelectContent>
           </Select>
         </div>
-        <div className="space-y-2">
+        <div>
           <Label htmlFor="make">Make</Label>
-          <Select value={make} onValueChange={setMake} required>
+          <Select value={make} onValueChange={handleMakeChange}>
             <SelectTrigger id="make">
               <SelectValue placeholder="Select make" />
             </SelectTrigger>
@@ -116,9 +144,9 @@ const AddVehicle = () => {
             </SelectContent>
           </Select>
         </div>
-        <div className="space-y-2">
+        <div>
           <Label htmlFor="model">Model</Label>
-          <Select value={model} onValueChange={setModel} required>
+          <Select value={model} onValueChange={setModel}>
             <SelectTrigger id="model">
               <SelectValue placeholder="Select model" />
             </SelectTrigger>
@@ -129,22 +157,22 @@ const AddVehicle = () => {
             </SelectContent>
           </Select>
         </div>
-        <div className="space-y-2">
+        <div>
           <Label htmlFor="engineSize">Engine Size</Label>
-          <Select value={engineSize} onValueChange={setEngineSize} required>
+          <Select value={engineSize} onValueChange={setEngineSize}>
             <SelectTrigger id="engineSize">
               <SelectValue placeholder="Select engine size" />
             </SelectTrigger>
             <SelectContent>
-              {engines.map((e) => (
-                <SelectItem key={e} value={e}>{e}</SelectItem>
+              {engineSizes.map((size) => (
+                <SelectItem key={size} value={size}>{size}</SelectItem>
               ))}
             </SelectContent>
           </Select>
         </div>
-        <div className="space-y-2">
+        <div>
           <Label htmlFor="drivetrain">Drivetrain</Label>
-          <Select value={drivetrain} onValueChange={setDrivetrain} required>
+          <Select value={drivetrain} onValueChange={setDrivetrain}>
             <SelectTrigger id="drivetrain">
               <SelectValue placeholder="Select drivetrain" />
             </SelectTrigger>
@@ -155,9 +183,9 @@ const AddVehicle = () => {
             </SelectContent>
           </Select>
         </div>
-        <div className="space-y-2">
+        <div>
           <Label htmlFor="bodyConfig">Body Configuration</Label>
-          <Select value={bodyConfig} onValueChange={setBodyConfig} required>
+          <Select value={bodyConfig} onValueChange={setBodyConfig}>
             <SelectTrigger id="bodyConfig">
               <SelectValue placeholder="Select body configuration" />
             </SelectTrigger>
@@ -168,20 +196,19 @@ const AddVehicle = () => {
             </SelectContent>
           </Select>
         </div>
-        <div className="space-y-2">
+        <div>
           <Label htmlFor="fuelType">Fuel Type</Label>
-          <Select value={fuelType} onValueChange={setFuelType} required>
+          <Select value={fuelType} onValueChange={setFuelType}>
             <SelectTrigger id="fuelType">
               <SelectValue placeholder="Select fuel type" />
             </SelectTrigger>
             <SelectContent>
-              {fuelTypes.map((ft) => (
-                <SelectItem key={ft} value={ft}>{ft}</SelectItem>
-              ))}
+              <SelectItem value="gas">Gas</SelectItem>
+              <SelectItem value="diesel">Diesel</SelectItem>
             </SelectContent>
           </Select>
         </div>
-        <div className="space-y-2">
+        <div>
           <Label htmlFor="mileage">Mileage</Label>
           <Input
             id="mileage"
@@ -189,12 +216,9 @@ const AddVehicle = () => {
             value={mileage}
             onChange={(e) => setMileage(e.target.value)}
             placeholder="Enter vehicle mileage"
-            required
           />
         </div>
-        <Button type="submit" className="w-full" disabled={isSubmitting}>
-          {isSubmitting ? "Adding Vehicle..." : "Add Vehicle"}
-        </Button>
+        <Button type="submit">Add Vehicle</Button>
       </form>
     </div>
   );
