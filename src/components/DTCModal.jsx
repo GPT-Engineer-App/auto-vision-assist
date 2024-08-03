@@ -1,13 +1,15 @@
 import { useState } from 'react';
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { fetchDTCByCode } from '@/lib/firebase';
 import { toast } from "sonner";
+import { generateDiagnosticResponse } from '@/lib/openai';
 
 const DTCModal = ({ isOpen, onClose }) => {
   const [dtcCode, setDtcCode] = useState('');
   const [dtcInfo, setDtcInfo] = useState(null);
+  const [diagnosticResponse, setDiagnosticResponse] = useState('');
   const [loading, setLoading] = useState(false);
 
   const handleSearch = async () => {
@@ -20,6 +22,8 @@ const DTCModal = ({ isOpen, onClose }) => {
       const info = await fetchDTCByCode(dtcCode);
       if (info) {
         setDtcInfo(info);
+        const response = await generateDiagnosticResponse(`Provide a diagnostic response for DTC ${dtcCode}: ${info.description}`);
+        setDiagnosticResponse(response);
       } else {
         toast.error("DTC code not found");
       }
@@ -31,14 +35,21 @@ const DTCModal = ({ isOpen, onClose }) => {
     }
   };
 
+  const handleClose = () => {
+    setDtcCode('');
+    setDtcInfo(null);
+    setDiagnosticResponse('');
+    onClose();
+  };
+
   return (
-    <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent>
+    <Dialog open={isOpen} onOpenChange={handleClose}>
+      <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
           <DialogTitle>DTC Code Reference</DialogTitle>
         </DialogHeader>
-        <div className="space-y-4">
-          <div className="flex space-x-2">
+        <div className="grid gap-4 py-4">
+          <div className="flex items-center gap-4">
             <Input
               placeholder="Enter DTC"
               value={dtcCode}
@@ -49,14 +60,21 @@ const DTCModal = ({ isOpen, onClose }) => {
             </Button>
           </div>
           {dtcInfo && (
-            <div className="bg-muted p-4 rounded-md">
-              <h3 className="font-bold mb-2">{dtcInfo.code}</h3>
+            <div className="grid gap-2">
+              <h3 className="font-semibold">DTC: {dtcInfo.code}</h3>
               <p><strong>Description:</strong> {dtcInfo.description}</p>
-              <p><strong>Possible Causes:</strong> {dtcInfo.possible_causes}</p>
-              <p><strong>Theory of Operation:</strong> {dtcInfo.diagnostic_aids}</p>
+              {diagnosticResponse && (
+                <div>
+                  <h4 className="font-semibold mt-2">Diagnostic Response:</h4>
+                  <p>{diagnosticResponse}</p>
+                </div>
+              )}
             </div>
           )}
         </div>
+        <DialogFooter>
+          <Button onClick={handleClose}>Close</Button>
+        </DialogFooter>
       </DialogContent>
     </Dialog>
   );
