@@ -8,7 +8,6 @@ import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
 import { fetchDTCByCode } from '@/lib/firebase';
 import { useQuery } from '@tanstack/react-query';
-import { generateRangeFinderAnalysis } from '@/lib/openai';
 
 const RangeFinder = ({ isPro }) => {
   const { dtc } = useParams();
