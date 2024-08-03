@@ -41,12 +41,24 @@ const RangeFinder = ({ isPro }) => {
     setVehicleInfo(prev => ({ ...prev, [name]: value }));
   };
 
-  const handleAnalyze = () => {
+  const [analysis, setAnalysis] = useState("");
+  const [isAnalyzing, setIsAnalyzing] = useState(false);
+
+  const handleAnalyze = async () => {
     if (remainingQueries > 0 || isPro) {
-      // Perform analysis here
-      toast.success("Analysis complete!");
-      if (!isPro) {
-        setRemainingQueries(prev => prev - 1);
+      setIsAnalyzing(true);
+      try {
+        const result = await generateRangeFinderAnalysis(dtc, vehicleInfo);
+        setAnalysis(result);
+        toast.success("Analysis complete!");
+        if (!isPro) {
+          setRemainingQueries(prev => prev - 1);
+        }
+      } catch (error) {
+        console.error("Error generating Range Finder analysis:", error);
+        toast.error("Failed to generate analysis. Please try again.");
+      } finally {
+        setIsAnalyzing(false);
       }
     } else {
       toast.error("No remaining queries. Please purchase a query pack or upgrade to Pro.");
@@ -165,3 +177,13 @@ const RangeFinder = ({ isPro }) => {
 };
 
 export default RangeFinder;
+      {analysis && (
+        <Card className="mt-6 bg-card text-card-foreground">
+          <CardHeader>
+            <CardTitle>Range Finder Analysis</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <p className="whitespace-pre-wrap">{analysis}</p>
+          </CardContent>
+        </Card>
+      )}
