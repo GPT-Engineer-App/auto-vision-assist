@@ -1,6 +1,6 @@
 import { initializeApp } from "firebase/app";
-import { getAuth } from "firebase/auth";
-import { getFirestore, collection, addDoc, query, where, getDocs, doc, deleteDoc, updateDoc } from "firebase/firestore";
+import { getAuth, connectAuthEmulator } from "firebase/auth";
+import { getFirestore, connectFirestoreEmulator, collection, addDoc, query, where, getDocs, doc, deleteDoc, updateDoc } from "firebase/firestore";
 import { getAnalytics } from "firebase/analytics";
 
 const firebaseConfig = {
@@ -21,11 +21,8 @@ export const analytics = getAnalytics(app);
 
 if (import.meta.env.DEV) {
   // Use emulators in development mode
-  // Uncomment these lines if you're using Firebase emulators
-  // import { connectAuthEmulator } from "firebase/auth";
-  // import { connectFirestoreEmulator } from "firebase/firestore";
-  // connectAuthEmulator(auth, "http://localhost:9099");
-  // connectFirestoreEmulator(db, "localhost", 8080);
+  connectAuthEmulator(auth, "http://localhost:9099");
+  connectFirestoreEmulator(db, "localhost", 8080);
 }
 
 /**
