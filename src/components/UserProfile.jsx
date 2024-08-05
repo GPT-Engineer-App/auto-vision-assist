@@ -13,48 +13,48 @@ const UserProfile = ({ isPro, setIsPro, user }) => {
   const [error, setError] = useState(null);
   const [userData, setUserData] = useState(null);
 
-  useEffect(() => {
-    const fetchUserProfile = async () => {
-      if (user) {
-        try {
-          setLoading(true);
-          setError(null);
-          const userDoc = await getDoc(doc(db, "users", user.uid));
-          if (userDoc.exists()) {
-            const userData = userDoc.data();
-            setUserData(userData);
-            setIsProEnabled(userData.isPro || false);
-            setIsPro(userData.isPro || false);
-          } else {
-            // If the user document doesn't exist, create it
-            const newUserData = {
-              email: user.email,
-              isPro: false,
-              createdAt: new Date(),
-            };
-            await setDoc(doc(db, "users", user.uid), newUserData);
-            setUserData(newUserData);
-            setIsProEnabled(false);
-            setIsPro(false);
-          }
-          // Check if the user has purchased Pro version
-          const hasPurchasedPro = await checkProPurchaseStatus();
-          if (hasPurchasedPro && !isProEnabled) {
-            await handleProUpgrade(true);
-          }
-        } catch (error) {
-          console.error("Error fetching user profile:", error);
-          setError("Failed to load user profile. Please try again later.");
-          toast.error("Failed to load user profile");
-        } finally {
-          setLoading(false);
+  const fetchUserProfile = async () => {
+    if (user) {
+      try {
+        setLoading(true);
+        setError(null);
+        const userDoc = await getDoc(doc(db, "users", user.uid));
+        if (userDoc.exists()) {
+          const userData = userDoc.data();
+          setUserData(userData);
+          setIsProEnabled(userData.isPro || false);
+          setIsPro(userData.isPro || false);
+        } else {
+          // If the user document doesn't exist, create it
+          const newUserData = {
+            email: user.email,
+            isPro: false,
+            createdAt: new Date(),
+          };
+          await setDoc(doc(db, "users", user.uid), newUserData);
+          setUserData(newUserData);
+          setIsProEnabled(false);
+          setIsPro(false);
         }
-      } else {
+        // Check if the user has purchased Pro version
+        const hasPurchasedPro = await checkProPurchaseStatus();
+        if (hasPurchasedPro && !isProEnabled) {
+          await handleProUpgrade(true);
+        }
+      } catch (error) {
+        console.error("Error fetching user profile:", error);
+        setError("Failed to load user profile. Please try again later.");
+        toast.error("Failed to load user profile");
+      } finally {
         setLoading(false);
-        setError("User not authenticated. Please log in.");
       }
-    };
+    } else {
+      setLoading(false);
+      setError("User not authenticated. Please log in.");
+    }
+  };
 
+  useEffect(() => {
     fetchUserProfile();
   }, [user, setIsPro, isProEnabled]);
 
@@ -98,7 +98,7 @@ const UserProfile = ({ isPro, setIsPro, user }) => {
   if (error) {
     return <div className="text-red-500 p-4 bg-red-100 rounded-md">
       <p>{error}</p>
-      <Button onClick={() => window.location.reload()} className="mt-4">
+      <Button onClick={fetchUserProfile} className="mt-4">
         Retry
       </Button>
     </div>;
