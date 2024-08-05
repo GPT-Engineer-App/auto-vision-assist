@@ -6,6 +6,7 @@ import { getAnalytics } from "firebase/analytics";
 const firebaseConfig = {
   apiKey: "AIzaSyBaMsvZCdwFLWgTUZsTZlScUzDNc_WvyCQ",
   authDomain: "auto-vision-pro-v2.firebaseapp.com",
+  databaseURL: "https://auto-vision-pro-v2-default-rtdb.firebaseio.com",
   projectId: "auto-vision-pro-v2",
   storageBucket: "auto-vision-pro-v2.appspot.com",
   messagingSenderId: "933665969916",
@@ -17,9 +18,6 @@ const app = initializeApp(firebaseConfig);
 export const auth = getAuth(app);
 export const db = getFirestore(app);
 export const analytics = getAnalytics(app);
-
-// Initialize Firebase with the config
-initializeApp(firebaseConfig);
 
 if (import.meta.env.DEV) {
   // Use emulators in development mode
