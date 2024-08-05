@@ -25,6 +25,7 @@ const UserProfile = ({ isPro, setIsPro, user }) => {
           setIsProEnabled(userData.isPro || false);
           setIsPro(userData.isPro || false);
         } else {
+          // If the user document doesn't exist, create it
           const newUserData = {
             email: user.email,
             isPro: false,
@@ -35,6 +36,7 @@ const UserProfile = ({ isPro, setIsPro, user }) => {
           setIsProEnabled(false);
           setIsPro(false);
         }
+        // Check if the user has purchased Pro version
         const hasPurchasedPro = await checkProPurchaseStatus();
         if (hasPurchasedPro && !isProEnabled) {
           await handleProUpgrade(true);
@@ -65,6 +67,7 @@ const UserProfile = ({ isPro, setIsPro, user }) => {
     setLoading(true);
     try {
       if (!isPurchased) {
+        // Initiate the purchase process
         const success = await purchaseProVersion();
         if (!success) {
           toast.error("Pro version purchase failed");
@@ -73,6 +76,7 @@ const UserProfile = ({ isPro, setIsPro, user }) => {
         }
       }
 
+      // Update user's pro status in Firestore
       await setDoc(doc(db, "users", user.uid), { isPro: true }, { merge: true });
       setIsProEnabled(true);
       setIsPro(true);
