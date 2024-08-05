@@ -38,7 +38,7 @@ const App = () => {
           <Router>
             <AnimatePresence mode="wait">
               <Routes>
-                <Route element={<Layout user={user} isPro={isPro} />}>
+                <Route path="/" element={<Layout user={user} isPro={isPro} />}>
                   {navItems.map((item) => (
                     <Route 
                       key={item.to} 
