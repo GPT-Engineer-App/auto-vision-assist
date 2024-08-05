@@ -90,19 +90,31 @@ const UserProfile = ({ isPro, setIsPro, user }) => {
   };
 
   if (loading) {
-    return <div>Loading profile...</div>;
+    return <div className="flex justify-center items-center h-full">
+      <div className="animate-spin rounded-full h-32 w-32 border-t-2 border-b-2 border-primary"></div>
+    </div>;
   }
 
   if (error) {
-    return <div className="text-red-500">{error}</div>;
+    return <div className="text-red-500 p-4 bg-red-100 rounded-md">
+      <p>{error}</p>
+      <Button onClick={() => window.location.reload()} className="mt-4">
+        Retry
+      </Button>
+    </div>;
   }
 
   if (!user) {
-    return <div>Please log in to view your profile.</div>;
+    return <div className="text-center p-4">
+      <p>Please log in to view your profile.</p>
+      <Button onClick={() => navigate("/")} className="mt-4">
+        Go to Login
+      </Button>
+    </div>;
   }
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-4 p-4 bg-card rounded-lg shadow">
       <h2 className="text-2xl font-bold">User Profile</h2>
       <p>Email: {userData?.email}</p>
       <div className="flex items-center space-x-2">
