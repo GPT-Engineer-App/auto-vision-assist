@@ -1,40 +1,16 @@
-import { initializeApp } from "firebase/app";
-import { getFunctions, httpsCallable } from "firebase/functions";
-import { getAuth } from "firebase/auth";
+// This is a mock implementation of in-app purchase functionality
+// In a real app, you would integrate with the actual Play Store billing library
 
-const firebaseConfig = {
-  // Your Firebase configuration
-};
-
-const app = initializeApp(firebaseConfig);
-const functions = getFunctions(app);
-const auth = getAuth(app);
+let isPurchased = false;
 
 export const purchaseProVersion = async () => {
-  try {
-    const user = auth.currentUser;
-    if (!user) {
-      throw new Error("User not authenticated");
-    }
-
-    const createPaymentIntent = httpsCallable(functions, 'createPaymentIntent');
-    const result = await createPaymentIntent({ amount: 2000, currency: 'usd' });
-
-    // Here you would typically open a payment modal or redirect to a payment page
-    // For this example, we'll just simulate a successful payment
-    console.log("Payment intent created:", result.data);
-
-    // Simulate payment processing
-    await new Promise(resolve => setTimeout(resolve, 2000));
-
-    const confirmPayment = httpsCallable(functions, 'confirmPayment');
-    await confirmPayment({ paymentIntentId: result.data.paymentIntentId });
-
-    return true;
-  } catch (error) {
-    console.error("Error during purchase:", error);
-    return false;
-  }
+  return new Promise((resolve) => {
+    // Simulate a purchase process
+    setTimeout(() => {
+      isPurchased = true;
+      resolve(true);
+    }, 2000);
+  });
 };
 
 export const checkProPurchaseStatus = async () => {
