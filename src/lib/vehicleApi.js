@@ -65,11 +65,12 @@ const engineSizesByMakeAndModel = {
 
 export const fetchAllMakes = async () => {
   try {
-    const response = await fetch('https://api.example.com/makes');
+    const response = await fetch('https://vpic.nhtsa.dot.gov/api/vehicles/getallmakes?format=json');
     if (!response.ok) {
       throw new Error('Failed to fetch makes');
     }
-    return await response.json();
+    const data = await response.json();
+    return data.Results.map(make => make.Make_Name);
   } catch (error) {
     console.error('Error fetching makes:', error);
     return [];
