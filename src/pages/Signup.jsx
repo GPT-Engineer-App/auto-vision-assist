@@ -1,11 +1,9 @@
 import AuthForm from "@/components/AuthForm";
 import { Link } from "react-router-dom";
-import CarWireframe from "@/components/CarWireframe";
 
 const Signup = () => {
   return (
-    <div className="relative flex flex-col min-h-screen bg-gradient-to-b from-gray-900 to-black justify-between overflow-x-hidden">
-      <CarWireframe />
+    <div className="relative flex flex-col min-h-screen bg-gradient-to-b from-gray-900 to-black justify-between">
       <div className="flex-grow z-10 flex items-center justify-center">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8 max-w-md">
           <div className="mb-8 text-center">
