@@ -21,8 +21,13 @@ export const analytics = getAnalytics(app);
 
 if (import.meta.env.DEV) {
   // Use emulators in development mode
-  connectAuthEmulator(auth, "http://localhost:9099");
-  connectFirestoreEmulator(db, "localhost", 8080);
+  try {
+    connectAuthEmulator(auth, "http://localhost:9099");
+    connectFirestoreEmulator(db, "localhost", 8080);
+    console.log("Connected to Firebase emulators");
+  } catch (error) {
+    console.error("Failed to connect to Firebase emulators:", error);
+  }
 }
 
 /**

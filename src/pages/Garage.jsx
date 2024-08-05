@@ -27,27 +27,25 @@ const Garage = ({ isPro, setIsPro, user }) => {
   useEffect(() => {
     const fetchVehicles = async () => {
       if (!user) {
-        console.log("User not authenticated, skipping vehicle fetch");
-        setLoading(false);
+        navigate("/");
         return;
       }
+      setLoading(true);
       try {
-        console.log("Fetching vehicles for user:", user.uid);
         const q = query(collection(db, "vehicles"), where("userId", "==", user.uid));
         const querySnapshot = await getDocs(q);
         const vehicleData = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-        console.log("Fetched vehicles:", vehicleData);
         setVehicles(vehicleData);
       } catch (error) {
         console.error("Error fetching vehicles:", error);
-        toast.error("Error fetching vehicles: " + error.message);
+        toast.error("Error fetching vehicles. Please try again.");
       } finally {
         setLoading(false);
       }
     };
 
     fetchVehicles();
-  }, [user]);
+  }, [user, navigate]);
 
   const handleAddVehicle = () => {
     if (!isPro && vehicles.length >= 1) {

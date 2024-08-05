@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import { Toaster } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { Route, BrowserRouter as Router, Routes } from "react-router-dom";
+import { Route, BrowserRouter as Router, Routes, Navigate } from "react-router-dom";
 import Layout from "./layouts/navbar";
 import { navItems } from "./nav-items";
 import UserProfile from "./components/UserProfile";
@@ -43,11 +43,29 @@ const App = () => {
                     <Route 
                       key={item.to} 
                       path={item.to} 
-                      element={React.cloneElement(item.page, { isPro, setIsPro, user })}
+                      element={
+                        user ? 
+                          React.cloneElement(item.page, { isPro, setIsPro, user }) : 
+                          <Navigate to="/" replace />
+                      }
                     />
                   ))}
-                  <Route path="/profile" element={<UserProfile isPro={isPro} setIsPro={setIsPro} user={user} />} />
-                  <Route path="/range-finder/:dtc" element={<RangeFinder isPro={isPro} />} />
+                  <Route 
+                    path="/profile" 
+                    element={
+                      user ? 
+                        <UserProfile isPro={isPro} setIsPro={setIsPro} user={user} /> : 
+                        <Navigate to="/" replace />
+                    } 
+                  />
+                  <Route 
+                    path="/range-finder/:dtc" 
+                    element={
+                      user ? 
+                        <RangeFinder isPro={isPro} /> : 
+                        <Navigate to="/" replace />
+                    } 
+                  />
                 </Route>
               </Routes>
             </AnimatePresence>
