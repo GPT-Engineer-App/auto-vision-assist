@@ -1,45 +1,61 @@
-import React, { useState } from 'react';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { useState } from 'react';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { dtcCodes } from '@/lib/dtc-codes';
+import { fetchDTCByCode } from '@/lib/firebase';
+import { toast } from "sonner";
 
 const DTCModal = ({ isOpen, onClose }) => {
-  const [searchTerm, setSearchTerm] = useState('');
-  const [searchResults, setSearchResults] = useState([]);
+  const [dtcCode, setDtcCode] = useState('');
+  const [dtcInfo, setDtcInfo] = useState(null);
+  const [loading, setLoading] = useState(false);
 
-  const handleSearch = () => {
-    const results = dtcCodes.filter(code => 
-      code.code.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      code.description.toLowerCase().includes(searchTerm.toLowerCase())
-    );
-    setSearchResults(results);
+  const handleSearch = async () => {
+    if (!dtcCode) {
+      toast.error("Please enter a DTC code");
+      return;
+    }
+    setLoading(true);
+    try {
+      const info = await fetchDTCByCode(dtcCode);
+      if (info) {
+        setDtcInfo(info);
+      } else {
+        toast.error("DTC code not found");
+      }
+    } catch (error) {
+      console.error("Error fetching DTC info:", error);
+      toast.error("Error fetching DTC information");
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-[425px]">
+      <DialogContent>
         <DialogHeader>
           <DialogTitle>DTC Code Reference</DialogTitle>
         </DialogHeader>
-        <div className="grid gap-4 py-4">
-          <div className="flex items-center gap-4">
+        <div className="space-y-4">
+          <div className="flex space-x-2">
             <Input
-              id="dtc-search"
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              placeholder="Search DTC code or description"
+              placeholder="Enter DTC"
+              value={dtcCode}
+              onChange={(e) => setDtcCode(e.target.value)}
             />
-            <Button onClick={handleSearch}>Search</Button>
+            <Button onClick={handleSearch} disabled={loading}>
+              {loading ? "Searching..." : "Search"}
+            </Button>
           </div>
-          <div className="max-h-[300px] overflow-y-auto">
-            {searchResults.map((result, index) => (
-              <div key={index} className="mb-2 p-2 border rounded">
-                <p className="font-bold">{result.code}</p>
-                <p>{result.description}</p>
-              </div>
-            ))}
-          </div>
+          {dtcInfo && (
+            <div className="bg-muted p-4 rounded-md">
+              <h3 className="font-bold mb-2">{dtcInfo.code}</h3>
+              <p><strong>Description:</strong> {dtcInfo.description}</p>
+              <p><strong>Possible Causes:</strong> {dtcInfo.possible_causes}</p>
+              <p><strong>Theory of Operation:</strong> {dtcInfo.diagnostic_aids}</p>
+            </div>
+          )}
         </div>
       </DialogContent>
     </Dialog>

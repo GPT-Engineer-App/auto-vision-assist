@@ -2,7 +2,7 @@ import OpenAI from 'openai';
 
 const openai = new OpenAI({
   apiKey: import.meta.env.VITE_OPENAI_API_KEY,
-  dangerouslyAllowBrowser: true // Note: This is not recommended for production. Use a backend proxy instead.
+  dangerouslyAllowBrowser: true
 });
 
 export const generateDiagnosticResponse = async (prompt) => {
