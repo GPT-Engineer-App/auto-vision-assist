@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { createUserWithEmailAndPassword, signInWithEmailAndPassword, sendPasswordResetEmail } from "firebase/auth";
-import { auth, db, signInWithGoogle, signInWithFacebook } from "@/lib/firebase";
+import { createUserWithEmailAndPassword, signInWithEmailAndPassword, sendPasswordResetEmail, GoogleAuthProvider, signInWithPopup } from "firebase/auth";
+import { auth, db } from "@/lib/firebase";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -57,12 +57,15 @@ const AuthForm = ({ isLogin }) => {
   // Add these functions for Google and Facebook sign-in
   const handleGoogleSignIn = async () => {
     try {
-      await signInWithGoogle();
+      const provider = new GoogleAuthProvider();
+      const result = await signInWithPopup(auth, provider);
+      const user = result.user;
+      console.log("User signed in:", user);
       toast.success("Logged in with Google successfully");
       navigate("/garage");
     } catch (error) {
       console.error("Google sign-in error:", error);
-      toast.error("Failed to sign in with Google");
+      toast.error("Failed to sign in with Google: " + error.message);
     }
   };
 
@@ -144,9 +147,6 @@ const AuthForm = ({ isLogin }) => {
       <div className="mt-4">
         <Button type="button" onClick={handleGoogleSignIn} className="w-full mb-2 bg-red-600 hover:bg-red-700 text-white">
           Sign in with Google
-        </Button>
-        <Button type="button" onClick={handleFacebookSignIn} className="w-full bg-blue-600 hover:bg-blue-700 text-white">
-          Sign in with Facebook
         </Button>
       </div>
       <div className="mt-4">
