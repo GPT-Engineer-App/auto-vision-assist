@@ -46,7 +46,7 @@ if (import.meta.env.DEV) {
  */
 export async function fetchDTCByCode(code) {
   try {
-    const dtcDoc = await getDoc(doc(db, "dtcCodes", code));
+    const dtcDoc = await getDocs(doc(db, "dtcCodes", code));
     if (dtcDoc.exists()) {
       return dtcDoc.data();
     }
