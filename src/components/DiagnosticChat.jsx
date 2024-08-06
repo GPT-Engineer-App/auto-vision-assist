@@ -105,16 +105,7 @@ const DiagnosticChat = ({ vehicleId, isPro }) => {
   );
 };
 
-export default DiagnosticChat;import { useState, useEffect } from "react";
-import { useQuery } from "@tanstack/react-query";
-import { db } from "@/lib/firebase";
-import { collection, addDoc, query, where, getDocs, limit } from "firebase/firestore";
-import { Button } from "@/components/ui/button";
-import { Textarea } from "@/components/ui/textarea";
-import { toast } from "sonner";
-import { generateDiagnosticResponse } from "@/lib/openai";
-
-const DiagnosticChat = ({ vehicleId, isPro }) => {
+export default DiagnosticChat;
   const [input, setInput] = useState("");
   const [response, setResponse] = useState("");
   const [queryCount, setQueryCount] = useState(0);
