@@ -27,7 +27,7 @@ const Layout = ({ user, isPro }) => {
           </div>
         </div>
       </motion.header>
-      <main className="flex-1 container py-6">
+      <main className="flex-1 container py-6 bg-background">
         <Outlet />
       </main>
       <motion.footer
@@ -38,7 +38,7 @@ const Layout = ({ user, isPro }) => {
       >
         <div className="container flex flex-col items-center justify-between gap-4 md:h-24 md:flex-row">
           <p className="text-center text-sm leading-loose text-muted-foreground md:text-left">
-            Built by the Acme Inc team. The source code is available on GitHub.
+            Built by the Auto Vision V2 team. All rights reserved.
           </p>
         </div>
       </motion.footer>
