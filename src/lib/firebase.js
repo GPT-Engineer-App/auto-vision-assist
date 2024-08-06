@@ -2,6 +2,8 @@ import { initializeApp } from "firebase/app";
 import { getAuth, connectAuthEmulator, signInWithPopup, GoogleAuthProvider, FacebookAuthProvider } from "firebase/auth";
 import { getFirestore, connectFirestoreEmulator, collection, addDoc, query, where, getDocs, doc, deleteDoc, updateDoc } from "firebase/firestore";
 import { getAnalytics } from "firebase/analytics";
+import { getDatabase } from "firebase/database";
+import { getStorage } from "firebase/storage";
 import { toast } from "sonner";
 
 const firebaseConfig = {
@@ -19,6 +21,8 @@ const app = initializeApp(firebaseConfig);
 export const auth = getAuth(app);
 export const db = getFirestore(app);
 export const analytics = getAnalytics(app);
+export const database = getDatabase(app);
+export const storage = getStorage(app);
 
 export const googleProvider = new GoogleAuthProvider();
 export const facebookProvider = new FacebookAuthProvider();
