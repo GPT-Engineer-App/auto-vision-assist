@@ -54,6 +54,29 @@ const AuthForm = ({ isLogin }) => {
     }
   };
 
+  // Add these functions for Google and Facebook sign-in
+  const handleGoogleSignIn = async () => {
+    try {
+      await signInWithGoogle();
+      toast.success("Logged in with Google successfully");
+      navigate("/garage");
+    } catch (error) {
+      console.error("Google sign-in error:", error);
+      toast.error("Failed to sign in with Google");
+    }
+  };
+
+  const handleFacebookSignIn = async () => {
+    try {
+      await signInWithFacebook();
+      toast.success("Logged in with Facebook successfully");
+      navigate("/garage");
+    } catch (error) {
+      console.error("Facebook sign-in error:", error);
+      toast.error("Failed to sign in with Facebook");
+    }
+  };
+
   const handleGoogleSignIn = async () => {
     try {
       await signInWithGoogle();
@@ -140,6 +163,14 @@ const AuthForm = ({ isLogin }) => {
       <Button type="button" variant="link" onClick={togglePasswordReset} className="w-full text-[#ff6600]">
         {isResettingPassword ? "Back to Login" : "Forgot Password?"}
       </Button>
+      <div className="mt-4">
+        <Button type="button" onClick={handleGoogleSignIn} className="w-full mb-2 bg-red-600 hover:bg-red-700 text-white">
+          Sign in with Google
+        </Button>
+        <Button type="button" onClick={handleFacebookSignIn} className="w-full bg-blue-600 hover:bg-blue-700 text-white">
+          Sign in with Facebook
+        </Button>
+      </div>
       <div className="mt-4">
         <Button type="button" onClick={handleGoogleSignIn} className="w-full mb-2 bg-red-600 hover:bg-red-700 text-white">
           Sign in with Google
