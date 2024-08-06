@@ -15,6 +15,8 @@ import { Tooltip } from "@/components/ui/tooltip";
 import { HelpCircle } from "lucide-react";
 import OpenSightModal from "@/components/OpenSightModal";
 import DTCModal from "@/components/DTCModal";
+import ProGarageView from "@/components/ProGarageView";
+import DiagnosticChat from "@/components/DiagnosticChat";
 
 const Garage = ({ isPro, setIsPro, user }) => {
   const [vehicles, setVehicles] = useState([]);
@@ -178,16 +180,26 @@ const Garage = ({ isPro, setIsPro, user }) => {
           ))}
         </motion.div>
       </AnimatePresence>
-      <div className="mt-6">
-        <Tooltip content="Add a new vehicle to your garage">
-          <Button onClick={handleAddVehicle}>Add Vehicle</Button>
-        </Tooltip>
-        {!isPro && vehicles.length >= 1 && (
-          <Tooltip content="Upgrade to Pro for more features">
-            <Button variant="outline" className="ml-4" onClick={() => setIsPro(true)}>Upgrade to Pro</Button>
+      {isPro ? (
+        <ProGarageView vehicles={vehicles} />
+      ) : (
+        <div className="mt-6">
+          <Tooltip content="Add a new vehicle to your garage">
+            <Button onClick={handleAddVehicle}>Add Vehicle</Button>
           </Tooltip>
-        )}
-      </div>
+          {vehicles.length >= 1 && (
+            <Tooltip content="Upgrade to Pro for more features">
+              <Button variant="outline" className="ml-4" onClick={() => setIsPro(true)}>Upgrade to Pro</Button>
+            </Tooltip>
+          )}
+        </div>
+      )}
+      {isPro && (
+        <div className="mt-8">
+          <h2 className="text-2xl font-bold mb-4">Diagnostic Chat</h2>
+          <DiagnosticChat vehicleId={vehicles[0]?.id} isPro={isPro} />
+        </div>
+      )}
       <EditVehicleDialog
         vehicle={editingVehicle}
         onClose={() => setEditingVehicle(null)}
