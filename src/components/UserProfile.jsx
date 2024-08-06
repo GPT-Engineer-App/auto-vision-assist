@@ -6,12 +6,18 @@ import { toast } from "sonner";
 import { auth, db } from "@/lib/firebase";
 import { doc, getDoc, setDoc } from "firebase/firestore";
 import { purchaseProVersion, checkProPurchaseStatus } from "@/lib/inAppPurchase";
+import { savePreferences, loadPreferences } from "@/lib/userPreferences";
 
 const UserProfile = ({ isPro, setIsPro, user }) => {
   const [isProEnabled, setIsProEnabled] = useState(isPro);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [userData, setUserData] = useState(null);
+  const [preferences, setPreferences] = useState({
+    darkMode: false,
+    notifications: true,
+    language: 'en',
+  });
 
   const fetchUserProfile = async () => {
     if (user) {
@@ -57,10 +63,26 @@ const UserProfile = ({ isPro, setIsPro, user }) => {
   useEffect(() => {
     if (user) {
       fetchUserProfile();
+      loadUserPreferences();
     } else {
       navigate("/");
     }
   }, [user, navigate]);
+
+  const loadUserPreferences = async () => {
+    const savedPreferences = await loadPreferences();
+    if (savedPreferences) {
+      setPreferences(savedPreferences);
+    }
+  };
+
+  const handlePreferenceChange = (key, value) => {
+    setPreferences(prev => {
+      const newPreferences = { ...prev, [key]: value };
+      savePreferences(newPreferences);
+      return newPreferences;
+    });
+  };
 
   const handleProUpgrade = async (isPurchased = false) => {
     if (!user) {
@@ -140,6 +162,38 @@ const UserProfile = ({ isPro, setIsPro, user }) => {
           Upgrade to Pro
         </Button>
       )}
+      <h3 className="text-xl font-semibold mt-6 mb-4">User Preferences</h3>
+      <div className="space-y-4">
+        <div className="flex items-center justify-between">
+          <Label htmlFor="darkMode">Dark Mode</Label>
+          <Switch
+            id="darkMode"
+            checked={preferences.darkMode}
+            onCheckedChange={(checked) => handlePreferenceChange('darkMode', checked)}
+          />
+        </div>
+        <div className="flex items-center justify-between">
+          <Label htmlFor="notifications">Notifications</Label>
+          <Switch
+            id="notifications"
+            checked={preferences.notifications}
+            onCheckedChange={(checked) => handlePreferenceChange('notifications', checked)}
+          />
+        </div>
+        <div className="flex items-center justify-between">
+          <Label htmlFor="language">Language</Label>
+          <select
+            id="language"
+            value={preferences.language}
+            onChange={(e) => handlePreferenceChange('language', e.target.value)}
+            className="border rounded p-2"
+          >
+            <option value="en">English</option>
+            <option value="es">Español</option>
+            <option value="fr">Français</option>
+          </select>
+        </div>
+      </div>
     </div>
   );
 };
