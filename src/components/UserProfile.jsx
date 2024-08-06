@@ -55,8 +55,12 @@ const UserProfile = ({ isPro, setIsPro, user }) => {
   };
 
   useEffect(() => {
-    fetchUserProfile();
-  }, [user, setIsPro, isProEnabled]);
+    if (user) {
+      fetchUserProfile();
+    } else {
+      navigate("/");
+    }
+  }, [user, navigate]);
 
   const handleProUpgrade = async (isPurchased = false) => {
     if (!user) {
