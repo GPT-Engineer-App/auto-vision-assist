@@ -30,6 +30,13 @@ const App = () => {
     return () => unsubscribe();
   }, []);
 
+  const ProtectedRoute = ({ children }) => {
+    if (!user) {
+      return <Navigate to="/" replace />;
+    }
+    return children;
+  };
+
   return (
     <QueryClientProvider client={queryClient}>
       <ThemeProvider defaultTheme="dark" storageKey="vite-ui-theme">
@@ -44,26 +51,26 @@ const App = () => {
                       key={item.to} 
                       path={item.to} 
                       element={
-                        user ? 
-                          React.cloneElement(item.page, { isPro, setIsPro, user }) : 
-                          <Navigate to="/" replace />
+                        <ProtectedRoute>
+                          {React.cloneElement(item.page, { isPro, setIsPro, user })}
+                        </ProtectedRoute>
                       }
                     />
                   ))}
                   <Route 
                     path="/profile" 
                     element={
-                      user ? 
-                        <UserProfile isPro={isPro} setIsPro={setIsPro} user={user} /> : 
-                        <Navigate to="/" replace />
+                      <ProtectedRoute>
+                        <UserProfile isPro={isPro} setIsPro={setIsPro} user={user} />
+                      </ProtectedRoute>
                     } 
                   />
                   <Route 
                     path="/range-finder/:dtc" 
                     element={
-                      user ? 
-                        <RangeFinder isPro={isPro} /> : 
-                        <Navigate to="/" replace />
+                      <ProtectedRoute>
+                        <RangeFinder isPro={isPro} />
+                      </ProtectedRoute>
                     } 
                   />
                 </Route>

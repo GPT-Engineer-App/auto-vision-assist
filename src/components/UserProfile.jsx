@@ -2,9 +2,10 @@ import React, { useState, useEffect } from 'react';
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
+import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
 import { auth, db } from "@/lib/firebase";
-import { doc, getDoc, setDoc, collection, query, where, getDocs } from "firebase/firestore";
+import { doc, getDoc, setDoc, updateDoc, collection, query, where, getDocs } from "firebase/firestore";
 import { purchaseProVersion, checkProPurchaseStatus } from "@/lib/inAppPurchase";
 import { savePreferences, loadPreferences } from "@/lib/userPreferences";
 import { useNavigate } from 'react-router-dom';
@@ -20,6 +21,7 @@ const UserProfile = ({ isPro, setIsPro, user }) => {
     notifications: true,
     language: 'en',
   });
+  const [isEditing, setIsEditing] = useState(false);
   const navigate = useNavigate();
 
   const fetchUserProfile = async () => {
@@ -133,6 +135,26 @@ const UserProfile = ({ isPro, setIsPro, user }) => {
     }
   };
 
+  const handleEditProfile = () => {
+    setIsEditing(true);
+  };
+
+  const handleSaveProfile = async () => {
+    try {
+      await updateDoc(doc(db, "users", user.uid), userData);
+      setIsEditing(false);
+      toast.success("Profile updated successfully");
+    } catch (error) {
+      console.error("Error updating profile:", error);
+      toast.error("Failed to update profile");
+    }
+  };
+
+  const handleInputChange = (e) => {
+    const { name, value } = e.target;
+    setUserData(prev => ({ ...prev, [name]: value }));
+  };
+
   if (loading) {
     return <div className="flex justify-center items-center h-full">
       <div className="animate-spin rounded-full h-32 w-32 border-t-2 border-b-2 border-primary"></div>
@@ -160,7 +182,32 @@ const UserProfile = ({ isPro, setIsPro, user }) => {
   return (
     <div className="space-y-4 p-4 bg-card rounded-lg shadow">
       <h2 className="text-2xl font-bold">User Profile</h2>
-      <p>Email: {userData?.email}</p>
+      {isEditing ? (
+        <>
+          <Label htmlFor="username">Username</Label>
+          <Input
+            id="username"
+            name="username"
+            value={userData?.username || ''}
+            onChange={handleInputChange}
+          />
+          <Label htmlFor="email">Email</Label>
+          <Input
+            id="email"
+            name="email"
+            value={userData?.email || ''}
+            onChange={handleInputChange}
+            disabled
+          />
+          <Button onClick={handleSaveProfile}>Save Profile</Button>
+        </>
+      ) : (
+        <>
+          <p>Username: {userData?.username || 'Not set'}</p>
+          <p>Email: {userData?.email}</p>
+          <Button onClick={handleEditProfile}>Edit Profile</Button>
+        </>
+      )}
       <div className="flex items-center space-x-2">
         <Switch
           id="pro-mode"
