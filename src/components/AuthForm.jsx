@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { createUserWithEmailAndPassword, signInWithEmailAndPassword, sendPasswordResetEmail } from "firebase/auth";
-import { auth, db, signInWithGoogle, signInWithFacebook } from "@/lib/firebase";
+import { auth, db, signInWithGoogle } from "@/lib/firebase";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -62,17 +62,6 @@ const AuthForm = ({ isLogin }) => {
     } catch (error) {
       console.error("Google sign-in error:", error);
       toast.error("Failed to sign in with Google");
-    }
-  };
-
-  const handleFacebookSignIn = async () => {
-    try {
-      await signInWithFacebook();
-      toast.success("Logged in with Facebook successfully");
-      navigate("/garage");
-    } catch (error) {
-      console.error("Facebook sign-in error:", error);
-      toast.error("Failed to sign in with Facebook");
     }
   };
 
@@ -143,9 +132,6 @@ const AuthForm = ({ isLogin }) => {
       <div className="mt-4">
         <Button type="button" onClick={handleGoogleSignIn} className="w-full mb-2 bg-red-600 hover:bg-red-700 text-white">
           Sign in with Google
-        </Button>
-        <Button type="button" onClick={handleFacebookSignIn} className="w-full bg-blue-600 hover:bg-blue-700 text-white">
-          Sign in with Facebook
         </Button>
       </div>
     </form>
