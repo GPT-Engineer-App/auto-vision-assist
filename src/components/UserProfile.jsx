@@ -4,20 +4,23 @@ import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
 import { auth, db } from "@/lib/firebase";
-import { doc, getDoc, setDoc } from "firebase/firestore";
+import { doc, getDoc, setDoc, collection, query, where, getDocs } from "firebase/firestore";
 import { purchaseProVersion, checkProPurchaseStatus } from "@/lib/inAppPurchase";
 import { savePreferences, loadPreferences } from "@/lib/userPreferences";
+import { useNavigate } from 'react-router-dom';
 
 const UserProfile = ({ isPro, setIsPro, user }) => {
   const [isProEnabled, setIsProEnabled] = useState(isPro);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [userData, setUserData] = useState(null);
+  const [vehicles, setVehicles] = useState([]);
   const [preferences, setPreferences] = useState({
     darkMode: false,
     notifications: true,
     language: 'en',
   });
+  const navigate = useNavigate();
 
   const fetchUserProfile = async () => {
     if (user) {
@@ -47,6 +50,8 @@ const UserProfile = ({ isPro, setIsPro, user }) => {
         if (hasPurchasedPro && !isProEnabled) {
           await handleProUpgrade(true);
         }
+        // Fetch user's vehicles
+        await fetchUserVehicles();
       } catch (error) {
         console.error("Error fetching user profile:", error);
         setError("Failed to load user profile. Please try again later.");
@@ -57,6 +62,19 @@ const UserProfile = ({ isPro, setIsPro, user }) => {
     } else {
       setLoading(false);
       setError("User not authenticated. Please log in.");
+    }
+  };
+
+  const fetchUserVehicles = async () => {
+    try {
+      const vehiclesRef = collection(db, "vehicles");
+      const q = query(vehiclesRef, where("userId", "==", user.uid));
+      const querySnapshot = await getDocs(q);
+      const vehicleData = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+      setVehicles(vehicleData);
+    } catch (error) {
+      console.error("Error fetching user vehicles:", error);
+      toast.error("Failed to load user vehicles");
     }
   };
 
@@ -162,6 +180,21 @@ const UserProfile = ({ isPro, setIsPro, user }) => {
           Upgrade to Pro
         </Button>
       )}
+      <h3 className="text-xl font-semibold mt-6 mb-4">Your Vehicles</h3>
+      {vehicles.length > 0 ? (
+        <ul className="list-disc pl-5">
+          {vehicles.map(vehicle => (
+            <li key={vehicle.id}>
+              {vehicle.year} {vehicle.make} {vehicle.model}
+            </li>
+          ))}
+        </ul>
+      ) : (
+        <p>No vehicles added yet.</p>
+      )}
+      <Button onClick={() => navigate("/add-vehicle")} className="mt-2">
+        Add Vehicle
+      </Button>
       <h3 className="text-xl font-semibold mt-6 mb-4">User Preferences</h3>
       <div className="space-y-4">
         <div className="flex items-center justify-between">

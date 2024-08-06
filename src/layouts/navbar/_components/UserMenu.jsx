@@ -12,7 +12,6 @@ import { auth } from "@/lib/firebase";
 import { signOut } from "firebase/auth";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
-import UserProfile from "@/components/UserProfile";
 
 export const UserMenu = ({ user, isPro, setIsPro }) => {
   const navigate = useNavigate();
@@ -54,8 +53,8 @@ export const UserMenu = ({ user, isPro, setIsPro }) => {
           </div>
         </DropdownMenuLabel>
         <DropdownMenuSeparator />
-        <DropdownMenuItem>
-          <UserProfile user={user} isPro={isPro} setIsPro={setIsPro} />
+        <DropdownMenuItem onClick={() => navigate("/profile")}>
+          Profile
         </DropdownMenuItem>
         <DropdownMenuItem onClick={() => navigate("/garage")}>
           Garage
