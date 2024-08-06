@@ -8,6 +8,9 @@ import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
 import { fetchDTCByCode } from '@/lib/firebase';
 import { useQuery } from '@tanstack/react-query';
+import { purchaseQueryPack, initializeBillingClient } from '@/lib/inAppPurchase';
+import { getFirestore, doc, getDoc, updateDoc, increment } from 'firebase/firestore';
+import { getAuth } from 'firebase/auth';
 
 const RangeFinder = ({ isPro }) => {
   const { dtc } = useParams();
@@ -18,22 +21,41 @@ const RangeFinder = ({ isPro }) => {
     year: '',
     engine: '',
   });
+  const [isLoading, setIsLoading] = useState(false);
 
-  const { data: dtcData, isLoading, error } = useQuery({
+  const { data: dtcData, isLoading: isDtcLoading, error } = useQuery({
     queryKey: ['dtc', dtc],
     queryFn: () => fetchDTCByCode(dtc),
     enabled: !!dtc,
   });
 
   useEffect(() => {
-    // In a real application, you would fetch the remaining queries from the backend
-    setRemainingQueries(isPro ? Infinity : 10);
+    const fetchRemainingQueries = async () => {
+      const auth = getAuth();
+      const db = getFirestore();
+      const userRef = doc(db, 'users', auth.currentUser.uid);
+      const userDoc = await getDoc(userRef);
+      setRemainingQueries(userDoc.data().queryCount || 0);
+    };
+
+    initializeBillingClient();
+    fetchRemainingQueries();
   }, [isPro]);
 
-  const handlePurchaseQueryPack = () => {
-    // In a real application, this would initiate the purchase process
-    toast.success("Query pack purchased successfully! 20 queries added.");
-    setRemainingQueries(prev => prev + 20);
+  const handlePurchaseQueryPack = async () => {
+    setIsLoading(true);
+    try {
+      const success = await purchaseQueryPack();
+      if (success) {
+        toast.success("Query pack purchased successfully! 20 queries added.");
+        setRemainingQueries(prev => prev + 20);
+      }
+    } catch (error) {
+      console.error('Error purchasing query pack:', error);
+      toast.error("Failed to purchase query pack. Please try again.");
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const handleVehicleInfoChange = (e) => {
@@ -41,12 +63,32 @@ const RangeFinder = ({ isPro }) => {
     setVehicleInfo(prev => ({ ...prev, [name]: value }));
   };
 
-  const handleAnalyze = () => {
+  const handleAnalyze = async () => {
     if (remainingQueries > 0 || isPro) {
-      // Perform analysis here
-      toast.success("Analysis complete!");
-      if (!isPro) {
-        setRemainingQueries(prev => prev - 1);
+      setIsLoading(true);
+      try {
+        // Perform analysis here
+        // This is a placeholder for the actual analysis logic
+        await new Promise(resolve => setTimeout(resolve, 1000));
+        
+        toast.success("Analysis complete!");
+        
+        if (!isPro) {
+          const auth = getAuth();
+          const db = getFirestore();
+          const userRef = doc(db, 'users', auth.currentUser.uid);
+          
+          await updateDoc(userRef, {
+            queryCount: increment(-1)
+          });
+          
+          setRemainingQueries(prev => prev - 1);
+        }
+      } catch (error) {
+        console.error('Error performing analysis:', error);
+        toast.error("Failed to perform analysis. Please try again.");
+      } finally {
+        setIsLoading(false);
       }
     } else {
       toast.error("No remaining queries. Please purchase a query pack or upgrade to Pro.");
