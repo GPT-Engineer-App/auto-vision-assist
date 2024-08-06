@@ -34,7 +34,7 @@ const App = () => {
     if (!user) {
       return <Navigate to="/" replace />;
     }
-    return children;
+    return <>{children}</>;
   };
 
   return (
@@ -46,16 +46,19 @@ const App = () => {
             <AnimatePresence mode="wait">
               <Routes>
                 <Route element={<Layout user={user} isPro={isPro} setIsPro={setIsPro} />}>
+                  <Route index element={<Index />} />
                   {navItems.map((item) => (
-                    <Route 
-                      key={item.to} 
-                      path={item.to} 
-                      element={
-                        <ProtectedRoute>
-                          {React.cloneElement(item.page, { isPro, setIsPro, user })}
-                        </ProtectedRoute>
-                      }
-                    />
+                    item.to !== "/" && (
+                      <Route 
+                        key={item.to} 
+                        path={item.to} 
+                        element={
+                          <ProtectedRoute>
+                            {React.cloneElement(item.page, { isPro, setIsPro, user })}
+                          </ProtectedRoute>
+                        }
+                      />
+                    )
                   ))}
                   <Route 
                     path="/profile" 
