@@ -77,6 +77,28 @@ const AuthForm = ({ isLogin }) => {
     }
   };
 
+  const handleGoogleSignIn = async () => {
+    try {
+      await signInWithGoogle();
+      toast.success("Logged in with Google successfully");
+      navigate("/garage");
+    } catch (error) {
+      console.error("Google sign-in error:", error);
+      toast.error("Failed to sign in with Google");
+    }
+  };
+
+  const handleFacebookSignIn = async () => {
+    try {
+      await signInWithFacebook();
+      toast.success("Logged in with Facebook successfully");
+      navigate("/garage");
+    } catch (error) {
+      console.error("Facebook sign-in error:", error);
+      toast.error("Failed to sign in with Facebook");
+    }
+  };
+
   const togglePasswordReset = () => {
     setIsResettingPassword(!isResettingPassword);
   };
