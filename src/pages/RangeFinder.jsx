@@ -29,6 +29,23 @@ const RangeFinder = ({ isPro }) => {
     enabled: !!dtc,
   });
 
+  const renderDTCAnalysis = () => {
+    if (isDtcLoading) return <p>Loading DTC analysis...</p>;
+    if (error) return <p>Error loading DTC analysis: {error.message}</p>;
+    if (!dtcData) return <p>No data available for this DTC code.</p>;
+
+    return (
+      <div>
+        <h3 className="text-lg font-semibold mb-2">DTC Analysis</h3>
+        <p><strong>Code:</strong> {dtcData.code}</p>
+        <p><strong>Description:</strong> {dtcData.description}</p>
+        <p><strong>Possible Causes:</strong> {dtcData.possibleCauses}</p>
+        <p><strong>Diagnostic Steps:</strong> {dtcData.diagnosticSteps}</p>
+        <p><strong>Severity:</strong> {dtcData.severity}</p>
+      </div>
+    );
+  };
+
   useEffect(() => {
     const fetchRemainingQueries = async () => {
       const auth = getAuth();
@@ -114,9 +131,7 @@ const RangeFinder = ({ isPro }) => {
               <CardDescription>Details about the selected DTC</CardDescription>
             </CardHeader>
             <CardContent>
-              <p><strong>Code:</strong> {dtcData?.code}</p>
-              <p><strong>Description:</strong> {dtcData?.description}</p>
-              <p><strong>Possible Causes:</strong> {dtcData?.possible_causes}</p>
+              {renderDTCAnalysis()}
             </CardContent>
           </Card>
           <Card className="bg-card text-card-foreground">
