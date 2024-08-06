@@ -106,10 +106,6 @@ const DiagnosticChat = ({ vehicleId, isPro }) => {
 };
 
 export default DiagnosticChat;
-  const [input, setInput] = useState("");
-  const [response, setResponse] = useState("");
-  const [queryCount, setQueryCount] = useState(0);
-  const [isLoading, setIsLoading] = useState(false);
 
   const fetchQueryCount = async () => {
     const queryCountRef = collection(db, "queryCounts");
