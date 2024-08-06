@@ -29,7 +29,11 @@ const DTCModal = ({ isOpen, onClose }) => {
       }
     } catch (error) {
       console.error("Error fetching DTC info:", error);
-      toast.error("Error fetching DTC information");
+      if (error.message.includes("rate limit")) {
+        toast.error("Rate limit exceeded. Please try again later.");
+      } else {
+        toast.error("Error fetching DTC information. Please try again.");
+      }
     } finally {
       setLoading(false);
     }

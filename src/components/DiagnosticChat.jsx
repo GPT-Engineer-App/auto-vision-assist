@@ -64,7 +64,11 @@ const DiagnosticChat = ({ vehicleId, isPro }) => {
       setQueryCount((prev) => prev + 1);
     } catch (error) {
       console.error("Error processing query:", error);
-      toast.error("Error processing your query: " + error.message);
+      if (error.message.includes("rate limit")) {
+        toast.error("Rate limit exceeded. Please try again later.");
+      } else {
+        toast.error("Error processing your query. Please try again.");
+      }
     } finally {
       setIsLoading(false);
     }

@@ -2,6 +2,7 @@ import { initializeApp } from "firebase/app";
 import { getAuth, connectAuthEmulator } from "firebase/auth";
 import { getFirestore, connectFirestoreEmulator, collection, addDoc, query, where, getDocs, doc, deleteDoc, updateDoc } from "firebase/firestore";
 import { getAnalytics } from "firebase/analytics";
+import { toast } from "sonner";
 
 const firebaseConfig = {
   apiKey: "AIzaSyBaMsvZCdwFLWgTUZsTZlScUzDNc_WvyCQ",
@@ -44,8 +45,26 @@ if (import.meta.env.DEV) {
  * @param {string} code - The DTC code to fetch
  * @returns {Promise<DTC|null>} The DTC object or null if not found
  */
+const API_RATE_LIMIT = 100; // Requests per minute
+const API_RATE_WINDOW = 60 * 1000; // 1 minute in milliseconds
+let apiCallCount = 0;
+let apiCallResetTime = Date.now() + API_RATE_WINDOW;
+
+function checkRateLimit() {
+  const now = Date.now();
+  if (now > apiCallResetTime) {
+    apiCallCount = 0;
+    apiCallResetTime = now + API_RATE_WINDOW;
+  }
+  if (apiCallCount >= API_RATE_LIMIT) {
+    throw new Error("API rate limit exceeded. Please try again later.");
+  }
+  apiCallCount++;
+}
+
 export async function fetchDTCByCode(code) {
   try {
+    checkRateLimit();
     const dtcDoc = await getDocs(doc(db, "dtcCodes", code));
     if (dtcDoc.exists()) {
       return dtcDoc.data();
@@ -53,6 +72,7 @@ export async function fetchDTCByCode(code) {
     return null;
   } catch (error) {
     console.error("Error fetching DTC data:", error);
+    toast.error(error.message || "Failed to fetch DTC data. Please try again.");
     throw error;
   }
 }
