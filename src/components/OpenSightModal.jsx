@@ -1,28 +1,26 @@
 import { useState, useEffect } from "react";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Loader2 } from "lucide-react";
 import { VisuallyHidden } from "@radix-ui/react-visually-hidden";
+import { LineChart, BarChart, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 
 const OpenSightModal = ({ vehicle, onClose }) => {
-  const [faultyComponents, setFaultyComponents] = useState([]);
+  const [diagnosticData, setDiagnosticData] = useState(null);
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     if (vehicle) {
       setLoading(true);
-      // Simulating an API call to fetch faulty components
-      setTimeout(() => {
-        const mockFaultyComponents = [
-          { name: "Alternator", probability: 0.8 },
-          { name: "Battery", probability: 0.6 },
-          { name: "Starter Motor", probability: 0.4 },
-          { name: "Fuel Pump", probability: 0.3 },
-          { name: "Spark Plugs", probability: 0.2 },
-        ];
-        setFaultyComponents(mockFaultyComponents);
-        setLoading(false);
-      }, 2000);
+      fetchDiagnosticData(vehicle)
+        .then(data => {
+          setDiagnosticData(data);
+          setLoading(false);
+        })
+        .catch(error => {
+          console.error("Error fetching diagnostic data:", error);
+          setLoading(false);
+        });
     }
   }, [vehicle]);
 
@@ -30,7 +28,7 @@ const OpenSightModal = ({ vehicle, onClose }) => {
 
   return (
     <Dialog open={!!vehicle} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-[425px]">
+      <DialogContent className="sm:max-w-[800px]">
         <VisuallyHidden>
           <DialogTitle>Open Sight Analysis</DialogTitle>
         </VisuallyHidden>
@@ -43,17 +41,33 @@ const OpenSightModal = ({ vehicle, onClose }) => {
           </div>
         ) : (
           <div className="py-4">
-            <h3 className="text-lg font-semibold mb-2">Likely Faulty Components:</h3>
-            <ul className="space-y-2">
-              {faultyComponents.map((component, index) => (
-                <li key={index} className="flex justify-between items-center">
-                  <span>{component.name}</span>
-                  <span className="text-sm font-medium bg-blue-100 text-blue-800 py-1 px-2 rounded-full">
-                    {(component.probability * 100).toFixed(0)}%
-                  </span>
-                </li>
-              ))}
-            </ul>
+            {diagnosticData && (
+              <>
+                <h3 className="text-lg font-semibold mb-2">Diagnostic Data Visualization</h3>
+                <ResponsiveContainer width="100%" height={300}>
+                  <LineChart data={diagnosticData.timeSeriesData}>
+                    <CartesianGrid strokeDasharray="3 3" />
+                    <XAxis dataKey="timestamp" />
+                    <YAxis />
+                    <Tooltip />
+                    <Legend />
+                    <Line type="monotone" dataKey="engineTemp" stroke="#8884d8" name="Engine Temperature" />
+                    <Line type="monotone" dataKey="oilPressure" stroke="#82ca9d" name="Oil Pressure" />
+                  </LineChart>
+                </ResponsiveContainer>
+                <h3 className="text-lg font-semibold mt-6 mb-2">Component Health</h3>
+                <ResponsiveContainer width="100%" height={300}>
+                  <BarChart data={diagnosticData.componentHealth}>
+                    <CartesianGrid strokeDasharray="3 3" />
+                    <XAxis dataKey="name" />
+                    <YAxis />
+                    <Tooltip />
+                    <Legend />
+                    <Bar dataKey="health" fill="#8884d8" name="Health Score" />
+                  </BarChart>
+                </ResponsiveContainer>
+              </>
+            )}
           </div>
         )}
         <div className="mt-4 flex justify-end">
@@ -62,6 +76,30 @@ const OpenSightModal = ({ vehicle, onClose }) => {
       </DialogContent>
     </Dialog>
   );
+};
+
+const fetchDiagnosticData = async (vehicle) => {
+  // Simulating an API call to fetch diagnostic data
+  return new Promise((resolve) => {
+    setTimeout(() => {
+      resolve({
+        timeSeriesData: [
+          { timestamp: '00:00', engineTemp: 180, oilPressure: 40 },
+          { timestamp: '00:05', engineTemp: 185, oilPressure: 42 },
+          { timestamp: '00:10', engineTemp: 190, oilPressure: 41 },
+          { timestamp: '00:15', engineTemp: 195, oilPressure: 43 },
+          { timestamp: '00:20', engineTemp: 200, oilPressure: 44 },
+        ],
+        componentHealth: [
+          { name: 'Engine', health: 90 },
+          { name: 'Transmission', health: 85 },
+          { name: 'Brakes', health: 95 },
+          { name: 'Suspension', health: 88 },
+          { name: 'Electrical', health: 92 },
+        ],
+      });
+    }, 2000);
+  });
 };
 
 export default OpenSightModal;
