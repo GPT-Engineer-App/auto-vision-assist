@@ -45,15 +45,16 @@ if (import.meta.env.DEV) {
  * @returns {Promise<DTC|null>} The DTC object or null if not found
  */
 export async function fetchDTCByCode(code) {
-  const dtcRef = collection(db, "dtc");
-  const q = query(dtcRef, where("code", "==", code));
-  const querySnapshot = await getDocs(q);
-
-  if (querySnapshot.empty) {
+  try {
+    const dtcDoc = await getDoc(doc(db, "dtcCodes", code));
+    if (dtcDoc.exists()) {
+      return dtcDoc.data();
+    }
     return null;
+  } catch (error) {
+    console.error("Error fetching DTC data:", error);
+    throw error;
   }
-
-  return querySnapshot.docs[0].data();
 }
 
 /**
