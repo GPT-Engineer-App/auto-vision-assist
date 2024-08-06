@@ -3,7 +3,8 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { Button } from "@/components/ui/button";
 import { Loader2 } from "lucide-react";
 import { VisuallyHidden } from "@radix-ui/react-visually-hidden";
-import { LineChart, BarChart, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
+import { LineChart, BarChart, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from '@nivo/line';
+import { Bar } from '@nivo/bar';
 
 const OpenSightModal = ({ vehicle, onClose }) => {
   const [diagnosticData, setDiagnosticData] = useState(null);
