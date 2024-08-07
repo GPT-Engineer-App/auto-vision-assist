@@ -52,6 +52,12 @@ export const deleteData = async (collectionName, docId) => {
   await deleteDoc(doc(db, collectionName, docId));
 };
 
+export const getData = async (collectionName, docId) => {
+  const docRef = doc(db, collectionName, docId);
+  const docSnap = await getDoc(docRef);
+  return docSnap.exists() ? docSnap.data() : null;
+};
+
 export const fetchVehiclesForUser = async (userId) => {
   const vehiclesRef = collection(db, "vehicles");
   const q = query(vehiclesRef, where("userId", "==", userId));
