@@ -1,5 +1,5 @@
-import { useState, useEffect } from "react";
-import { auth, getData, updateData, deleteData } from "@/lib/firebase";
+import React, { useState, useEffect } from "react";
+import { auth, getData, updateData, deleteData, fetchVehiclesForUser } from "@/lib/firebase";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
