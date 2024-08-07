@@ -27,6 +27,45 @@ export const signUpWithEmail = (email, password) => createUserWithEmailAndPasswo
 export const signInWithEmail = (email, password) => signInWithEmailAndPassword(auth, email, password);
 export const signOutUser = () => signOut(auth);
 
+// Register User
+const registerUser = async (email, password) => {
+  try {
+    const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+    const user = userCredential.user;
+    console.log("User registered:", user);
+    return user;
+  } catch (error) {
+    console.error("Error registering user:", error.code, error.message);
+    throw error;
+  }
+};
+
+// Login User
+const loginUser = async (email, password) => {
+  try {
+    const userCredential = await signInWithEmailAndPassword(auth, email, password);
+    const user = userCredential.user;
+    console.log("User signed in:", user);
+    return user;
+  } catch (error) {
+    console.error("Error signing in user:", error.code, error.message);
+    throw error;
+  }
+};
+
+// Logout User
+const logoutUser = async () => {
+  try {
+    await signOut(auth);
+    console.log("User signed out");
+  } catch (error) {
+    console.error("Error signing out user:", error);
+    throw error;
+  }
+};
+
+export { registerUser, loginUser, logoutUser };
+
 if (import.meta.env.DEV) {
   // Use emulators in development mode
   try {
