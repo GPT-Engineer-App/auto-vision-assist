@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { createUserWithEmailAndPassword, signInWithEmailAndPassword, sendPasswordResetEmail } from "firebase/auth";
 import { auth, db, signInWithGoogle } from "@/lib/firebase";
+import { doc, setDoc } from "firebase/firestore";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -13,6 +14,7 @@ const AuthForm = ({ isLogin }) => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [username, setUsername] = useState("");
+  const [userType, setUserType] = useState("free");
   const [isResettingPassword, setIsResettingPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [retryCount, setRetryCount] = useState(0);
@@ -30,6 +32,10 @@ const AuthForm = ({ isLogin }) => {
         return;
       }
 
+      if (!isLogin && !isStrongPassword(password)) {
+        throw new Error("Password does not meet security standards");
+      }
+
       const authFunction = isLogin
         ? () => signInWithEmailAndPassword(auth, email, password)
         : () => createUserWithEmailAndPassword(auth, email, password);
@@ -41,6 +47,7 @@ const AuthForm = ({ isLogin }) => {
         await setDoc(doc(db, "users", user.uid), {
           username,
           email,
+          userType,
           createdAt: new Date(),
         });
       }
@@ -68,6 +75,20 @@ const AuthForm = ({ isLogin }) => {
     }
   };
 
+  const isStrongPassword = (password) => {
+    const minLength = 8;
+    const hasNumber = /\d/;
+    const hasUpperCase = /[A-Z]/;
+    const hasLowerCase = /[a-z]/;
+    const hasSpecialChar = /[!@#$%^&*(),.?":{}|<>]/;
+    
+    return password.length >= minLength &&
+           hasNumber.test(password) &&
+           hasUpperCase.test(password) &&
+           hasLowerCase.test(password) &&
+           hasSpecialChar.test(password);
+  };
+
   const handleGoogleSignIn = async () => {
     try {
       await signInWithGoogle();
@@ -86,22 +107,36 @@ const AuthForm = ({ isLogin }) => {
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
       {!isLogin && !isResettingPassword && (
-        <div className="space-y-2">
-          <Label htmlFor="username" className="text-gray-300">Username</Label>
-          <div className="relative">
-            <User className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500" size={18} />
-            <Input
-              id="username"
-              name="username"
-              type="text"
-              value={username}
-              onChange={(e) => setUsername(e.target.value)}
-              required
-              autoComplete="username"
-              className="pl-10 bg-black/50 border-[#ff6600] text-[#ff6600] placeholder-[#ff6600]/50 focus:border-[#ff6600] focus:ring-[#ff6600]"
-            />
+        <>
+          <div className="space-y-2">
+            <Label htmlFor="username" className="text-gray-300">Username</Label>
+            <div className="relative">
+              <User className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500" size={18} />
+              <Input
+                id="username"
+                name="username"
+                type="text"
+                value={username}
+                onChange={(e) => setUsername(e.target.value)}
+                required
+                autoComplete="username"
+                className="pl-10 bg-black/50 border-[#ff6600] text-[#ff6600] placeholder-[#ff6600]/50 focus:border-[#ff6600] focus:ring-[#ff6600]"
+              />
+            </div>
           </div>
-        </div>
+          <div className="space-y-2">
+            <Label htmlFor="userType" className="text-gray-300">User Type</Label>
+            <Select value={userType} onValueChange={setUserType}>
+              <SelectTrigger id="userType">
+                <SelectValue placeholder="Select user type" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="free">Free User</SelectItem>
+                <SelectItem value="paid">Paid User</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+        </>
       )}
       <div className="space-y-2">
         <Label htmlFor="email" className="text-gray-300">Email</Label>
