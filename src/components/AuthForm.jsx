@@ -129,88 +129,11 @@ const AuthForm = ({ isLogin }) => {
         </Alert>
       )}
       <form onSubmit={handleSubmit} className="space-y-4">
-      {!isLogin && !isResettingPassword && (
-        <>
-          <div className="space-y-2">
-            <Label htmlFor="username" className="text-gray-300">Username</Label>
-            <div className="relative">
-              <User className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500" size={18} />
-              <Input
-                id="username"
-                name="username"
-                type="text"
-                value={username}
-                onChange={(e) => setUsername(e.target.value)}
-                required
-                autoComplete="username"
-                className="pl-10 bg-black/50 border-[#ff6600] text-[#ff6600] placeholder-[#ff6600]/50 focus:border-[#ff6600] focus:ring-[#ff6600]"
-              />
-            </div>
-          </div>
-          <div className="space-y-2">
-            <Label htmlFor="userType" className="text-gray-300">User Type</Label>
-            <Select value={userType} onValueChange={setUserType}>
-              <SelectTrigger id="userType">
-                <SelectValue placeholder="Select user type" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="free">Free User</SelectItem>
-                <SelectItem value="paid">Paid User</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-        </>
-      )}
-      <div className="space-y-2">
-        <Label htmlFor="email" className="text-gray-300">Email</Label>
-        <div className="relative">
-          <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500" size={18} />
-          <Input
-            id="email"
-            name="email"
-            type="email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            required
-            autoComplete="email"
-            className="pl-10 bg-black/50 border-[#ff6600] text-[#ff6600] placeholder-[#ff6600]/50 focus:border-[#ff6600] focus:ring-[#ff6600]"
-          />
-        </div>
-      </div>
-      {!isResettingPassword && (
-        <div className="space-y-2">
-          <Label htmlFor="password" className="text-gray-300">Password</Label>
-          <div className="relative">
-            <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500" size={18} />
-            <Input
-              id="password"
-              name="password"
-              type="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              required
-              autoComplete={isLogin ? "current-password" : "new-password"}
-              className="pl-10 bg-black/50 border-[#ff6600] text-[#ff6600] placeholder-[#ff6600]/50 focus:border-[#ff6600] focus:ring-[#ff6600]"
-            />
-          </div>
-        </div>
-      )}
-      <Button type="submit" className="w-full bg-[#ff6600] hover:bg-[#ff8533] text-black font-bold" disabled={loading}>
-        {loading ? "Processing..." : isResettingPassword ? "Reset Password" : isLogin ? "Log In" : "Sign Up"}
-      </Button>
-      <Button type="button" variant="link" onClick={togglePasswordReset} className="w-full text-[#ff6600]">
-        {isResettingPassword ? "Back to Login" : "Forgot Password?"}
-      </Button>
-      <div className="mt-4">
-        <Button type="button" onClick={handleGoogleSignIn} className="w-full mb-2 bg-red-600 hover:bg-red-700 text-white">
-          Sign in with Google
-        </Button>
-      </div>
-    </form>
-  );
-};
-
+        {/* ... (form content) */}
+      </form>
+    </>
   );
 };
 
 export default AuthForm;
+```
