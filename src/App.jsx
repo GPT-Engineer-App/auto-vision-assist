@@ -4,6 +4,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter as Router } from "react-router-dom";
 import { ThemeProvider } from "@/components/theme-provider";
+import { useEffect } from "react";
 import { AnimatePresence } from "framer-motion";
 import AppRoutes from "./AppRoutes";
 import { AuthProvider } from "./contexts/AuthContext";
@@ -14,7 +15,7 @@ const queryClient = new QueryClient();
 const App = () => {
   return (
     <QueryClientProvider client={queryClient}>
-      <ThemeProvider defaultTheme="dark" storageKey="vite-ui-theme">
+      <ThemeProvider defaultTheme="light" storageKey="vite-ui-theme">
         <AuthProvider>
           <ProStatusProvider>
             <TooltipProvider>
@@ -29,6 +30,14 @@ const App = () => {
         </AuthProvider>
       </ThemeProvider>
     </QueryClientProvider>
+  );
+};
+
+// Set the default theme to light
+useEffect(() => {
+  document.documentElement.classList.remove('dark');
+  document.documentElement.classList.add('light');
+}, []);
   );
 };
 
