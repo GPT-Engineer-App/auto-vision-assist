@@ -10,8 +10,8 @@ const firebaseConfig = {
   projectId: "auto-vision-pro-v2",
   storageBucket: "auto-vision-pro-v2.appspot.com",
   messagingSenderId: "933665969916",
-  appId: "1:933665969916:web:1f9dd6d881f3d6b2102979",
-  measurementId: "G-Y2PXHXH917"
+  appId: "1:933665969916:web:e17792bd261905ea102979",
+  measurementId: "G-DTT5BB21FZ"
 };
 
 const app = initializeApp(firebaseConfig);
