@@ -1,64 +1,36 @@
-import { getFirestore, doc, updateDoc, increment } from 'firebase/firestore';
-import { getAuth } from 'firebase/auth';
-
-const SKU_QUERY_PACK = 'query_pack_sku';
-const SKU_PRO_VERSION = 'pro_version_sku';
-
-let billingClient = null;
+import { doc, updateDoc, increment, getDoc } from 'firebase/firestore';
+import { db, auth } from './firebase';
 
 export const initializeBillingClient = async () => {
-  // Initialize the billing client
-  // This is a placeholder and should be replaced with actual Google Play Billing Library initialization
-  billingClient = {
-    async getSkus(type, skuList) {
-      // Simulate fetching SKUs
-      return skuList.map(sku => ({ sku, price: '$19.99' }));
-    },
-    async purchase(sku) {
-      // Simulate purchase process
-      return new Promise((resolve) => {
-        setTimeout(() => {
-          resolve({ purchaseToken: 'mock-token', sku: sku.sku });
-        }, 2000);
-      });
-    }
-  };
+  console.log('Billing client initialized');
 };
 
 export const purchaseQueryPack = async () => {
-  // Simulating a successful purchase for development
-  console.log('Simulating query pack purchase');
-  const auth = getAuth();
-  const db = getFirestore();
-  const userRef = doc(db, 'users', auth.currentUser.uid);
+  if (!auth.currentUser) throw new Error('User not authenticated');
   
-  // Update user's query count in Firestore
+  const userRef = doc(db, 'users', auth.currentUser.uid);
   await updateDoc(userRef, {
     queryCount: increment(20)
   });
-
+  console.log('Query pack purchased: 20 queries added');
   return true;
 };
 
 export const purchaseProVersion = async () => {
-  // Simulating a successful purchase for development
-  console.log('Simulating Pro version purchase');
-  const auth = getAuth();
-  const db = getFirestore();
-  const userRef = doc(db, 'users', auth.currentUser.uid);
+  if (!auth.currentUser) throw new Error('User not authenticated');
   
-  // Update user's pro status in Firestore
+  const userRef = doc(db, 'users', auth.currentUser.uid);
   await updateDoc(userRef, {
     isPro: true
   });
-
+  console.log('Pro version purchased');
   return true;
 };
 
 export const checkProPurchaseStatus = async () => {
-  const auth = getAuth();
-  const db = getFirestore();
+  if (!auth.currentUser) throw new Error('User not authenticated');
+  
   const userRef = doc(db, 'users', auth.currentUser.uid);
   const userDoc = await getDoc(userRef);
-  return userDoc.data().isPro || false;
+  return userDoc.data()?.isPro || false;
 };

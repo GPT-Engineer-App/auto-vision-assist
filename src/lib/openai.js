@@ -6,26 +6,31 @@ const openai = new OpenAI({
   dangerouslyAllowBrowser: true
 });
 
-const API_RATE_LIMIT = 50; // Requests per minute
-const API_RATE_WINDOW = 60 * 1000; // 1 minute in milliseconds
-let apiCallCount = 0;
-let apiCallResetTime = Date.now() + API_RATE_WINDOW;
+class RateLimiter {
+  constructor(limit, window) {
+    this.limit = limit;
+    this.window = window;
+    this.tokens = [];
+  }
 
-function checkRateLimit() {
-  const now = Date.now();
-  if (now > apiCallResetTime) {
-    apiCallCount = 0;
-    apiCallResetTime = now + API_RATE_WINDOW;
+  async waitForToken() {
+    const now = Date.now();
+    this.tokens = this.tokens.filter(t => now - t < this.window);
+    if (this.tokens.length >= this.limit) {
+      const oldestToken = this.tokens[0];
+      const msToWait = this.window - (now - oldestToken);
+      await new Promise(resolve => setTimeout(resolve, msToWait));
+      return this.waitForToken();
+    }
+    this.tokens.push(now);
   }
-  if (apiCallCount >= API_RATE_LIMIT) {
-    throw new Error("API rate limit exceeded. Please try again later.");
-  }
-  apiCallCount++;
 }
+
+const rateLimiter = new RateLimiter(50, 60 * 1000); // 50 requests per minute
 
 export const generateDiagnosticResponse = async (prompt) => {
   try {
-    checkRateLimit();
+    await rateLimiter.waitForToken();
     const response = await openai.chat.completions.create({
       model: "gpt-3.5-turbo",
       messages: [
