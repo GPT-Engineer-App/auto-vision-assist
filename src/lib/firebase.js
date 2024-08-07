@@ -21,6 +21,13 @@ export const analytics = getAnalytics(app);
 export const googleProvider = new GoogleAuthProvider();
 export const signInWithGoogle = () => signInWithPopup(auth, googleProvider);
 
+export const fetchVehiclesForUser = async (userId) => {
+  const vehiclesRef = collection(db, "vehicles");
+  const q = query(vehiclesRef, where("userId", "==", userId));
+  const querySnapshot = await getDocs(q);
+  return querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+};
+
 export const fetchDTCByCode = async (code) => {
   const dtcRef = doc(db, "dtcCodes", code);
   const dtcSnap = await getDoc(dtcRef);
