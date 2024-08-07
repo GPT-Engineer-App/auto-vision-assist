@@ -17,7 +17,7 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 export const auth = getAuth(app);
 export const db = getFirestore(app);
-export const analytics = getAnalytics(app);
+export const analytics = import.meta.env.DEV ? null : getAnalytics(app);
 export const googleProvider = new GoogleAuthProvider();
 export const signInWithGoogle = () => signInWithPopup(auth, googleProvider);
 
@@ -67,8 +67,6 @@ export const fetchVehiclesForUser = async (userId) => {
 
 if (import.meta.env.DEV) {
   // Use emulators in development mode
-  const { connectAuthEmulator } = require("firebase/auth");
-  const { connectFirestoreEmulator } = require("firebase/firestore");
   connectAuthEmulator(auth, "http://localhost:9099");
   connectFirestoreEmulator(db, "localhost", 8080);
   console.log("Connected to Firebase emulators");
