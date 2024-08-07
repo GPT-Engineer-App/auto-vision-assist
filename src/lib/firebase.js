@@ -1,6 +1,6 @@
 import { initializeApp } from "firebase/app";
 import { getAuth, GoogleAuthProvider } from "firebase/auth";
-import { getFirestore } from "firebase/firestore";
+import { getFirestore, doc, getDoc } from "firebase/firestore";
 import { getAnalytics } from "firebase/analytics";
 
 const firebaseConfig = {
@@ -20,6 +20,12 @@ export const db = getFirestore(app);
 export const analytics = getAnalytics(app);
 export const googleProvider = new GoogleAuthProvider();
 export const signInWithGoogle = () => signInWithPopup(auth, googleProvider);
+
+export const fetchDTCByCode = async (code) => {
+  const dtcRef = doc(db, "dtcCodes", code);
+  const dtcSnap = await getDoc(dtcRef);
+  return dtcSnap.exists() ? dtcSnap.data() : null;
+};
 
 if (import.meta.env.DEV) {
   // Use emulators in development mode
