@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { createUserWithEmailAndPassword, signInWithEmailAndPassword, sendPasswordResetEmail } from "firebase/auth";
 import { auth, db, signInWithGoogle } from "@/lib/firebase";
@@ -7,8 +7,9 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
-import { Lock, Mail, User } from "lucide-react";
+import { Lock, Mail, User, AlertTriangle } from "lucide-react";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 
 const AuthForm = ({ isLogin }) => {
   const [email, setEmail] = useState("");
@@ -18,12 +19,32 @@ const AuthForm = ({ isLogin }) => {
   const [isResettingPassword, setIsResettingPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [retryCount, setRetryCount] = useState(0);
+  const [networkError, setNetworkError] = useState(false);
   const navigate = useNavigate();
+
+  useEffect(() => {
+    const checkNetworkConnection = () => {
+      setNetworkError(!navigator.onLine);
+    };
+
+    window.addEventListener('online', checkNetworkConnection);
+    window.addEventListener('offline', checkNetworkConnection);
+
+    return () => {
+      window.removeEventListener('online', checkNetworkConnection);
+      window.removeEventListener('offline', checkNetworkConnection);
+    };
+  }, []);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
+    setNetworkError(false);
     try {
+      if (!navigator.onLine) {
+        throw new Error("No internet connection. Please check your network and try again.");
+      }
+
       if (isResettingPassword) {
         await sendPasswordResetEmail(auth, email);
         toast.success("Password reset email sent. Check your inbox.");
@@ -56,7 +77,12 @@ const AuthForm = ({ isLogin }) => {
       navigate("/garage");
     } catch (error) {
       console.error("Authentication error:", error);
-      toast.error(error.message || "An error occurred during authentication. Please try again.");
+      if (error.code === "auth/network-request-failed") {
+        setNetworkError(true);
+        toast.error("Network error. Please check your internet connection and try again.");
+      } else {
+        toast.error(error.message || "An error occurred during authentication. Please try again.");
+      }
     } finally {
       setLoading(false);
     }
@@ -92,7 +118,17 @@ const AuthForm = ({ isLogin }) => {
   };
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-4">
+    <>
+      {networkError && (
+        <Alert variant="destructive" className="mb-4">
+          <AlertTriangle className="h-4 w-4" />
+          <AlertTitle>Network Error</AlertTitle>
+          <AlertDescription>
+            Unable to connect to the server. Please check your internet connection and try again.
+          </AlertDescription>
+        </Alert>
+      )}
+      <form onSubmit={handleSubmit} className="space-y-4">
       {!isLogin && !isResettingPassword && (
         <>
           <div className="space-y-2">
