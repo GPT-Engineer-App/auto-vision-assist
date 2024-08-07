@@ -1,9 +1,12 @@
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { motion } from "framer-motion";
+import AuthForm from "@/components/AuthForm";
+import { useAuth } from "@/contexts/AuthContext";
 
 const Index = () => {
   const navigate = useNavigate();
+  const { user } = useAuth();
 
   return (
     <motion.div 
@@ -28,15 +31,32 @@ const Index = () => {
       >
         Your smart automotive companion
       </motion.p>
-      <motion.div
-        initial={{ scale: 0.8, opacity: 0 }}
-        animate={{ scale: 1, opacity: 1 }}
-        transition={{ delay: 0.6, type: "spring", stiffness: 120 }}
-      >
-        <Button onClick={() => navigate("/signup")} size="lg" className="text-lg">
-          Get Started
-        </Button>
-      </motion.div>
+      {user ? (
+        <motion.div
+          initial={{ scale: 0.8, opacity: 0 }}
+          animate={{ scale: 1, opacity: 1 }}
+          transition={{ delay: 0.6, type: "spring", stiffness: 120 }}
+        >
+          <Button onClick={() => navigate("/garage")} size="lg" className="text-lg">
+            Go to Garage
+          </Button>
+        </motion.div>
+      ) : (
+        <motion.div
+          initial={{ scale: 0.8, opacity: 0 }}
+          animate={{ scale: 1, opacity: 1 }}
+          transition={{ delay: 0.6, type: "spring", stiffness: 120 }}
+          className="w-full max-w-md"
+        >
+          <AuthForm isLogin={true} />
+          <p className="mt-4 text-center">
+            Don't have an account?{" "}
+            <Button variant="link" onClick={() => navigate("/signup")}>
+              Sign up
+            </Button>
+          </p>
+        </motion.div>
+      )}
     </motion.div>
   );
 };
