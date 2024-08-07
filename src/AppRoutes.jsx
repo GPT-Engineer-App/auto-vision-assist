@@ -7,6 +7,7 @@ import RangeFinder from "./pages/RangeFinder";
 import { useAuth } from "./contexts/AuthContext";
 import { useProStatus } from "./contexts/ProStatusContext";
 import Index from "./pages/Index";
+import Signup from "./pages/Signup";
 
 const AppRoutes = () => {
   const { user } = useAuth();
@@ -23,12 +24,13 @@ const AppRoutes = () => {
     <Routes>
       <Route element={<Layout />}>
         <Route index element={<Index />} />
+        <Route path="/signup" element={<Signup />} />
         {navItems.map((item) => (
           <Route 
             key={item.to} 
             path={item.to} 
             element={
-              item.to === "/" ? (
+              item.to === "/" || item.to === "/signup" ? (
                 item.page
               ) : (
                 <ProtectedRoute>
