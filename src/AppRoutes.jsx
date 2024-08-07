@@ -6,6 +6,7 @@ import UserProfile from "./components/UserProfile";
 import RangeFinder from "./pages/RangeFinder";
 import { useAuth } from "./contexts/AuthContext";
 import { useProStatus } from "./contexts/ProStatusContext";
+import Index from "./pages/Index";
 
 const AppRoutes = () => {
   const { user } = useAuth();
