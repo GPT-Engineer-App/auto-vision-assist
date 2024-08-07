@@ -1,13 +1,14 @@
-import React from "react";
+import React, { lazy, Suspense } from "react";
 import { Routes, Route, Navigate } from "react-router-dom";
 import Layout from "./layouts/navbar";
 import { navItems } from "./nav-items";
-import UserProfile from "./components/UserProfile";
-import RangeFinder from "./pages/RangeFinder";
 import { useAuth } from "./contexts/AuthContext";
 import { useProStatus } from "./contexts/ProStatusContext";
-import Index from "./pages/Index";
-import Signup from "./pages/Signup";
+
+const Index = lazy(() => import("./pages/Index"));
+const Signup = lazy(() => import("./pages/Signup"));
+const UserProfile = lazy(() => import("./components/UserProfile"));
+const RangeFinder = lazy(() => import("./pages/RangeFinder"));
 
 const AppRoutes = () => {
   const { user } = useAuth();
@@ -23,18 +24,20 @@ const AppRoutes = () => {
   return (
     <Routes>
       <Route element={<Layout />}>
-        <Route index element={<Index />} />
-        <Route path="/signup" element={<Signup />} />
+        <Route index element={<Suspense fallback={<div>Loading...</div>}><Index /></Suspense>} />
+        <Route path="/signup" element={<Suspense fallback={<div>Loading...</div>}><Signup /></Suspense>} />
         {navItems.map((item) => (
           <Route 
             key={item.to} 
             path={item.to} 
             element={
               item.to === "/" || item.to === "/signup" ? (
-                item.page
+                <Suspense fallback={<div>Loading...</div>}>{item.page}</Suspense>
               ) : (
                 <ProtectedRoute>
-                  {React.cloneElement(item.page, { isPro, user })}
+                  <Suspense fallback={<div>Loading...</div>}>
+                    {React.cloneElement(item.page, { isPro, user })}
+                  </Suspense>
                 </ProtectedRoute>
               )
             }
@@ -44,7 +47,9 @@ const AppRoutes = () => {
           path="/profile" 
           element={
             <ProtectedRoute>
-              <UserProfile />
+              <Suspense fallback={<div>Loading...</div>}>
+                <UserProfile />
+              </Suspense>
             </ProtectedRoute>
           } 
         />
@@ -52,7 +57,9 @@ const AppRoutes = () => {
           path="/range-finder/:dtc" 
           element={
             <ProtectedRoute>
-              <RangeFinder />
+              <Suspense fallback={<div>Loading...</div>}>
+                <RangeFinder />
+              </Suspense>
             </ProtectedRoute>
           } 
         />
