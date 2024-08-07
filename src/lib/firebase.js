@@ -19,6 +19,7 @@ export const auth = getAuth(app);
 export const db = getFirestore(app);
 export const analytics = getAnalytics(app);
 export const googleProvider = new GoogleAuthProvider();
+export const signInWithGoogle = () => signInWithPopup(auth, googleProvider);
 
 if (import.meta.env.DEV) {
   // Use emulators in development mode
