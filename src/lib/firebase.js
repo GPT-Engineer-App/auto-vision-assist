@@ -208,6 +208,9 @@ export async function addVehicle(vehicle) {
  * @returns {Promise<Object[]>} An array of vehicle objects
  */
 export async function fetchVehiclesForUser(userId) {
+  if (!auth.currentUser) {
+    throw new Error("User must be authenticated to fetch vehicles");
+  }
   const vehiclesRef = collection(db, "vehicles");
   const q = query(vehiclesRef, where("userId", "==", userId));
   const querySnapshot = await getDocs(q);

@@ -57,7 +57,11 @@ const UserProfile = ({ isPro, setIsPro, user }) => {
         await fetchUserVehicles();
       } catch (error) {
         console.error("Error fetching user profile:", error);
-        setError("Failed to load user profile. Please try again later.");
+        if (error.code === 'permission-denied') {
+          setError("Permission denied. Please make sure you're logged in.");
+        } else {
+          setError("Failed to load user profile. Please try again later.");
+        }
         toast.error("Failed to load user profile");
       } finally {
         setLoading(false);

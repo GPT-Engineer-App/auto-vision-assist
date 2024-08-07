@@ -34,9 +34,7 @@ const Garage = ({ isPro, setIsPro, user }) => {
       }
       setLoading(true);
       try {
-        const q = query(collection(db, "vehicles"), where("userId", "==", user.uid));
-        const querySnapshot = await getDocs(q);
-        const vehicleData = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+        const vehicleData = await fetchVehiclesForUser(user.uid);
         setVehicles(vehicleData);
       } catch (error) {
         console.error("Error fetching vehicles:", error);
