@@ -16,7 +16,7 @@ const AppRoutes = () => {
     if (!user) {
       return <Navigate to="/" replace />;
     }
-    return <>{children}</>;
+    return children;
   };
 
   return (
