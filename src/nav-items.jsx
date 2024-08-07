@@ -1,6 +1,6 @@
 import { Home, UserPlus, Car, Wrench, FileCode2, User, Compass } from "lucide-react";
 import Index from "./pages/Index.jsx";
-import Signup from "./pages/Signup.jsx";
+import Signup from "./components/Signup.jsx";
 import AddVehicle from "./pages/AddVehicle.jsx";
 import GaragePage from "./pages/Garage.jsx";
 import DTCCodes from "./pages/DTCCodes.jsx";

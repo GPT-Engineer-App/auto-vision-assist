@@ -9,7 +9,7 @@ import { AuthProvider } from "./contexts/AuthContext";
 import { ProStatusProvider } from "./contexts/ProStatusContext";
 import Layout from "./layouts/navbar";
 import Index from "./pages/Index";
-import Signup from "./pages/Signup";
+import Signup from "./components/Signup";
 import Garage from "./pages/Garage";
 import AddVehicle from "./pages/AddVehicle";
 import DTCCodes from "./pages/DTCCodes";
