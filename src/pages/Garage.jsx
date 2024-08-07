@@ -1,6 +1,5 @@
 import { useState, useEffect } from "react";
-import { collection, query, getDocs, doc, deleteDoc, updateDoc, where } from "firebase/firestore";
-import { db, auth } from "@/lib/firebase";
+import { auth, getData, updateData, deleteData } from "@/lib/firebase";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -64,8 +63,7 @@ const Garage = ({ isPro, setIsPro, user }) => {
   const handleUpdateVehicle = async (updatedVehicle) => {
     try {
       const { id, ...vehicleData } = updatedVehicle;
-      const vehicleRef = doc(db, "vehicles", id);
-      await updateDoc(vehicleRef, vehicleData);
+      await updateData("vehicles", id, vehicleData);
       setVehicles(vehicles.map(v => v.id === id ? updatedVehicle : v));
       toast.success("Vehicle updated successfully");
       setEditingVehicle(null);
@@ -77,7 +75,7 @@ const Garage = ({ isPro, setIsPro, user }) => {
 
   const handleDeleteVehicle = async (vehicleId) => {
     try {
-      await deleteDoc(doc(db, "vehicles", vehicleId));
+      await deleteData("vehicles", vehicleId);
       setVehicles(vehicles.filter(v => v.id !== vehicleId));
       toast.success("Vehicle deleted successfully");
     } catch (error) {

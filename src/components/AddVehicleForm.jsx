@@ -1,7 +1,6 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { addDoc, collection } from "firebase/firestore";
-import { db, auth } from "@/lib/firebase";
+import { auth, addData } from "@/lib/firebase";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -52,7 +51,7 @@ const AddVehicleForm = () => {
     }
 
     try {
-      const docRef = await addDoc(collection(db, "vehicles"), {
+      const vehicleData = {
         userId: auth.currentUser.uid,
         year,
         make,
@@ -61,8 +60,9 @@ const AddVehicleForm = () => {
         drivetrain,
         bodyConfig,
         createdAt: new Date(),
-      });
-      console.log("Vehicle added with ID: ", docRef.id);
+      };
+      const docId = await addData("vehicles", vehicleData);
+      console.log("Vehicle added with ID: ", docId);
       toast.success("Vehicle added successfully");
       navigate("/garage");
     } catch (error) {

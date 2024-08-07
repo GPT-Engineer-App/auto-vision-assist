@@ -27,6 +27,49 @@ export const signUpWithEmail = (email, password) => createUserWithEmailAndPasswo
 export const signInWithEmail = (email, password) => signInWithEmailAndPassword(auth, email, password);
 export const signOutUser = () => signOut(auth);
 
+// CRUD operations for Firestore
+export const addData = async (collectionName, data) => {
+  try {
+    const docRef = await addDoc(collection(db, collectionName), data);
+    console.log("Document written with ID: ", docRef.id);
+    return docRef.id;
+  } catch (e) {
+    console.error("Error adding document: ", e);
+    throw e;
+  }
+};
+
+export const getData = async (collectionName) => {
+  try {
+    const querySnapshot = await getDocs(collection(db, collectionName));
+    return querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+  } catch (e) {
+    console.error("Error getting documents: ", e);
+    throw e;
+  }
+};
+
+export const updateData = async (collectionName, docId, data) => {
+  try {
+    const docRef = doc(db, collectionName, docId);
+    await updateDoc(docRef, data);
+    console.log("Document updated successfully");
+  } catch (e) {
+    console.error("Error updating document: ", e);
+    throw e;
+  }
+};
+
+export const deleteData = async (collectionName, docId) => {
+  try {
+    await deleteDoc(doc(db, collectionName, docId));
+    console.log("Document deleted successfully");
+  } catch (e) {
+    console.error("Error deleting document: ", e);
+    throw e;
+  }
+};
+
 // Register User
 const registerUser = async (email, password) => {
   try {
