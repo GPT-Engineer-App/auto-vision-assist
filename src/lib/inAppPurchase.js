@@ -26,59 +26,33 @@ export const initializeBillingClient = async () => {
 };
 
 export const purchaseQueryPack = async () => {
-  if (!billingClient) {
-    throw new Error('Billing client not initialized');
-  }
+  // Simulating a successful purchase for development
+  console.log('Simulating query pack purchase');
+  const auth = getAuth();
+  const db = getFirestore();
+  const userRef = doc(db, 'users', auth.currentUser.uid);
+  
+  // Update user's query count in Firestore
+  await updateDoc(userRef, {
+    queryCount: increment(20)
+  });
 
-  try {
-    const skus = await billingClient.getSkus('inapp', [SKU_QUERY_PACK]);
-    const purchase = await billingClient.purchase(skus[0]);
-    
-    // Handle successful purchase
-    if (purchase.sku === SKU_QUERY_PACK) {
-      const auth = getAuth();
-      const db = getFirestore();
-      const userRef = doc(db, 'users', auth.currentUser.uid);
-      
-      // Update user's query count in Firestore
-      await updateDoc(userRef, {
-        queryCount: increment(20)
-      });
-
-      return true;
-    }
-  } catch (error) {
-    console.error('Error purchasing query pack:', error);
-    throw error;
-  }
+  return true;
 };
 
 export const purchaseProVersion = async () => {
-  if (!billingClient) {
-    throw new Error('Billing client not initialized');
-  }
+  // Simulating a successful purchase for development
+  console.log('Simulating Pro version purchase');
+  const auth = getAuth();
+  const db = getFirestore();
+  const userRef = doc(db, 'users', auth.currentUser.uid);
+  
+  // Update user's pro status in Firestore
+  await updateDoc(userRef, {
+    isPro: true
+  });
 
-  try {
-    const skus = await billingClient.getSkus('inapp', [SKU_PRO_VERSION]);
-    const purchase = await billingClient.purchase(skus[0]);
-    
-    // Handle successful purchase
-    if (purchase.sku === SKU_PRO_VERSION) {
-      const auth = getAuth();
-      const db = getFirestore();
-      const userRef = doc(db, 'users', auth.currentUser.uid);
-      
-      // Update user's pro status in Firestore
-      await updateDoc(userRef, {
-        isPro: true
-      });
-
-      return true;
-    }
-  } catch (error) {
-    console.error('Error purchasing pro version:', error);
-    throw error;
-  }
+  return true;
 };
 
 export const checkProPurchaseStatus = async () => {
