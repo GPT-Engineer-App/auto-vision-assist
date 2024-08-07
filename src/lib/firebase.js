@@ -27,6 +27,22 @@ export const fetchDTCByCode = async (code) => {
   return dtcSnap.exists() ? dtcSnap.data() : null;
 };
 
+export const fetchAllDTCs = async () => {
+  const dtcRef = collection(db, "dtcCodes");
+  const querySnapshot = await getDocs(dtcRef);
+  return querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+};
+
+export const searchDTCs = async (searchTerm) => {
+  const dtcRef = collection(db, "dtcCodes");
+  const q = query(dtcRef, 
+    where("code", ">=", searchTerm.toUpperCase()),
+    where("code", "<=", searchTerm.toUpperCase() + '\uf8ff')
+  );
+  const querySnapshot = await getDocs(q);
+  return querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+};
+
 export const updateData = async (collectionName, docId, data) => {
   const docRef = doc(db, collectionName, docId);
   await updateDoc(docRef, data);
