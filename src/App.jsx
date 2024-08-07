@@ -13,6 +13,11 @@ import { ProStatusProvider } from "./contexts/ProStatusContext";
 const queryClient = new QueryClient();
 
 const App = () => {
+  useEffect(() => {
+    document.documentElement.classList.remove('dark');
+    document.documentElement.classList.add('light');
+  }, []);
+
   return (
     <QueryClientProvider client={queryClient}>
       <ThemeProvider defaultTheme="light" storageKey="vite-ui-theme">
@@ -30,14 +35,6 @@ const App = () => {
         </AuthProvider>
       </ThemeProvider>
     </QueryClientProvider>
-  );
-};
-
-// Set the default theme to light
-useEffect(() => {
-  document.documentElement.classList.remove('dark');
-  document.documentElement.classList.add('light');
-}, []);
   );
 };
 
