@@ -15,6 +15,7 @@ const AuthForm = ({ isLogin }) => {
   const [username, setUsername] = useState("");
   const [isResettingPassword, setIsResettingPassword] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [retryCount, setRetryCount] = useState(0);
   const navigate = useNavigate();
 
   const handleSubmit = async (e) => {
@@ -29,28 +30,41 @@ const AuthForm = ({ isLogin }) => {
         return;
       }
 
-      if (isLogin) {
-        await signInWithEmailAndPassword(auth, email, password);
-        toast.success("Logged in successfully");
-      } else {
-        const userCredential = await createUserWithEmailAndPassword(auth, email, password);
-        const user = userCredential.user;
-        
-        // Create user profile in Firestore
+      const authFunction = isLogin
+        ? () => signInWithEmailAndPassword(auth, email, password)
+        : () => createUserWithEmailAndPassword(auth, email, password);
+
+      const result = await authFunction();
+
+      if (!isLogin) {
+        const user = result.user;
         await setDoc(doc(db, "users", user.uid), {
           username,
           email,
           createdAt: new Date(),
         });
-        
-        toast.success("Account created successfully");
       }
+
+      toast.success(isLogin ? "Logged in successfully" : "Account created successfully");
       navigate("/garage");
     } catch (error) {
       console.error("Authentication error:", error);
-      toast.error(error.message);
+      if (error.code === 'auth/network-request-failed') {
+        if (retryCount < 3) {
+          setRetryCount(prevCount => prevCount + 1);
+          toast.error(`Network error. Retrying... (Attempt ${retryCount + 1}/3)`);
+          setTimeout(() => handleSubmit(e), 3000);
+        } else {
+          toast.error("Network error persists. Please check your internet connection and try again later.");
+          setRetryCount(0);
+        }
+      } else {
+        toast.error(error.message || "An error occurred during authentication. Please try again.");
+      }
     } finally {
-      setLoading(false);
+      if (retryCount === 0) {
+        setLoading(false);
+      }
     }
   };
 
