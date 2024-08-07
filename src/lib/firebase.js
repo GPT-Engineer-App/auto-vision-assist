@@ -1,9 +1,7 @@
 import { initializeApp } from "firebase/app";
-import { getAuth, connectAuthEmulator, signInWithPopup, GoogleAuthProvider } from "firebase/auth";
+import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, connectAuthEmulator, signInWithPopup, GoogleAuthProvider } from "firebase/auth";
 import { getFirestore, connectFirestoreEmulator, collection, addDoc, query, where, getDocs, doc, deleteDoc, updateDoc } from "firebase/firestore";
 import { getAnalytics } from "firebase/analytics";
-import { getDatabase } from "firebase/database";
-import { getStorage } from "firebase/storage";
 import { toast } from "sonner";
 
 const firebaseConfig = {
@@ -21,12 +19,13 @@ const app = initializeApp(firebaseConfig);
 export const auth = getAuth(app);
 export const db = getFirestore(app);
 export const analytics = getAnalytics(app);
-export const database = getDatabase(app);
-export const storage = getStorage(app);
 
 export const googleProvider = new GoogleAuthProvider();
 
 export const signInWithGoogle = () => signInWithPopup(auth, googleProvider);
+export const signUpWithEmail = (email, password) => createUserWithEmailAndPassword(auth, email, password);
+export const signInWithEmail = (email, password) => signInWithEmailAndPassword(auth, email, password);
+export const signOutUser = () => signOut(auth);
 
 if (import.meta.env.DEV) {
   // Use emulators in development mode
