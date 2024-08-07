@@ -2,7 +2,7 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { createUserWithEmailAndPassword, signInWithEmailAndPassword, sendPasswordResetEmail } from "firebase/auth";
 import { auth, db, signInWithGoogle } from "@/lib/firebase";
-import { doc, setDoc } from "firebase/firestore";
+import { doc, setDoc, serverTimestamp } from "firebase/firestore";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -48,7 +48,7 @@ const AuthForm = ({ isLogin }) => {
           username,
           email,
           userType,
-          createdAt: new Date(),
+          createdAt: serverTimestamp(),
         });
       }
 
@@ -56,22 +56,9 @@ const AuthForm = ({ isLogin }) => {
       navigate("/garage");
     } catch (error) {
       console.error("Authentication error:", error);
-      if (error.code === 'auth/network-request-failed') {
-        if (retryCount < 3) {
-          setRetryCount(prevCount => prevCount + 1);
-          toast.error(`Network error. Retrying... (Attempt ${retryCount + 1}/3)`);
-          setTimeout(() => handleSubmit(e), 3000);
-        } else {
-          toast.error("Network error persists. Please check your internet connection and try again later.");
-          setRetryCount(0);
-        }
-      } else {
-        toast.error(error.message || "An error occurred during authentication. Please try again.");
-      }
+      toast.error(error.message || "An error occurred during authentication. Please try again.");
     } finally {
-      if (retryCount === 0) {
-        setLoading(false);
-      }
+      setLoading(false);
     }
   };
 
