@@ -136,4 +136,3 @@ const AuthForm = ({ isLogin }) => {
 };
 
 export default AuthForm;
-```
