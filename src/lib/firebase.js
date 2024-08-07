@@ -1,6 +1,6 @@
 import { initializeApp } from "firebase/app";
 import { getAuth, GoogleAuthProvider } from "firebase/auth";
-import { getFirestore, doc, getDoc } from "firebase/firestore";
+import { getFirestore, doc, getDoc, updateDoc, deleteDoc, collection, query, where, getDocs } from "firebase/firestore";
 import { getAnalytics } from "firebase/analytics";
 
 const firebaseConfig = {
@@ -32,6 +32,22 @@ export const fetchDTCByCode = async (code) => {
   const dtcRef = doc(db, "dtcCodes", code);
   const dtcSnap = await getDoc(dtcRef);
   return dtcSnap.exists() ? dtcSnap.data() : null;
+};
+
+export const updateData = async (collectionName, docId, data) => {
+  const docRef = doc(db, collectionName, docId);
+  await updateDoc(docRef, data);
+};
+
+export const deleteData = async (collectionName, docId) => {
+  await deleteDoc(doc(db, collectionName, docId));
+};
+
+export const fetchVehiclesForUser = async (userId) => {
+  const vehiclesRef = collection(db, "vehicles");
+  const q = query(vehiclesRef, where("userId", "==", userId));
+  const querySnapshot = await getDocs(q);
+  return querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
 };
 
 if (import.meta.env.DEV) {
