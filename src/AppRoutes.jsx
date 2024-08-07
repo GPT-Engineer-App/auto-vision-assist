@@ -24,17 +24,19 @@ const AppRoutes = () => {
       <Route element={<Layout />}>
         <Route index element={<Index />} />
         {navItems.map((item) => (
-          item.to !== "/" && (
-            <Route 
-              key={item.to} 
-              path={item.to} 
-              element={
+          <Route 
+            key={item.to} 
+            path={item.to} 
+            element={
+              item.to === "/" ? (
+                item.page
+              ) : (
                 <ProtectedRoute>
                   {React.cloneElement(item.page, { isPro, user })}
                 </ProtectedRoute>
-              }
-            />
-          )
+              )
+            }
+          />
         ))}
         <Route 
           path="/profile" 
