@@ -8,6 +8,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
 import { Lock, Mail, User } from "lucide-react";
+import Select from 'react-select';
 
 const AuthForm = ({ isLogin }) => {
   const [email, setEmail] = useState("");
@@ -125,15 +126,16 @@ const AuthForm = ({ isLogin }) => {
           </div>
           <div className="space-y-2">
             <Label htmlFor="userType" className="text-gray-300">User Type</Label>
-            <Select value={userType} onValueChange={setUserType}>
-              <SelectTrigger id="userType">
-                <SelectValue placeholder="Select user type" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="free">Free User</SelectItem>
-                <SelectItem value="paid">Paid User</SelectItem>
-              </SelectContent>
-            </Select>
+            <Select
+              id="userType"
+              options={[
+                { value: 'free', label: 'Free User' },
+                { value: 'paid', label: 'Paid User' }
+              ]}
+              value={{ value: userType, label: userType === 'free' ? 'Free User' : 'Paid User' }}
+              onChange={(selectedOption) => setUserType(selectedOption.value)}
+              className="bg-black/50 border-[#ff6600] text-[#ff6600] placeholder-[#ff6600]/50 focus:border-[#ff6600] focus:ring-[#ff6600]"
+            />
           </div>
         </>
       )}
