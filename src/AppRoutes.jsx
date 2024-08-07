@@ -11,33 +11,38 @@ const UserProfile = lazy(() => import("./components/UserProfile"));
 const RangeFinder = lazy(() => import("./pages/RangeFinder"));
 
 const AppRoutes = () => {
-  const { user } = useAuth();
+  const { user, loading } = useAuth();
   const { isPro } = useProStatus();
 
   const ProtectedRoute = ({ children }) => {
+    if (loading) {
+      return <div className="flex items-center justify-center h-screen">Loading...</div>;
+    }
     if (!user) {
       return <Navigate to="/" replace />;
     }
     return children;
   };
 
+  if (loading) {
+    return <div className="flex items-center justify-center h-screen">Loading...</div>;
+  }
+
   return (
     <Routes>
       <Route element={<Layout />}>
-        <Route index element={<Suspense fallback={<div>Loading...</div>}><Index /></Suspense>} />
-        <Route path="/signup" element={<Suspense fallback={<div>Loading...</div>}><Signup /></Suspense>} />
+        <Route index element={<Index />} />
+        <Route path="/signup" element={<Signup />} />
         {navItems.map((item) => (
           <Route 
             key={item.to} 
             path={item.to} 
             element={
               item.to === "/" || item.to === "/signup" ? (
-                <Suspense fallback={<div>Loading...</div>}>{item.page}</Suspense>
+                item.page
               ) : (
                 <ProtectedRoute>
-                  <Suspense fallback={<div>Loading...</div>}>
-                    {React.cloneElement(item.page, { isPro, user })}
-                  </Suspense>
+                  {React.cloneElement(item.page, { isPro, user })}
                 </ProtectedRoute>
               )
             }
@@ -47,9 +52,7 @@ const AppRoutes = () => {
           path="/profile" 
           element={
             <ProtectedRoute>
-              <Suspense fallback={<div>Loading...</div>}>
-                <UserProfile />
-              </Suspense>
+              <UserProfile />
             </ProtectedRoute>
           } 
         />
@@ -57,9 +60,7 @@ const AppRoutes = () => {
           path="/range-finder/:dtc" 
           element={
             <ProtectedRoute>
-              <Suspense fallback={<div>Loading...</div>}>
-                <RangeFinder />
-              </Suspense>
+              <RangeFinder />
             </ProtectedRoute>
           } 
         />
