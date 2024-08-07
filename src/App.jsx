@@ -9,7 +9,7 @@ import { AuthProvider } from "./contexts/AuthContext";
 import { ProStatusProvider } from "./contexts/ProStatusContext";
 import Layout from "./layouts/navbar";
 import Index from "./pages/Index";
-import Signup from "./pages/Signup";
+import Signup from "./components/Signup";
 import Garage from "./pages/Garage";
 import AddVehicle from "./pages/AddVehicle";
 import DTCCodes from "./pages/DTCCodes";
@@ -31,7 +31,7 @@ const App = () => {
                   <Routes>
                     <Route element={<Layout />}>
                       <Route index element={<Index />} />
-                      <Route path="/signup" element={<Signup />} />
+                      <Route path="/signup" element={<Signup isPro={isPro} setIsPro={setIsPro} />} />
                       <Route path="/garage" element={<Garage />} />
                       <Route path="/add-vehicle" element={<AddVehicle />} />
                       <Route path="/dtc-codes" element={<DTCCodes />} />
