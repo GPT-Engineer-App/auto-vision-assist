@@ -25,33 +25,39 @@ export const purchaseProVersion = async () => {
   
   const stripe = await stripePromise;
   
-  // Create a Checkout Session on your server
-  const response = await fetch('/create-checkout-session', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify({
-      priceId: 'price_1234567890', // Replace with your actual Stripe Price ID for Pro version
-      userId: auth.currentUser.uid,
-    }),
-  });
-  
-  const session = await response.json();
-  
-  // Redirect to Stripe Checkout
-  const result = await stripe.redirectToCheckout({
-    sessionId: session.id,
-  });
-  
-  if (result.error) {
-    console.error('Error in checkout:', result.error);
-    throw new Error('Failed to initiate checkout');
+  try {
+    // Create a Checkout Session on your server
+    const response = await fetch('/api/create-checkout-session', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        priceId: import.meta.env.VITE_STRIPE_PRO_PRICE_ID,
+        userId: auth.currentUser.uid,
+      }),
+    });
+    
+    if (!response.ok) {
+      throw new Error('Failed to create checkout session');
+    }
+
+    const session = await response.json();
+    
+    // Redirect to Stripe Checkout
+    const result = await stripe.redirectToCheckout({
+      sessionId: session.id,
+    });
+    
+    if (result.error) {
+      throw new Error(result.error.message);
+    }
+    
+    return true;
+  } catch (error) {
+    console.error('Error in Pro version purchase:', error);
+    throw error;
   }
-  
-  // The actual update of the user's pro status should be done on the server
-  // after receiving a webhook from Stripe confirming the payment
-  return true;
 };
 
 export const checkProPurchaseStatus = async () => {

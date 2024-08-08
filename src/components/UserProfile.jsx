@@ -109,7 +109,7 @@ const UserProfile = ({ isPro, setIsPro, user }) => {
     });
   };
 
-  const handleProUpgrade = async (isPurchased = false) => {
+  const handleProUpgrade = async () => {
     if (!user) {
       toast.error("You must be logged in to change your subscription");
       return;
@@ -117,24 +117,12 @@ const UserProfile = ({ isPro, setIsPro, user }) => {
 
     setLoading(true);
     try {
-      if (!isPurchased) {
-        // Initiate the purchase process
-        const success = await purchaseProVersion();
-        if (!success) {
-          toast.error("Pro version purchase failed");
-          setLoading(false);
-          return;
-        }
-      }
-
-      // Update user's pro status in Firestore
-      await setDoc(doc(db, "users", user.uid), { isPro: true }, { merge: true });
-      setIsProEnabled(true);
-      setIsPro(true);
-      toast.success("Upgraded to Pro successfully!");
+      await purchaseProVersion();
+      // The actual status update will be handled by a webhook
+      toast.success("Redirecting to payment page...");
     } catch (error) {
-      console.error("Error updating pro status:", error);
-      toast.error("Failed to update subscription status");
+      console.error("Error initiating pro upgrade:", error);
+      toast.error("Failed to initiate upgrade process. Please try again.");
     } finally {
       setLoading(false);
     }
