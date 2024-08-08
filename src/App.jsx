@@ -5,15 +5,7 @@ import { BrowserRouter as Router } from "react-router-dom";
 import { ThemeProvider } from "@/components/theme-provider";
 import { AuthProvider } from "./contexts/AuthContext";
 import { ProStatusProvider } from "./contexts/ProStatusContext";
-import { Routes, Route } from "react-router-dom";
-import Layout from "./layouts/navbar";
-import Index from "./pages/Index";
-import Signup from "./pages/Signup";
-import AddVehicle from "./pages/AddVehicle";
-import Garage from "./pages/Garage";
-import DTCCodes from "./pages/DTCCodes";
-import RangeFinder from "./pages/RangeFinder";
-import UserProfile from "./components/UserProfile";
+import AppRoutes from "./AppRoutes";
 
 const queryClient = new QueryClient();
 
@@ -26,18 +18,7 @@ const App = () => {
             <ProStatusProvider>
               <TooltipProvider>
                 <Toaster />
-                <Routes>
-                  <Route element={<Layout />}>
-                    <Route index element={<Index />} />
-                    <Route path="/signup" element={<Signup />} />
-                    <Route path="/add-vehicle" element={<AddVehicle />} />
-                    <Route path="/garage" element={<Garage />} />
-                    <Route path="/dtc-codes" element={<DTCCodes />} />
-                    <Route path="/range-finder" element={<RangeFinder />} />
-                    <Route path="/range-finder/:dtc" element={<RangeFinder />} />
-                    <Route path="/profile" element={<UserProfile />} />
-                  </Route>
-                </Routes>
+                <AppRoutes />
               </TooltipProvider>
             </ProStatusProvider>
           </AuthProvider>

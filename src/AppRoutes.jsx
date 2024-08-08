@@ -1,13 +1,15 @@
 import React, { lazy, Suspense } from "react";
 import { Routes, Route, Navigate } from "react-router-dom";
 import Layout from "./layouts/navbar";
-import { navItems } from "./nav-items";
 import { useAuth } from "./contexts/AuthContext";
 
 const Index = lazy(() => import("./pages/Index"));
 const Signup = lazy(() => import("./pages/Signup"));
-const UserProfile = lazy(() => import("./components/UserProfile"));
+const AddVehicle = lazy(() => import("./pages/AddVehicle"));
+const Garage = lazy(() => import("./pages/Garage"));
+const DTCCodes = lazy(() => import("./pages/DTCCodes"));
 const RangeFinder = lazy(() => import("./pages/RangeFinder"));
+const UserProfile = lazy(() => import("./components/UserProfile"));
 
 const AppRoutes = () => {
   const { user, loading } = useAuth();
@@ -31,37 +33,12 @@ const AppRoutes = () => {
       <Route element={<Layout />}>
         <Route index element={<Suspense fallback={<div>Loading...</div>}><Index /></Suspense>} />
         <Route path="/signup" element={<Suspense fallback={<div>Loading...</div>}><Signup /></Suspense>} />
-        {navItems.map((item) => (
-          <Route 
-            key={item.to} 
-            path={item.to} 
-            element={
-              item.to === "/" || item.to === "/signup" ? (
-                <Suspense fallback={<div>Loading...</div>}>{item.page}</Suspense>
-              ) : (
-                <ProtectedRoute>
-                  <Suspense fallback={<div>Loading...</div>}>{item.page}</Suspense>
-                </ProtectedRoute>
-              )
-            }
-          />
-        ))}
-        <Route 
-          path="/profile" 
-          element={
-            <ProtectedRoute>
-              <Suspense fallback={<div>Loading...</div>}><UserProfile /></Suspense>
-            </ProtectedRoute>
-          } 
-        />
-        <Route 
-          path="/range-finder/:dtc" 
-          element={
-            <ProtectedRoute>
-              <Suspense fallback={<div>Loading...</div>}><RangeFinder /></Suspense>
-            </ProtectedRoute>
-          } 
-        />
+        <Route path="/add-vehicle" element={<ProtectedRoute><Suspense fallback={<div>Loading...</div>}><AddVehicle /></Suspense></ProtectedRoute>} />
+        <Route path="/garage" element={<ProtectedRoute><Suspense fallback={<div>Loading...</div>}><Garage /></Suspense></ProtectedRoute>} />
+        <Route path="/dtc-codes" element={<ProtectedRoute><Suspense fallback={<div>Loading...</div>}><DTCCodes /></Suspense></ProtectedRoute>} />
+        <Route path="/range-finder" element={<ProtectedRoute><Suspense fallback={<div>Loading...</div>}><RangeFinder /></Suspense></ProtectedRoute>} />
+        <Route path="/range-finder/:dtc" element={<ProtectedRoute><Suspense fallback={<div>Loading...</div>}><RangeFinder /></Suspense></ProtectedRoute>} />
+        <Route path="/profile" element={<ProtectedRoute><Suspense fallback={<div>Loading...</div>}><UserProfile /></Suspense></ProtectedRoute>} />
       </Route>
     </Routes>
   );
