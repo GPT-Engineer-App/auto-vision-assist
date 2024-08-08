@@ -72,7 +72,7 @@ export const fetchAllMakes = async () => {
     return await response.json();
   } catch (error) {
     console.error('Error fetching makes:', error);
-    return [];
+    throw new Error('Failed to fetch vehicle makes. Please check your internet connection and try again.');
   }
 };
 
@@ -85,7 +85,7 @@ export const fetchModelsForMake = async (make) => {
     return await response.json();
   } catch (error) {
     console.error('Error fetching models:', error);
-    return [];
+    throw new Error('Failed to fetch vehicle models. Please check your internet connection and try again.');
   }
 };
 
@@ -98,7 +98,7 @@ export const fetchEngineSizesForMakeAndModel = async (year, make, model) => {
     return await response.json();
   } catch (error) {
     console.error('Error fetching engine sizes:', error);
-    return [];
+    throw new Error('Failed to fetch engine sizes. Please check your internet connection and try again.');
   }
 };
 

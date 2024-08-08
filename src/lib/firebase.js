@@ -22,47 +22,82 @@ export const googleProvider = new GoogleAuthProvider();
 export const signInWithGoogle = () => signInWithPopup(auth, googleProvider);
 
 export const fetchDTCByCode = async (code) => {
-  const dtcRef = doc(db, "dtcCodes", code);
-  const dtcSnap = await getDoc(dtcRef);
-  return dtcSnap.exists() ? dtcSnap.data() : null;
+  try {
+    const dtcRef = doc(db, "dtcCodes", code);
+    const dtcSnap = await getDoc(dtcRef);
+    return dtcSnap.exists() ? dtcSnap.data() : null;
+  } catch (error) {
+    console.error("Error fetching DTC by code:", error);
+    throw new Error("Failed to fetch DTC information. Please try again.");
+  }
 };
 
 export const fetchAllDTCs = async () => {
-  const dtcRef = collection(db, "dtcCodes");
-  const querySnapshot = await getDocs(dtcRef);
-  return querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+  try {
+    const dtcRef = collection(db, "dtcCodes");
+    const querySnapshot = await getDocs(dtcRef);
+    return querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+  } catch (error) {
+    console.error("Error fetching all DTCs:", error);
+    throw new Error("Failed to fetch DTC codes. Please try again.");
+  }
 };
 
 export const searchDTCs = async (searchTerm) => {
-  const dtcRef = collection(db, "dtcCodes");
-  const q = query(dtcRef, 
-    where("code", ">=", searchTerm.toUpperCase()),
-    where("code", "<=", searchTerm.toUpperCase() + '\uf8ff')
-  );
-  const querySnapshot = await getDocs(q);
-  return querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+  try {
+    const dtcRef = collection(db, "dtcCodes");
+    const q = query(dtcRef, 
+      where("code", ">=", searchTerm.toUpperCase()),
+      where("code", "<=", searchTerm.toUpperCase() + '\uf8ff')
+    );
+    const querySnapshot = await getDocs(q);
+    return querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+  } catch (error) {
+    console.error("Error searching DTCs:", error);
+    throw new Error("Failed to search DTC codes. Please try again.");
+  }
 };
 
 export const updateData = async (collectionName, docId, data) => {
-  const docRef = doc(db, collectionName, docId);
-  await updateDoc(docRef, data);
+  try {
+    const docRef = doc(db, collectionName, docId);
+    await updateDoc(docRef, data);
+  } catch (error) {
+    console.error(`Error updating document in ${collectionName}:`, error);
+    throw new Error(`Failed to update ${collectionName}. Please try again.`);
+  }
 };
 
 export const deleteData = async (collectionName, docId) => {
-  await deleteDoc(doc(db, collectionName, docId));
+  try {
+    await deleteDoc(doc(db, collectionName, docId));
+  } catch (error) {
+    console.error(`Error deleting document from ${collectionName}:`, error);
+    throw new Error(`Failed to delete from ${collectionName}. Please try again.`);
+  }
 };
 
 export const getData = async (collectionName, docId) => {
-  const docRef = doc(db, collectionName, docId);
-  const docSnap = await getDoc(docRef);
-  return docSnap.exists() ? docSnap.data() : null;
+  try {
+    const docRef = doc(db, collectionName, docId);
+    const docSnap = await getDoc(docRef);
+    return docSnap.exists() ? docSnap.data() : null;
+  } catch (error) {
+    console.error(`Error getting document from ${collectionName}:`, error);
+    throw new Error(`Failed to fetch data from ${collectionName}. Please try again.`);
+  }
 };
 
 export const fetchVehiclesForUser = async (userId) => {
-  const vehiclesRef = collection(db, "vehicles");
-  const q = query(vehiclesRef, where("userId", "==", userId));
-  const querySnapshot = await getDocs(q);
-  return querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+  try {
+    const vehiclesRef = collection(db, "vehicles");
+    const q = query(vehiclesRef, where("userId", "==", userId));
+    const querySnapshot = await getDocs(q);
+    return querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+  } catch (error) {
+    console.error("Error fetching vehicles for user:", error);
+    throw new Error("Failed to fetch vehicles. Please try again.");
+  }
 };
 
 if (import.meta.env.DEV) {
