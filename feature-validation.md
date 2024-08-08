@@ -1,6 +1,20 @@
 # Feature Validation
 
-## 1. User Authentication
+## 1. U## 4. Pro User Features
+
+- **Status**: Partially Functional
+- **Description**: Pro users have access to additional features, but some improvements are needed:
+  - Implement actual payment processing for Pro upgrade
+  - Add more exclusive Pro features
+
+## 5. DTC Code Lookup
+
+- **Status**: Functional
+- **Description**: Users can search for and view information about DTC (Diagnostic Trouble Code) codes.
+
+## 6. Range Finder: DTC
+
+- **Status**: Partially Functionalser Authentication
 - **Status**: Functional
 - **Description**: Users can sign up, log in, and log out using email/password authentication.
 
