@@ -6,7 +6,6 @@ import { ThemeProvider } from "@/components/theme-provider";
 import { AuthProvider } from "./contexts/AuthContext";
 import { ProStatusProvider } from "./contexts/ProStatusContext";
 import AppRoutes from "./AppRoutes";
-import { Suspense } from "react";
 
 const queryClient = new QueryClient();
 
@@ -19,9 +18,7 @@ const App = () => {
             <ProStatusProvider>
               <TooltipProvider>
                 <Toaster />
-                <Suspense fallback={<div>Loading...</div>}>
-                  <AppRoutes />
-                </Suspense>
+                <AppRoutes />
               </TooltipProvider>
             </ProStatusProvider>
           </AuthProvider>

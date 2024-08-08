@@ -29,18 +29,18 @@ const AppRoutes = () => {
   return (
     <Routes>
       <Route element={<Layout />}>
-        <Route index element={<Index />} />
-        <Route path="/signup" element={<Signup />} />
+        <Route index element={<Suspense fallback={<div>Loading...</div>}><Index /></Suspense>} />
+        <Route path="/signup" element={<Suspense fallback={<div>Loading...</div>}><Signup /></Suspense>} />
         {navItems.map((item) => (
           <Route 
             key={item.to} 
             path={item.to} 
             element={
               item.to === "/" || item.to === "/signup" ? (
-                item.page
+                <Suspense fallback={<div>Loading...</div>}>{item.page}</Suspense>
               ) : (
                 <ProtectedRoute>
-                  {item.page}
+                  <Suspense fallback={<div>Loading...</div>}>{item.page}</Suspense>
                 </ProtectedRoute>
               )
             }
@@ -50,7 +50,7 @@ const AppRoutes = () => {
           path="/profile" 
           element={
             <ProtectedRoute>
-              <UserProfile />
+              <Suspense fallback={<div>Loading...</div>}><UserProfile /></Suspense>
             </ProtectedRoute>
           } 
         />
@@ -58,7 +58,7 @@ const AppRoutes = () => {
           path="/range-finder/:dtc" 
           element={
             <ProtectedRoute>
-              <RangeFinder />
+              <Suspense fallback={<div>Loading...</div>}><RangeFinder /></Suspense>
             </ProtectedRoute>
           } 
         />
