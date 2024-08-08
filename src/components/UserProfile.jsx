@@ -10,8 +10,13 @@ import { doc, getDoc, setDoc, updateDoc } from "firebase/firestore";
 import { purchaseProVersion, checkProPurchaseStatus } from "@/lib/inAppPurchase";
 import { savePreferences, loadPreferences } from "@/lib/userPreferences";
 import { useNavigate } from 'react-router-dom';
+import { motion } from 'framer-motion';
+import { useAuth } from "@/contexts/AuthContext";
+import { useProStatus } from "@/contexts/ProStatusContext";
 
-const UserProfile = ({ isPro, setIsPro, user }) => {
+const UserProfile = () => {
+  const { user } = useAuth();
+  const { isPro, updateProStatus } = useProStatus();
   const [isProEnabled, setIsProEnabled] = useState(isPro);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);

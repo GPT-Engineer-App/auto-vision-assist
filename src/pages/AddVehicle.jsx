@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { addDoc, collection } from "firebase/firestore";
 import { db, auth } from "@/lib/firebase";
@@ -7,6 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { toast } from "sonner";
+import { motion } from "framer-motion";
 
 const AddVehicle = () => {
   const [year, setYear] = useState("");
@@ -115,7 +116,13 @@ const AddVehicle = () => {
   };
 
   return (
-    <div className="container mx-auto p-4">
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      exit={{ opacity: 0, y: -20 }}
+      transition={{ duration: 0.5 }}
+      className="container mx-auto p-4"
+    >
       <h1 className="text-3xl font-bold mb-6">Add a New Vehicle</h1>
       <form onSubmit={handleSubmit} className="space-y-4">
         <div>
@@ -220,7 +227,7 @@ const AddVehicle = () => {
         </div>
         <Button type="submit">Add Vehicle</Button>
       </form>
-    </div>
+    </motion.div>
   );
 };
 
