@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { navItems } from "@/nav-items";
-import { Outlet } from "react-router-dom";
+import { Outlet, useLocation } from "react-router-dom";
 import { DesktopNavbar } from "./_components/DesktopNavbar";
 import { MobileSheet } from "./_components/MobileSheet";
 import { UserMenu } from "./_components/UserMenu";
@@ -33,7 +33,7 @@ const Layout = () => {
         </div>
       </motion.header>
       <main className="flex-1 container py-6 bg-background">
-        <Outlet />
+        {useLocation().pathname !== "/" && <Outlet />}
       </main>
       <motion.footer
         initial={{ y: 100 }}
