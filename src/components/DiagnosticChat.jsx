@@ -7,7 +7,10 @@ import { Textarea } from "@/components/ui/textarea";
 import { toast } from "sonner";
 import { generateDiagnosticResponse } from "@/lib/openai";
 
-const DiagnosticChat = ({ vehicleId, isPro }) => {
+import { useProStatus } from "@/contexts/ProStatusContext";
+
+const DiagnosticChat = ({ vehicleId }) => {
+  const { isPro } = useProStatus();
   const [input, setInput] = useState("");
   const [response, setResponse] = useState("");
   const [queryCount, setQueryCount] = useState(0);

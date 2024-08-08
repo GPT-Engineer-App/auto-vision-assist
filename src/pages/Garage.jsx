@@ -17,7 +17,12 @@ import DTCModal from "@/components/DTCModal";
 import ProGarageView from "@/components/ProGarageView";
 import DiagnosticChat from "@/components/DiagnosticChat";
 
-const Garage = ({ isPro, setIsPro, user }) => {
+import { useAuth } from "@/contexts/AuthContext";
+import { useProStatus } from "@/contexts/ProStatusContext";
+
+const Garage = () => {
+  const { user } = useAuth();
+  const { isPro, setIsPro } = useProStatus();
   const [vehicles, setVehicles] = useState([]);
   const [loading, setLoading] = useState(true);
   const [editingVehicle, setEditingVehicle] = useState(null);

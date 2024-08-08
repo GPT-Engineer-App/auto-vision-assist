@@ -12,7 +12,10 @@ import { purchaseQueryPack, initializeBillingClient } from '@/lib/inAppPurchase'
 import { getFirestore, doc, getDoc, updateDoc, increment } from 'firebase/firestore';
 import { getAuth } from 'firebase/auth';
 
-const RangeFinder = ({ isPro }) => {
+import { useProStatus } from "@/contexts/ProStatusContext";
+
+const RangeFinder = () => {
+  const { isPro } = useProStatus();
   const { dtc } = useParams();
   const [remainingQueries, setRemainingQueries] = useState(0);
   const [vehicleInfo, setVehicleInfo] = useState({

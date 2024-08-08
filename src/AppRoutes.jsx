@@ -42,7 +42,7 @@ const AppRoutes = () => {
                 item.page
               ) : (
                 <ProtectedRoute>
-                  {React.cloneElement(item.page, { isPro, user })}
+                  {item.page}
                 </ProtectedRoute>
               )
             }

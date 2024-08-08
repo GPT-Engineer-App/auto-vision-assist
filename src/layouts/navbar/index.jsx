@@ -7,8 +7,13 @@ import { UserMenu } from "./_components/UserMenu";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { motion } from "framer-motion";
 
-const Layout = ({ user, isPro }) => {
+import { useAuth } from "@/contexts/AuthContext";
+import { useProStatus } from "@/contexts/ProStatusContext";
+
+const Layout = () => {
   const [isOpen, setIsOpen] = useState(false);
+  const { user } = useAuth();
+  const { isPro } = useProStatus();
 
   return (
     <div className="flex min-h-screen w-full flex-col bg-background text-foreground">
@@ -23,7 +28,7 @@ const Layout = ({ user, isPro }) => {
           <MobileSheet navItems={navItems} isOpen={isOpen} setIsOpen={setIsOpen} />
           <div className="flex items-center space-x-4">
             <ThemeToggle />
-            <UserMenu user={user} isPro={isPro} />
+            <UserMenu />
           </div>
         </div>
       </motion.header>
