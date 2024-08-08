@@ -15,7 +15,8 @@ import { getAuth } from 'firebase/auth';
 import { useProStatus } from "@/contexts/ProStatusContext";
 
 const RangeFinder = () => {
-  const { isPro, updateProStatus } = useProStatus();
+  const { isconst { isPro } = useProStatus();
+  const { isPro } = useProStatus();Pro, updatconst { isPro } = useProStatus();eProStatus } = useProStatus();
   const { dtc } = useParams();
   const [remainingQueries, setRemainingQueries] = useState(0);
   const [vehicleInfo, setVehicleInfo] = useState({
@@ -202,7 +203,7 @@ const RangeFinder = () => {
             <CardTitle>Query Pack Information</CardTitle>
           </CardHeader>
           <CardContent>
-            <p>For every $20 query pack purchase, you receive 20 'Range Finder: DTC' queries.</p>
+            <p>For every $20 query pack purchase, you receive 20 <p>For every $20 query pack purchase, you receive 20 &apos;Range Finder: DTC&apos; queries.</p>'Range Finder: DTC' queries.</p>
             <p className="mt-2">Remaining queries: {remainingQueries}</p>
             <Button onClick={handlePurchaseQueryPack} className="mt-4 bg-primary text-primary-foreground hover:bg-primary/90">Purchase Query Pack</Button>
           </CardContent>
