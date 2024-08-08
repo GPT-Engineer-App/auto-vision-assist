@@ -10,6 +10,8 @@ import { toast } from "sonner";
 import { Lock, Mail, User, AlertTriangle } from "lucide-react";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 
 const AuthForm = ({ isLogin }) => {
   const [email, setEmail] = useState("");
@@ -118,20 +120,95 @@ const AuthForm = ({ isLogin }) => {
   };
 
   return (
-    <>
-      {networkError && (
-        <Alert variant="destructive" className="mb-4">
-          <AlertTriangle className="h-4 w-4" />
-          <AlertTitle>Network Error</AlertTitle>
-          <AlertDescription>
-            Unable to connect to the server. Please check your internet connection and try again.
-          </AlertDescription>
-        </Alert>
-      )}
-      <form onSubmit={handleSubmit} className="space-y-4">
-        {/* ... (form content) */}
-      </form>
-    </>
+    <Card>
+      <CardHeader>
+        <CardTitle>{isLogin ? "Login" : "Sign Up"}</CardTitle>
+        <CardDescription>
+          {isLogin ? "Enter your credentials to access your account" : "Create a new account"}
+        </CardDescription>
+      </CardHeader>
+      <CardContent>
+        {networkError && (
+          <Alert variant="destructive" className="mb-4">
+            <AlertTriangle className="h-4 w-4" />
+            <AlertTitle>Network Error</AlertTitle>
+            <AlertDescription>
+              Unable to connect to the server. Please check your internet connection and try again.
+            </AlertDescription>
+          </Alert>
+        )}
+        <Form onSubmit={handleSubmit}>
+          <FormField
+            name="email"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Email</FormLabel>
+                <FormControl>
+                  <Input placeholder="Enter your email" {...field} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          <FormField
+            name="password"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Password</FormLabel>
+                <FormControl>
+                  <Input type="password" placeholder="Enter your password" {...field} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          {!isLogin && (
+            <FormField
+              name="username"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Username</FormLabel>
+                  <FormControl>
+                    <Input placeholder="Choose a username" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          )}
+          {!isLogin && (
+            <FormField
+              name="userType"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>User Type</FormLabel>
+                  <Select onValueChange={field.onChange} defaultValue={field.value}>
+                    <FormControl>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select user type" />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      <SelectItem value="free">Free</SelectItem>
+                      <SelectItem value="pro">Pro</SelectItem>
+                    </SelectContent>
+                  </Select>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          )}
+          <Button type="submit" className="w-full mt-4">
+            {isLogin ? "Login" : "Sign Up"}
+          </Button>
+        </Form>
+      </CardContent>
+      <CardFooter>
+        <Button variant="outline" onClick={handleGoogleSignIn} className="w-full">
+          Sign in with Google
+        </Button>
+      </CardFooter>
+    </Card>
   );
 };
 

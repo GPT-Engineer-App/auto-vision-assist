@@ -5,6 +5,8 @@ import { Button } from "@/components/ui/button";
 import { fetchDTCByCode } from '@/lib/firebase';
 import { toast } from "sonner";
 import { generateDiagnosticResponse } from '@/lib/openai';
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 
 const DTCModal = ({ isOpen, onClose }) => {
   const [dtcCode, setDtcCode] = useState('');
@@ -52,30 +54,44 @@ const DTCModal = ({ isOpen, onClose }) => {
         <DialogHeader>
           <DialogTitle>DTC Code Reference</DialogTitle>
         </DialogHeader>
-        <div className="grid gap-4 py-4">
-          <div className="flex items-center gap-4">
-            <Input
-              placeholder="Enter DTC"
-              value={dtcCode}
-              onChange={(e) => setDtcCode(e.target.value)}
-            />
-            <Button onClick={handleSearch} disabled={loading}>
-              {loading ? "Searching..." : "Search"}
-            </Button>
-          </div>
-          {dtcInfo && (
-            <div className="grid gap-2">
-              <h3 className="font-semibold">DTC: {dtcInfo.code}</h3>
+        <Form onSubmit={(e) => { e.preventDefault(); handleSearch(); }}>
+          <FormField
+            name="dtcCode"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>DTC Code</FormLabel>
+                <FormControl>
+                  <Input
+                    placeholder="Enter DTC"
+                    {...field}
+                    value={dtcCode}
+                    onChange={(e) => setDtcCode(e.target.value)}
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          <Button type="submit" className="mt-4" disabled={loading}>
+            {loading ? "Searching..." : "Search"}
+          </Button>
+        </Form>
+        {dtcInfo && (
+          <Card className="mt-4">
+            <CardHeader>
+              <CardTitle>DTC: {dtcInfo.code}</CardTitle>
+            </CardHeader>
+            <CardContent>
               <p><strong>Description:</strong> {dtcInfo.description}</p>
               {diagnosticResponse && (
-                <div>
-                  <h4 className="font-semibold mt-2">Diagnostic Response:</h4>
+                <div className="mt-4">
+                  <h4 className="font-semibold">Diagnostic Response:</h4>
                   <p>{diagnosticResponse}</p>
                 </div>
               )}
-            </div>
-          )}
-        </div>
+            </CardContent>
+          </Card>
+        )}
         <DialogFooter>
           <Button onClick={handleClose}>Close</Button>
         </DialogFooter>
