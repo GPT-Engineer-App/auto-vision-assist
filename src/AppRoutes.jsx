@@ -1,8 +1,8 @@
-import React, { lazy, Suspense, useState, useEffect } from "react";
+import React, { lazy, Suspense } from "react";
 import { Routes, Route, Navigate } from "react-router-dom";
 import Layout from "./layouts/navbar";
 import { navItems } from "./nav-items";
-import { auth } from "./lib/firebase";
+import { useAuth } from "./contexts/AuthContext";
 
 const Index = lazy(() => import("./pages/Index"));
 const Signup = lazy(() => import("./pages/Signup"));
@@ -10,17 +10,7 @@ const UserProfile = lazy(() => import("./components/UserProfile"));
 const RangeFinder = lazy(() => import("./pages/RangeFinder"));
 
 const AppRoutes = () => {
-  const [user, setUser] = useState(null);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    const unsubscribe = auth.onAuthStateChanged((currentUser) => {
-      setUser(currentUser);
-      setLoading(false);
-    });
-
-    return () => unsubscribe();
-  }, []);
+  const { user, loading } = useAuth();
 
   const ProtectedRoute = ({ children }) => {
     if (loading) {
@@ -39,18 +29,18 @@ const AppRoutes = () => {
   return (
     <Routes>
       <Route element={<Layout />}>
-        <Route index element={<Index />} />
-        <Route path="/signup" element={<Signup />} />
+        <Route index element={<Suspense fallback={<div>Loading...</div>}><Index /></Suspense>} />
+        <Route path="/signup" element={<Suspense fallback={<div>Loading...</div>}><Signup /></Suspense>} />
         {navItems.map((item) => (
           <Route 
             key={item.to} 
             path={item.to} 
             element={
               item.to === "/" || item.to === "/signup" ? (
-                item.page
+                <Suspense fallback={<div>Loading...</div>}>{item.page}</Suspense>
               ) : (
                 <ProtectedRoute>
-                  {item.page}
+                  <Suspense fallback={<div>Loading...</div>}>{item.page}</Suspense>
                 </ProtectedRoute>
               )
             }
@@ -60,7 +50,7 @@ const AppRoutes = () => {
           path="/profile" 
           element={
             <ProtectedRoute>
-              <UserProfile />
+              <Suspense fallback={<div>Loading...</div>}><UserProfile /></Suspense>
             </ProtectedRoute>
           } 
         />
@@ -68,7 +58,7 @@ const AppRoutes = () => {
           path="/range-finder/:dtc" 
           element={
             <ProtectedRoute>
-              <RangeFinder />
+              <Suspense fallback={<div>Loading...</div>}><RangeFinder /></Suspense>
             </ProtectedRoute>
           } 
         />
