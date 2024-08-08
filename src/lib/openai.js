@@ -28,7 +28,7 @@ class RateLimiter {
 
 const rateLimiter = new RateLimiter(50, 60 * 1000); // 50 requests per minute
 
-export const generateDiagnosticResponse = async (prompt) => {
+export const generateDiagnosticResponse = async (prompt, retries = 3) => {
   try {
     await rateLimiter.waitForToken();
     const response = await openai.chat.completions.create({
@@ -37,17 +37,49 @@ export const generateDiagnosticResponse = async (prompt) => {
         { role: "system", content: "You are an automotive diagnostic assistant. Provide concise and helpful responses to vehicle-related queries." },
         { role: "user", content: prompt }
       ],
-      max_tokens: 150
+      max_tokens: 150,
+      temperature: 0.7,
+      top_p: 1,
+      frequency_penalty: 0,
+      presence_penalty: 0,
     });
 
-    return response.choices[0].message.content.trim();
+    if (response.choices && response.choices.length > 0) {
+      return response.choices[0].message.content.trim();
+    } else {
+      throw new Error("No response generated");
+    }
   } catch (error) {
     console.error('Error calling OpenAI API:', error);
-    if (error.message.includes("rate limit")) {
-      toast.error("Rate limit exceeded. Please try again later.");
+    if (error.response) {
+      console.error(error.response.status, error.response.data);
+    }
+
+    if (error.message.includes("rate limit") || error.response?.status === 429) {
+      if (retries > 0) {
+        const delay = Math.pow(2, 4 - retries) * 1000;
+        await new Promise(resolve => setTimeout(resolve, delay));
+        return generateDiagnosticResponse(prompt, retries - 1);
+      } else {
+        toast.error("Rate limit exceeded. Please try again later.");
+      }
+    } else if (error.response?.status === 401) {
+      toast.error("Authentication error. Please check your API key.");
+    } else if (error.response?.status >= 500) {
+      toast.error("OpenAI service is currently unavailable. Please try again later.");
     } else {
       toast.error("Failed to generate diagnostic response. Please try again.");
     }
     throw error;
+  }
+};
+
+export const validateOpenAIKey = async () => {
+  try {
+    await openai.models.list();
+    return true;
+  } catch (error) {
+    console.error('Error validating OpenAI API key:', error);
+    return false;
   }
 };

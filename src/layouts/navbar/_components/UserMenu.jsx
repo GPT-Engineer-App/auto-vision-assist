@@ -13,7 +13,12 @@ import { signOut } from "firebase/auth";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 
-export const UserMenu = ({ user, isPro, setIsPro }) => {
+import { useAuth } from "@/contexts/AuthContext";
+import { useProStatus } from "@/contexts/ProStatusContext";
+
+export const UserMenu = () => {
+  const { user } = useAuth();
+  const { isPro } = useProStatus();
   const navigate = useNavigate();
 
   const handleSignOut = async () => {

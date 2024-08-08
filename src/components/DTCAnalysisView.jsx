@@ -7,12 +7,19 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
 const DTCAnalysisView = ({ dtc }) => {
+  if (!dtc) {
+    return <div>No DTC data available.</div>;
+  }
+
   return (
-    <div className="space-y-6">
-      <div className="bg-white p-6 rounded-lg shadow">
-        <h2 className="text-xl font-semibold mb-4">DTC Analysis: {dtc.code}</h2>
+    <Card className="w-full">
+      <CardHeader>
+        <CardTitle>DTC Analysis: {dtc.code}</CardTitle>
+      </CardHeader>
+      <CardContent>
         <Table>
           <TableBody>
             <TableRow>
@@ -21,20 +28,24 @@ const DTCAnalysisView = ({ dtc }) => {
             </TableRow>
             <TableRow>
               <TableCell className="font-medium">Possible Causes</TableCell>
-              <TableCell>{dtc.possible_causes}</TableCell>
+              <TableCell>{dtc.possibleCauses}</TableCell>
             </TableRow>
             <TableRow>
-              <TableCell className="font-medium">Diagnostic Aids</TableCell>
-              <TableCell>{dtc.diagnostic_aids}</TableCell>
+              <TableCell className="font-medium">Diagnostic Steps</TableCell>
+              <TableCell>{dtc.diagnosticSteps}</TableCell>
             </TableRow>
             <TableRow>
-              <TableCell className="font-medium">Application</TableCell>
-              <TableCell>{dtc.application}</TableCell>
+              <TableCell className="font-medium">Severity</TableCell>
+              <TableCell>{dtc.severity}</TableCell>
+            </TableRow>
+            <TableRow>
+              <TableCell className="font-medium">System</TableCell>
+              <TableCell>{dtc.system}</TableCell>
             </TableRow>
           </TableBody>
         </Table>
-      </div>
-    </div>
+      </CardContent>
+    </Card>
   );
 };
 

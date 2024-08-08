@@ -1,11 +1,13 @@
 import { Home, UserPlus, Car, Wrench, FileCode2, User, Compass } from "lucide-react";
-import Index from "./pages/Index.jsx";
-import Signup from "./pages/Signup.jsx";
-import AddVehicle from "./pages/AddVehicle.jsx";
-import GaragePage from "./pages/Garage.jsx";
-import DTCCodes from "./pages/DTCCodes.jsx";
-import UserProfile from "./components/UserProfile.jsx";
-import RangeFinder from "./pages/RangeFinder.jsx";
+import { lazy } from "react";
+
+const Index = lazy(() => import("./pages/Index.jsx"));
+const Signup = lazy(() => import("./pages/Signup.jsx"));
+const AddVehicle = lazy(() => import("./pages/AddVehicle.jsx"));
+const GaragePage = lazy(() => import("./pages/Garage.jsx"));
+const DTCCodes = lazy(() => import("./pages/DTCCodes.jsx"));
+const UserProfile = lazy(() => import("./components/UserProfile.jsx"));
+const RangeFinder = lazy(() => import("./pages/RangeFinder.jsx"));
 
 export const navItems = [
   {

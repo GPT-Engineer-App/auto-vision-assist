@@ -6,7 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { toast } from "sonner";
 import { auth, db } from "@/lib/firebase";
-import { doc, getDoc, setDoc, updateDoc, collection, query, where, getDocs } from "firebase/firestore";
+import { doc, getDoc, setDoc, updateDoc } from "firebase/firestore";
 import { purchaseProVersion, checkProPurchaseStatus } from "@/lib/inAppPurchase";
 import { savePreferences, loadPreferences } from "@/lib/userPreferences";
 import { useNavigate } from 'react-router-dom';
@@ -109,7 +109,7 @@ const UserProfile = ({ isPro, setIsPro, user }) => {
     });
   };
 
-  const handleProUpgrade = async (isPurchased = false) => {
+  const handleProUpgrade = async () => {
     if (!user) {
       toast.error("You must be logged in to change your subscription");
       return;
@@ -117,24 +117,12 @@ const UserProfile = ({ isPro, setIsPro, user }) => {
 
     setLoading(true);
     try {
-      if (!isPurchased) {
-        // Initiate the purchase process
-        const success = await purchaseProVersion();
-        if (!success) {
-          toast.error("Pro version purchase failed");
-          setLoading(false);
-          return;
-        }
-      }
-
-      // Update user's pro status in Firestore
-      await setDoc(doc(db, "users", user.uid), { isPro: true }, { merge: true });
-      setIsProEnabled(true);
-      setIsPro(true);
-      toast.success("Upgraded to Pro successfully!");
+      await purchaseProVersion();
+      // The actual status update will be handled by a webhook
+      toast.success("Redirecting to payment page...");
     } catch (error) {
-      console.error("Error updating pro status:", error);
-      toast.error("Failed to update subscription status");
+      console.error("Error initiating pro upgrade:", error);
+      toast.error("Failed to initiate upgrade process. Please try again.");
     } finally {
       setLoading(false);
     }
@@ -267,16 +255,12 @@ const UserProfile = ({ isPro, setIsPro, user }) => {
         </div>
         <div className="flex items-center justify-between">
           <Label htmlFor="language">Language</Label>
-          <select
+          <Input
             id="language"
-            value={preferences.language}
-            onChange={(e) => handlePreferenceChange('language', e.target.value)}
-            className="border rounded p-2"
-          >
-            <option value="en">English</option>
-            <option value="es">Español</option>
-            <option value="fr">Français</option>
-          </select>
+            value="English"
+            disabled
+            className="w-32 text-right"
+          />
         </div>
       </div>
     </div>

@@ -1,5 +1,6 @@
-import React, { useState, useEffect } from "react";
-import { auth, getData, updateData, deleteData, fetchVehiclesForUser } from "@/lib/firebase";
+import React, { useState } from "react";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { auth, updateData, deleteData, fetchVehiclesForUser } from "@/lib/firebase";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -17,34 +18,48 @@ import DTCModal from "@/components/DTCModal";
 import ProGarageView from "@/components/ProGarageView";
 import DiagnosticChat from "@/components/DiagnosticChat";
 
-const Garage = ({ isPro, setIsPro, user }) => {
-  const [vehicles, setVehicles] = useState([]);
-  const [loading, setLoading] = useState(true);
+import { useAuth } from "@/contexts/AuthContext";
+import { useProStatus } from "@/contexts/ProStatusContext";
+
+const Garage = () => {
+  const { user } = useAuth();
+  const { isPro, updateProStatus } = useProStatus();
   const [editingVehicle, setEditingVehicle] = useState(null);
   const [openSightVehicle, setOpenSightVehicle] = useState(null);
   const [isDTCModalOpen, setIsDTCModalOpen] = useState(false);
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
 
-  useEffect(() => {
-    const fetchVehicles = async () => {
-      if (!user) {
-        navigate("/");
-        return;
-      }
-      setLoading(true);
-      try {
-        const vehicleData = await fetchVehiclesForUser(user.uid);
-        setVehicles(vehicleData);
-      } catch (error) {
-        console.error("Error fetching vehicles:", error);
-        toast.error("Error fetching vehicles. Please try again.");
-      } finally {
-        setLoading(false);
-      }
-    };
+  const { data: vehicles, isLoading, error } = useQuery({
+    queryKey: ['vehicles', user?.uid],
+    queryFn: () => fetchVehiclesForUser(user.uid),
+    enabled: !!user,
+  });
 
-    fetchVehicles();
-  }, [user, navigate]);
+  const updateVehicleMutation = useMutation({
+    mutationFn: (updatedVehicle) => updateData("vehicles", updatedVehicle.id, updatedVehicle),
+    onSuccess: () => {
+      queryClient.invalidateQueries(['vehicles', user?.uid]);
+      toast.success("Vehicle updated successfully");
+      setEditingVehicle(null);
+    },
+    onError: (error) => {
+      console.error("Error updating vehicle:", error);
+      toast.error("Error updating vehicle: " + error.message);
+    },
+  });
+
+  const deleteVehicleMutation = useMutation({
+    mutationFn: (vehicleId) => deleteData("vehicles", vehicleId),
+    onSuccess: () => {
+      queryClient.invalidateQueries(['vehicles', user?.uid]);
+      toast.success("Vehicle deleted successfully");
+    },
+    onError: (error) => {
+      console.error("Error deleting vehicle:", error);
+      toast.error("Error deleting vehicle: " + error.message);
+    },
+  });
 
   const handleAddVehicle = () => {
     if (!isPro && vehicles.length >= 1) {
@@ -60,28 +75,12 @@ const Garage = ({ isPro, setIsPro, user }) => {
     setEditingVehicle({ ...vehicle });
   };
 
-  const handleUpdateVehicle = async (updatedVehicle) => {
-    try {
-      const { id, ...vehicleData } = updatedVehicle;
-      await updateData("vehicles", id, vehicleData);
-      setVehicles(vehicles.map(v => v.id === id ? updatedVehicle : v));
-      toast.success("Vehicle updated successfully");
-      setEditingVehicle(null);
-    } catch (error) {
-      console.error("Error updating vehicle:", error);
-      toast.error("Error updating vehicle: " + error.message);
-    }
+  const handleUpdateVehicle = (updatedVehicle) => {
+    updateVehicleMutation.mutate(updatedVehicle);
   };
 
-  const handleDeleteVehicle = async (vehicleId) => {
-    try {
-      await deleteData("vehicles", vehicleId);
-      setVehicles(vehicles.filter(v => v.id !== vehicleId));
-      toast.success("Vehicle deleted successfully");
-    } catch (error) {
-      console.error("Error deleting vehicle:", error);
-      toast.error("Error deleting vehicle: " + error.message);
-    }
+  const handleDeleteVehicle = (vehicleId) => {
+    deleteVehicleMutation.mutate(vehicleId);
   };
 
   const handleOpenSight = (vehicle) => {
@@ -92,7 +91,7 @@ const Garage = ({ isPro, setIsPro, user }) => {
     }
   };
 
-  if (loading) {
+  if (isLoading) {
     return <div className="text-center mt-8">Loading...</div>;
   }
 

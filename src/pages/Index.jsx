@@ -3,11 +3,20 @@ import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { motion } from "framer-motion";
 import AuthForm from "@/components/AuthForm";
-import { useAuth } from "@/contexts/AuthContext";
+import { useState, useEffect } from "react";
+import { auth } from "@/lib/firebase";
 
 const Index = () => {
   const navigate = useNavigate();
-  const { user } = useAuth();
+  const [user, setUser] = useState(null);
+
+  useEffect(() => {
+    const unsubscribe = auth.onAuthStateChanged((currentUser) => {
+      setUser(currentUser);
+    });
+
+    return () => unsubscribe();
+  }, []);
 
   return (
     <motion.div 

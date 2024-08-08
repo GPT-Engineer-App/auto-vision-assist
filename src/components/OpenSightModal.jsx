@@ -1,10 +1,11 @@
 import { useState, useEffect } from "react";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Loader2 } from "lucide-react";
 import { VisuallyHidden } from "@radix-ui/react-visually-hidden";
 import { ResponsiveContainer, LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend } from 'recharts';
 import { BarChart, Bar } from 'recharts';
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
 const OpenSightModal = ({ vehicle, onClose }) => {
   const [diagnosticData, setDiagnosticData] = useState(null);
@@ -30,11 +31,8 @@ const OpenSightModal = ({ vehicle, onClose }) => {
   return (
     <Dialog open={!!vehicle} onOpenChange={onClose}>
       <DialogContent className="sm:max-w-[800px]">
-        <VisuallyHidden>
-          <DialogTitle>Open Sight Analysis</DialogTitle>
-        </VisuallyHidden>
         <DialogHeader>
-          <h2 className="text-lg font-semibold">Open Sight Analysis: {vehicle.year} {vehicle.make} {vehicle.model}</h2>
+          <DialogTitle>Open Sight Analysis: {vehicle.year} {vehicle.make} {vehicle.model}</DialogTitle>
         </DialogHeader>
         {loading ? (
           <div className="flex justify-center items-center h-40">
@@ -44,36 +42,48 @@ const OpenSightModal = ({ vehicle, onClose }) => {
           <div className="py-4">
             {diagnosticData && (
               <>
-                <h3 className="text-lg font-semibold mb-2">Diagnostic Data Visualization</h3>
-                <ResponsiveContainer width="100%" height={300}>
-                  <LineChart data={diagnosticData.timeSeriesData}>
-                    <CartesianGrid strokeDasharray="3 3" />
-                    <XAxis dataKey="timestamp" />
-                    <YAxis />
-                    <Tooltip />
-                    <Legend />
-                    <Line type="monotone" dataKey="engineTemp" stroke="#8884d8" name="Engine Temperature" />
-                    <Line type="monotone" dataKey="oilPressure" stroke="#82ca9d" name="Oil Pressure" />
-                  </LineChart>
-                </ResponsiveContainer>
-                <h3 className="text-lg font-semibold mt-6 mb-2">Component Health</h3>
-                <ResponsiveContainer width="100%" height={300}>
-                  <BarChart data={diagnosticData.componentHealth}>
-                    <CartesianGrid strokeDasharray="3 3" />
-                    <XAxis dataKey="name" />
-                    <YAxis />
-                    <Tooltip />
-                    <Legend />
-                    <Bar dataKey="health" fill="#8884d8" name="Health Score" />
-                  </BarChart>
-                </ResponsiveContainer>
+                <Card className="mb-6">
+                  <CardHeader>
+                    <CardTitle>Diagnostic Data Visualization</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <ResponsiveContainer width="100%" height={300}>
+                      <LineChart data={diagnosticData.timeSeriesData}>
+                        <CartesianGrid strokeDasharray="3 3" />
+                        <XAxis dataKey="timestamp" />
+                        <YAxis />
+                        <Tooltip />
+                        <Legend />
+                        <Line type="monotone" dataKey="engineTemp" stroke="#8884d8" name="Engine Temperature" />
+                        <Line type="monotone" dataKey="oilPressure" stroke="#82ca9d" name="Oil Pressure" />
+                      </LineChart>
+                    </ResponsiveContainer>
+                  </CardContent>
+                </Card>
+                <Card>
+                  <CardHeader>
+                    <CardTitle>Component Health</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <ResponsiveContainer width="100%" height={300}>
+                      <BarChart data={diagnosticData.componentHealth}>
+                        <CartesianGrid strokeDasharray="3 3" />
+                        <XAxis dataKey="name" />
+                        <YAxis />
+                        <Tooltip />
+                        <Legend />
+                        <Bar dataKey="health" fill="#8884d8" name="Health Score" />
+                      </BarChart>
+                    </ResponsiveContainer>
+                  </CardContent>
+                </Card>
               </>
             )}
           </div>
         )}
-        <div className="mt-4 flex justify-end">
+        <DialogFooter>
           <Button onClick={onClose}>Close</Button>
-        </div>
+        </DialogFooter>
       </DialogContent>
     </Dialog>
   );
