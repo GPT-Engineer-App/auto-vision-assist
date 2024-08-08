@@ -1,48 +1,67 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { db } from "@/lib/firebase";
-import { collection, addDoc, query, where, getDocs, limit } from "firebase/firestore";
+import { db, auth } from "@/lib/firebase";
+import { collection, addDoc, query, where, getDocs, limit, doc, getDoc, updateDoc, increment } from "firebase/firestore";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
+import { ScrollArea } from "@/components/ui/scroll-area";
 import { toast } from "sonner";
 import { generateDiagnosticResponse } from "@/lib/openai";
-
 import { useProStatus } from "@/contexts/ProStatusContext";
 
 const DiagnosticChat = ({ vehicleId }) => {
   const { isPro } = useProStatus();
   const [input, setInput] = useState("");
-  const [response, setResponse] = useState("");
+  const [chatHistory, setChatHistory] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
   const queryClient = useQueryClient();
 
-  const { data: queryCount = 0 } = useQuery({
-    queryKey: ["queryCount"],
+  const { data: queryCount = 0, refetch: refetchQueryCount } = useQuery({
+    queryKey: ["queryCount", auth.currentUser?.uid],
     queryFn: async () => {
-      const queryCountRef = collection(db, "queryCounts");
-      const q = query(
-        queryCountRef,
-        where("timestamp", ">=", new Date(Date.now() - 29 * 24 * 60 * 60 * 1000))
-      );
-      const querySnapshot = await getDocs(q);
-      return querySnapshot.size;
+      if (!auth.currentUser) return 0;
+      const userRef = doc(db, "users", auth.currentUser.uid);
+      const userDoc = await getDoc(userRef);
+      return userDoc.data()?.queryCount || 0;
     },
+    enabled: !!auth.currentUser,
   });
 
   const addQueryMutation = useMutation({
     mutationFn: async (newQuery) => {
       await addDoc(collection(db, "diagnosticQueries"), newQuery);
-      await addDoc(collection(db, "queryCounts"), { timestamp: new Date() });
+      if (!isPro) {
+        const userRef = doc(db, "users", auth.currentUser.uid);
+        await updateDoc(userRef, { queryCount: increment(-1) });
+      }
     },
     onSuccess: () => {
-      queryClient.invalidateQueries(["queryCount"]);
+      refetchQueryCount();
     },
   });
+
+  useEffect(() => {
+    const fetchChatHistory = async () => {
+      if (auth.currentUser && vehicleId) {
+        const querySnapshot = await getDocs(
+          query(
+            collection(db, "diagnosticQueries"),
+            where("userId", "==", auth.currentUser.uid),
+            where("vehicleId", "==", vehicleId),
+            limit(50)
+          )
+        );
+        const history = querySnapshot.docs.map(doc => doc.data());
+        setChatHistory(history.sort((a, b) => a.timestamp - b.timestamp));
+      }
+    };
+    fetchChatHistory();
+  }, [vehicleId]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    if (!isPro && queryCount >= 5) {
+    if (!isPro && queryCount <= 0) {
       toast.error("You have reached your query limit. Upgrade to Pro for unlimited queries.");
       return;
     }
@@ -51,15 +70,17 @@ const DiagnosticChat = ({ vehicleId }) => {
 
     try {
       const aiResponse = await generateDiagnosticResponse(input);
-      setResponse(aiResponse);
-
-      // Store query and response in Firestore
-      addQueryMutation.mutate({
+      const newQuery = {
+        userId: auth.currentUser.uid,
         vehicleId,
         query: input,
         response: aiResponse,
         timestamp: new Date(),
-      });
+      };
+
+      setChatHistory(prev => [...prev, newQuery]);
+      addQueryMutation.mutate(newQuery);
+      setInput("");
     } catch (error) {
       console.error("Error processing query:", error);
       if (error.message.includes("rate limit")) {
@@ -74,6 +95,20 @@ const DiagnosticChat = ({ vehicleId }) => {
 
   return (
     <div className="space-y-4">
+      <ScrollArea className="h-[400px] border rounded-md p-4">
+        {chatHistory.map((chat, index) => (
+          <div key={index} className="mb-4">
+            <div className="bg-primary/10 p-2 rounded-md mb-2">
+              <p className="font-semibold">You:</p>
+              <p>{chat.query}</p>
+            </div>
+            <div className="bg-secondary/10 p-2 rounded-md">
+              <p className="font-semibold">AI:</p>
+              <p>{chat.response}</p>
+            </div>
+          </div>
+        ))}
+      </ScrollArea>
       <form onSubmit={handleSubmit} className="space-y-4">
         <Textarea
           value={input}
@@ -81,27 +116,21 @@ const DiagnosticChat = ({ vehicleId }) => {
           placeholder="Enter vehicle symptoms or diagnostic trouble codes..."
           className="w-full"
         />
-        <Button type="submit" disabled={!isPro && queryCount >= 5 || isLoading}>
-          {isLoading ? "Generating..." : "Get Diagnosis"}
-        </Button>
-      </form>
-      {response && (
-        <div className="bg-muted p-4 rounded-md">
-          <h3 className="font-semibold mb-2">Diagnosis:</h3>
-          <p>{response}</p>
-        </div>
-      )}
-      {!isPro && (
         <div className="flex justify-between items-center">
-          <p className="text-sm text-muted-foreground">
-            Queries remaining: {5 - queryCount}/5
-          </p>
-          {queryCount >= 5 && (
-            <Button onClick={() => toast.info("Please upgrade to Pro for unlimited queries.")}>
-              Upgrade to Pro
-            </Button>
+          <Button type="submit" disabled={!isPro && queryCount <= 0 || isLoading}>
+            {isLoading ? "Generating..." : "Send"}
+          </Button>
+          {!isPro && (
+            <p className="text-sm text-muted-foreground">
+              Queries remaining: {queryCount}
+            </p>
           )}
         </div>
+      </form>
+      {!isPro && queryCount <= 0 && (
+        <Button onClick={() => toast.info("Please upgrade to Pro for unlimited queries.")}>
+          Upgrade to Pro
+        </Button>
       )}
     </div>
   );
