@@ -23,9 +23,20 @@ export const signInWithGoogle = () => signInWithPopup(auth, googleProvider);
 
 export const fetchDTCByCode = async (code) => {
   try {
-    const dtcRef = doc(db, "dtcCodes", code);
+    const dtcRef = doc(db, "dtcCodes", code.toUpperCase());
     const dtcSnap = await getDoc(dtcRef);
-    return dtcSnap.exists() ? dtcSnap.data() : null;
+    if (dtcSnap.exists()) {
+      return { id: dtcSnap.id, ...dtcSnap.data() };
+    } else {
+      const querySnapshot = await getDocs(
+        query(collection(db, "dtcCodes"), where("code", "==", code.toUpperCase()))
+      );
+      if (!querySnapshot.empty) {
+        const doc = querySnapshot.docs[0];
+        return { id: doc.id, ...doc.data() };
+      }
+      return null;
+    }
   } catch (error) {
     console.error("Error fetching DTC by code:", error);
     throw new Error("Failed to fetch DTC information. Please try again.");

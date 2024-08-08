@@ -12,7 +12,8 @@ import {
 } from "@/components/ui/table";
 import DTCAnalysisView from '@/components/DTCAnalysisView';
 import { useNavigate } from 'react-router-dom';
-import { searchDTCs, fetchAllDTCs } from '@/lib/firebase';
+import { searchDTCs, fetchAllDTCs, fetchDTCByCode } from '@/lib/firebase';
+import { toast } from 'sonner';
 
 const DTCCodes = () => {
   const [searchTerm, setSearchTerm] = useState('');
@@ -31,16 +32,33 @@ const DTCCodes = () => {
     enabled: searchTerm.length > 0
   });
 
+  const { refetch: refetchDTC } = useQuery({
+    queryKey: ['dtc', dtcInput],
+    queryFn: () => fetchDTCByCode(dtcInput),
+    enabled: false,
+  });
+
   const filteredCodes = searchTerm ? searchResults : allDTCs;
 
-  const handleAnalyze = () => {
+  const handleAnalyze = async () => {
     if (dtcInput) {
-      navigate(`/range-finder/${dtcInput}`);
+      try {
+        const result = await refetchDTC();
+        if (result.data) {
+          setSelectedDTC(result.data);
+        } else {
+          toast.error("DTC code not found");
+        }
+      } catch (error) {
+        console.error("Error fetching DTC:", error);
+        toast.error("Failed to fetch DTC information");
+      }
     }
   };
 
   const handleDTCSelect = (dtc) => {
     setSelectedDTC(dtc);
+    setDtcInput(dtc.code);
   };
 
   if (isLoadingAllDTCs) {
@@ -69,7 +87,8 @@ const DTCCodes = () => {
             onChange={(e) => setDtcInput(e.target.value)}
             className="flex-grow"
           />
-          <Button onClick={handleAnalyze}>Range Finder: DTC</Button>
+          <Button onClick={handleAnalyze}>Analyze</Button>
+          <Button onClick={() => navigate(`/range-finder/${dtcInput}`)}>Range Finder: DTC</Button>
         </div>
       </div>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
