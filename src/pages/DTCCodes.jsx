@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useQuery } from '@tanstack/react-query';
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { 
@@ -12,7 +13,6 @@ import {
 import DTCAnalysisView from '@/components/DTCAnalysisView';
 import { useNavigate } from 'react-router-dom';
 import { searchDTCs, fetchAllDTCs } from '@/lib/firebase';
-import { useQuery } from '@tanstack/react-query';
 
 const DTCCodes = () => {
   const [searchTerm, setSearchTerm] = useState('');

@@ -1,5 +1,5 @@
-import { useState, useEffect } from "react";
-import { useQuery } from "@tanstack/react-query";
+import { useState } from "react";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { db } from "@/lib/firebase";
 import { collection, addDoc, query, where, getDocs, limit } from "firebase/firestore";
 import { Button } from "@/components/ui/button";
@@ -13,29 +13,31 @@ const DiagnosticChat = ({ vehicleId }) => {
   const { isPro } = useProStatus();
   const [input, setInput] = useState("");
   const [response, setResponse] = useState("");
-  const [queryCount, setQueryCount] = useState(0);
   const [isLoading, setIsLoading] = useState(false);
+  const queryClient = useQueryClient();
 
-  const fetchQueryCount = async () => {
-    const queryCountRef = collection(db, "queryCounts");
-    const q = query(
-      queryCountRef,
-      where("timestamp", ">=", new Date(Date.now() - 29 * 24 * 60 * 60 * 1000))
-    );
-    const querySnapshot = await getDocs(q);
-    return querySnapshot.size;
-  };
-
-  const { data: currentQueryCount } = useQuery({
+  const { data: queryCount = 0 } = useQuery({
     queryKey: ["queryCount"],
-    queryFn: fetchQueryCount,
+    queryFn: async () => {
+      const queryCountRef = collection(db, "queryCounts");
+      const q = query(
+        queryCountRef,
+        where("timestamp", ">=", new Date(Date.now() - 29 * 24 * 60 * 60 * 1000))
+      );
+      const querySnapshot = await getDocs(q);
+      return querySnapshot.size;
+    },
   });
 
-  useEffect(() => {
-    if (currentQueryCount !== undefined) {
-      setQueryCount(currentQueryCount);
-    }
-  }, [currentQueryCount]);
+  const addQueryMutation = useMutation({
+    mutationFn: async (newQuery) => {
+      await addDoc(collection(db, "diagnosticQueries"), newQuery);
+      await addDoc(collection(db, "queryCounts"), { timestamp: new Date() });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries(["queryCount"]);
+    },
+  });
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -52,19 +54,12 @@ const DiagnosticChat = ({ vehicleId }) => {
       setResponse(aiResponse);
 
       // Store query and response in Firestore
-      await addDoc(collection(db, "diagnosticQueries"), {
+      addQueryMutation.mutate({
         vehicleId,
         query: input,
         response: aiResponse,
         timestamp: new Date(),
       });
-
-      // Update query count
-      await addDoc(collection(db, "queryCounts"), {
-        timestamp: new Date(),
-      });
-
-      setQueryCount((prev) => prev + 1);
     } catch (error) {
       console.error("Error processing query:", error);
       if (error.message.includes("rate limit")) {
