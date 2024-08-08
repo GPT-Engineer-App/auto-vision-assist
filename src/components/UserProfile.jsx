@@ -6,7 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { toast } from "sonner";
 import { auth, db } from "@/lib/firebase";
-import { doc, getDoc, setDoc, updateDoc, collection, query, where, getDocs } from "firebase/firestore";
+import { doc, getDoc, setDoc, updateDoc } from "firebase/firestore";
 import { purchaseProVersion, checkProPurchaseStatus } from "@/lib/inAppPurchase";
 import { savePreferences, loadPreferences } from "@/lib/userPreferences";
 import { useNavigate } from 'react-router-dom';
@@ -267,16 +267,12 @@ const UserProfile = ({ isPro, setIsPro, user }) => {
         </div>
         <div className="flex items-center justify-between">
           <Label htmlFor="language">Language</Label>
-          <select
+          <Input
             id="language"
-            value={preferences.language}
-            onChange={(e) => handlePreferenceChange('language', e.target.value)}
-            className="border rounded p-2"
-          >
-            <option value="en">English</option>
-            <option value="es">Español</option>
-            <option value="fr">Français</option>
-          </select>
+            value="English"
+            disabled
+            className="w-32 text-right"
+          />
         </div>
       </div>
     </div>
