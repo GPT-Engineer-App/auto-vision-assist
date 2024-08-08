@@ -1,6 +1,6 @@
 import { initializeApp } from "firebase/app";
-import { getAuth, GoogleAuthProvider, signInWithPopup } from "firebase/auth";
-import { getFirestore, doc, getDoc, updateDoc, deleteDoc, collection, query, where, getDocs } from "firebase/firestore";
+import { getAuth, GoogleAuthProvider, signInWithPopup, connectAuthEmulator } from "firebase/auth";
+import { getFirestore, doc, getDoc, updateDoc, deleteDoc, collection, query, where, getDocs, connectFirestoreEmulator } from "firebase/firestore";
 import { getAnalytics } from "firebase/analytics";
 import { getStorage } from "firebase/storage";
 import { getFunctions, connectFunctionsEmulator } from "firebase/functions";
@@ -123,5 +123,6 @@ if (import.meta.env.DEV) {
   // Use emulators in development mode
   connectAuthEmulator(auth, "http://localhost:9099");
   connectFirestoreEmulator(db, "localhost", 8080);
+  connectFunctionsEmulator(functions, "localhost", 5001);
   console.log("Connected to Firebase emulators");
 }

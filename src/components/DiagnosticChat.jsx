@@ -1,5 +1,5 @@
-import { useState, useEffect } from "react";
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useState } from "react";
+import { useQuery, useMutation } from "@tanstack/react-query";
 import { db, auth } from "@/lib/firebase";
 import { collection, addDoc, query, where, getDocs, limit, doc, getDoc, updateDoc, increment } from "firebase/firestore";
 import { Button } from "@/components/ui/button";
