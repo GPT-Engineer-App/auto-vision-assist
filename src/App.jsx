@@ -4,8 +4,6 @@ import { BrowserRouter as Router } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { Toaster } from 'sonner';
 import { ThemeProvider } from '@/components/theme-provider';
-import { AuthProvider } from '@/contexts/AuthContext';
-import { ProStatusProvider } from '@/contexts/ProStatusContext';
 import AppRoutes from './AppRoutes';
 
 const queryClient = new QueryClient();
@@ -16,12 +14,8 @@ function App() {
       <QueryClientProvider client={queryClient}>
         <Router>
           <ThemeProvider defaultTheme="dark" storageKey="vite-ui-theme">
-            <AuthProvider>
-              <ProStatusProvider>
-                <AppRoutes />
-                <Toaster />
-              </ProStatusProvider>
-            </AuthProvider>
+            <AppRoutes />
+            <Toaster />
           </ThemeProvider>
         </Router>
       </QueryClientProvider>
