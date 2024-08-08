@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { createUserWithEmailAndPassword, signInWithEmailAndPassword, sendPasswordResetEmail } from "firebase/auth";
 import { auth, db, signInWithGoogle } from "@/lib/firebase";
@@ -13,7 +13,7 @@ import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 
-const AuthForm = ({ isLogin }) => {
+const AuthForm = ({ isLogin, setIsLoading }) => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [username, setUsername] = useState("");
@@ -41,6 +41,7 @@ const AuthForm = ({ isLogin }) => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
+    setIsLoading(true);
     setNetworkError(false);
     try {
       if (!navigator.onLine) {
@@ -52,6 +53,7 @@ const AuthForm = ({ isLogin }) => {
         toast.success("Password reset email sent. Check your inbox.");
         setIsResettingPassword(false);
         setLoading(false);
+        setIsLoading(false);
         return;
       }
 
@@ -87,6 +89,7 @@ const AuthForm = ({ isLogin }) => {
       }
     } finally {
       setLoading(false);
+      setIsLoading(false);
     }
   };
 
@@ -106,12 +109,15 @@ const AuthForm = ({ isLogin }) => {
 
   const handleGoogleSignIn = async () => {
     try {
+      setIsLoading(true);
       await signInWithGoogle();
       toast.success("Logged in with Google successfully");
       navigate("/garage");
     } catch (error) {
       console.error("Google sign-in error:", error);
       toast.error("Failed to sign in with Google");
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -137,74 +143,89 @@ const AuthForm = ({ isLogin }) => {
             </AlertDescription>
           </Alert>
         )}
-        <Form onSubmit={handleSubmit}>
-          <FormField
-            name="email"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Email</FormLabel>
-                <FormControl>
-                  <Input placeholder="Enter your email" {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-          <FormField
-            name="password"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Password</FormLabel>
-                <FormControl>
-                  <Input type="password" placeholder="Enter your password" {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-          {!isLogin && (
+        <form onSubmit={handleSubmit}>
+          <div className="space-y-4">
             <FormField
-              name="username"
-              render={({ field }) => (
+              name="email"
+              render={() => (
                 <FormItem>
-                  <FormLabel>Username</FormLabel>
+                  <FormLabel>Email</FormLabel>
                   <FormControl>
-                    <Input placeholder="Choose a username" {...field} />
+                    <Input
+                      type="email"
+                      placeholder="Enter your email"
+                      value={email}
+                      onChange={(e) => setEmail(e.target.value)}
+                      required
+                    />
                   </FormControl>
-                  <FormMessage />
                 </FormItem>
               )}
             />
-          )}
-          {!isLogin && (
             <FormField
-              name="userType"
-              render={({ field }) => (
+              name="password"
+              render={() => (
                 <FormItem>
-                  <FormLabel>User Type</FormLabel>
-                  <Select onValueChange={field.onChange} defaultValue={field.value}>
-                    <FormControl>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Select user type" />
-                      </SelectTrigger>
-                    </FormControl>
-                    <SelectContent>
-                      <SelectItem value="free">Free</SelectItem>
-                      <SelectItem value="pro">Pro</SelectItem>
-                    </SelectContent>
-                  </Select>
-                  <FormMessage />
+                  <FormLabel>Password</FormLabel>
+                  <FormControl>
+                    <Input
+                      type="password"
+                      placeholder="Enter your password"
+                      value={password}
+                      onChange={(e) => setPassword(e.target.value)}
+                      required
+                    />
+                  </FormControl>
                 </FormItem>
               )}
             />
-          )}
-          <Button type="submit" className="w-full mt-4">
-            {isLogin ? "Login" : "Sign Up"}
-          </Button>
-        </Form>
+            {!isLogin && (
+              <FormField
+                name="username"
+                render={() => (
+                  <FormItem>
+                    <FormLabel>Username</FormLabel>
+                    <FormControl>
+                      <Input
+                        placeholder="Choose a username"
+                        value={username}
+                        onChange={(e) => setUsername(e.target.value)}
+                        required
+                      />
+                    </FormControl>
+                  </FormItem>
+                )}
+              />
+            )}
+            {!isLogin && (
+              <FormField
+                name="userType"
+                render={() => (
+                  <FormItem>
+                    <FormLabel>User Type</FormLabel>
+                    <Select onValueChange={setUserType} defaultValue={userType}>
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select user type" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        <SelectItem value="free">Free</SelectItem>
+                        <SelectItem value="pro">Pro</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </FormItem>
+                )}
+              />
+            )}
+            <Button type="submit" className="w-full" disabled={loading}>
+              {loading ? "Processing..." : (isLogin ? "Login" : "Sign Up")}
+            </Button>
+          </div>
+        </form>
       </CardContent>
       <CardFooter>
-        <Button variant="outline" onClick={handleGoogleSignIn} className="w-full">
+        <Button variant="outline" onClick={handleGoogleSignIn} className="w-full" disabled={loading}>
           Sign in with Google
         </Button>
       </CardFooter>
