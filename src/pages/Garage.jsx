@@ -22,7 +22,7 @@ import { useProStatus } from "@/contexts/ProStatusContext";
 
 const Garage = () => {
   const { user } = useAuth();
-  const { isPro, setIsPro } = useProStatus();
+  const { isPro, updateProStatus } = useProStatus();
   const [vehicles, setVehicles] = useState([]);
   const [loading, setLoading] = useState(true);
   const [editingVehicle, setEditingVehicle] = useState(null);

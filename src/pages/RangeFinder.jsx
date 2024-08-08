@@ -15,7 +15,7 @@ import { getAuth } from 'firebase/auth';
 import { useProStatus } from "@/contexts/ProStatusContext";
 
 const RangeFinder = () => {
-  const { isPro } = useProStatus();
+  const { isPro, updateProStatus } = useProStatus();
   const { dtc } = useParams();
   const [remainingQueries, setRemainingQueries] = useState(0);
   const [vehicleInfo, setVehicleInfo] = useState({
