@@ -5,15 +5,16 @@ import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { toast } from "sonner";
-import { auth, db } from "@/lib/firebase";
-import { doc, getDoc, setDoc, updateDoc, collection, query, where, getDocs } from "firebase/firestore";
-import { purchaseProVersion, checkProPurchaseStatus } from "@/lib/inAppPurchase";
-import { savePreferences, loadPreferences } from "@/lib/userPreferences";
+import { auth, db } from '@/lib/firebase';
+import { doc, getDoc, setDoc, updateDoc, collection, query, where, getDocs, deleteDoc } from 'firebase/firestore';
+import { purchaseProVersion, checkProPurchaseStatus, purchaseQueryPack, checkQueryPackPurchaseStatus } from '@/lib/inAppPurchase';
+import { savePreferences, loadPreferences } from '@/lib/userPreferences';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { useAuth } from "@/contexts/AuthContext";
 import { useProStatus } from "@/contexts/ProStatusContext";
-import { Loader2 } from 'lucide-react';
+import { Loader2, Trash2 } from 'lucide-react';
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 
 const UserProfile = () => {
   const { user } = useAuth();
@@ -29,6 +30,7 @@ const UserProfile = () => {
     language: 'en',
   });
   const [isEditing, setIsEditing] = useState(false);
+  const [queryPacks, setQueryPacks] = useState(0);
   const navigate = useNavigate();
 
   const fetchUserProfile = async () => {
@@ -42,17 +44,20 @@ const UserProfile = () => {
           setUserData(userData);
           setIsProEnabled(userData.isPro || false);
           updateProStatus(userData.isPro || false);
+          setQueryPacks(userData.queryPacks || 0);
         } else {
           // If the user document doesn't exist, create it
           const newUserData = {
             email: user.email,
             isPro: false,
+            queryPacks: 0,
             createdAt: new Date(),
           };
           await setDoc(doc(db, "users", user.uid), newUserData);
           setUserData(newUserData);
           setIsProEnabled(false);
           updateProStatus(false);
+          setQueryPacks(0);
         }
         // Check if the user has purchased Pro version
         const hasPurchasedPro = await checkProPurchaseStatus();
@@ -136,6 +141,24 @@ const UserProfile = () => {
     }
   };
 
+  const handleQueryPackPurchase = async () => {
+    if (!user) {
+      toast.error("You must be logged in to purchase query packs");
+      return;
+    }
+
+    setLoading(true);
+    try {
+      await purchaseQueryPack();
+      toast.success("Redirecting to payment page for query pack purchase...");
+    } catch (error) {
+      console.error("Error initiating query pack purchase:", error);
+      toast.error("Failed to initiate query pack purchase. Please try again.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const handleEditProfile = () => {
     setIsEditing(true);
   };
@@ -154,6 +177,35 @@ const UserProfile = () => {
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     setUserData(prev => ({ ...prev, [name]: value }));
+  };
+
+  const handleDeleteAccount = async () => {
+    if (!user) {
+      toast.error("You must be logged in to delete your account");
+      return;
+    }
+
+    try {
+      // Delete user's vehicles
+      const vehiclesRef = collection(db, "vehicles");
+      const q = query(vehiclesRef, where("userId", "==", user.uid));
+      const querySnapshot = await getDocs(q);
+      querySnapshot.forEach(async (doc) => {
+        await deleteDoc(doc.ref);
+      });
+
+      // Delete user document
+      await deleteDoc(doc(db, "users", user.uid));
+
+      // Delete user authentication
+      await user.delete();
+
+      toast.success("Your account has been deleted successfully");
+      navigate("/");
+    } catch (error) {
+      console.error("Error deleting account:", error);
+      toast.error("Failed to delete account. Please try again.");
+    }
   };
 
   return (
@@ -237,6 +289,13 @@ const UserProfile = () => {
                   Upgrade to Pro
                 </Button>
               )}
+              <div>
+                <h3 className="text-xl font-semibold mt-6 mb-2">Query Packs</h3>
+                <p>Current Query Packs: {queryPacks}</p>
+                <Button onClick={handleQueryPackPurchase} disabled={loading} className="mt-2">
+                  Purchase Query Pack
+                </Button>
+              </div>
               <h3 className="text-xl font-semibold mt-6 mb-4">Your Vehicles</h3>
               {vehicles.length > 0 ? (
                 <ul className="list-disc pl-5">
@@ -279,6 +338,31 @@ const UserProfile = () => {
                     className="w-32 text-right"
                   />
                 </div>
+              </div>
+              <div className="mt-8">
+                <h3 className="text-xl font-semibold mb-4">Delete Account</h3>
+                <AlertDialog>
+                  <AlertDialogTrigger asChild>
+                    <Button variant="destructive">
+                      <Trash2 className="mr-2 h-4 w-4" /> Delete Account
+                    </Button>
+                  </AlertDialogTrigger>
+                  <AlertDialogContent>
+                    <AlertDialogHeader>
+                      <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+                      <AlertDialogDescription>
+                        This action cannot be undone. This will permanently delete your account
+                        and remove your data from our servers.
+                      </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                      <AlertDialogCancel>Cancel</AlertDialogCancel>
+                      <AlertDialogAction onClick={handleDeleteAccount}>
+                        Yes, delete my account
+                      </AlertDialogAction>
+                    </AlertDialogFooter>
+                  </AlertDialogContent>
+                </AlertDialog>
               </div>
             </>
           )}
