@@ -15,7 +15,15 @@ export const ProStatusProvider = ({ children }) => {
       if (user) {
         try {
           const userRef = doc(db, 'users', user.uid);
-          const userDoc = await getDoc(userRef);
+          const unsubscribeSnapshot = onSnapshot(userRef, (doc) => {
+            if (doc.exists()) {
+              setIsPro(doc.data().isPro || false);
+            } else {
+              setDoc(userRef, { isPro: false });
+            }
+            setLoading(false);
+          });
+          return () => unsubscribeSnapshot();
           if (userDoc.exists()) {
             setIsPro(userDoc.data().isPro || false);
           } else {

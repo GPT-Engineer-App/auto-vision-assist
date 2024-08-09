@@ -116,12 +116,5 @@ export const fetchVehiclesForUser = async (userId) => {
   }
 };
 
-if (import.meta.env.DEV) {
-  // Use emulators in development mode
-  connectAuthEmulator(auth, "http://localhost:9099");
-  connectFirestoreEmulator(db, "localhost", 8080);
-  connectFunctionsEmulator(functions, "localhost", 5001);
-  console.log("Connected to Firebase emulators");
-} else {
-  console.log("Running in production mode");
-}
+// Remove emulator connections for now
+console.log("Running in production mode");

@@ -38,7 +38,8 @@ const UserProfile = () => {
       try {
         setLoading(true);
         setError(null);
-        const userDoc = await getDoc(doc(db, "users", user.uid));
+        const userRef = doc(db, "users", user.uid);
+        const userDoc = await getDoc(userRef);
         if (userDoc.exists()) {
           const userData = userDoc.data();
           setUserData(userData);
