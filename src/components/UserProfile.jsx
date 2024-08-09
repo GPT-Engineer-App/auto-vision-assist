@@ -131,12 +131,17 @@ const UserProfile = () => {
 
     setLoading(true);
     try {
-      await purchaseProVersion();
-      // The actual status update will be handled by a webhook
-      toast.success("Redirecting to payment page...");
+      const result = await purchaseProVersion();
+      if (result.success) {
+        toast.success("Redirecting to payment page...");
+        // Redirect to the payment page or handle the next steps
+        // window.location.href = result.paymentUrl; // Uncomment if you have a payment URL
+      } else {
+        throw new Error(result.error || "Failed to initiate upgrade process");
+      }
     } catch (error) {
       console.error("Error initiating pro upgrade:", error);
-      toast.error("Failed to initiate upgrade process. Please try again.");
+      toast.error(error.message || "Failed to initiate upgrade process. Please try again.");
     } finally {
       setLoading(false);
     }

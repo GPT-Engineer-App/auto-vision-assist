@@ -67,23 +67,16 @@ export const purchaseProVersion = async () => {
     });
     
     if (!response.ok) {
-      throw new Error('Failed to create checkout session');
+      const errorData = await response.json();
+      return { success: false, error: errorData.message || 'Failed to create checkout session' };
     }
 
     const session = await response.json();
     
-    const result = await stripe.redirectToCheckout({
-      sessionId: session.id,
-    });
-    
-    if (result.error) {
-      throw new Error(result.error.message);
-    }
-    
-    return true;
+    return { success: true, paymentUrl: session.url };
   } catch (error) {
     console.error('Error in Pro version purchase:', error);
-    throw error;
+    return { success: false, error: error.message || 'An unexpected error occurred' };
   }
 };
 
