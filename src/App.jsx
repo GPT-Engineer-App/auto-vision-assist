@@ -6,7 +6,9 @@ import { ThemeProvider } from "@/components/theme-provider";
 import { AuthProvider } from "./contexts/AuthContext";
 import { ProStatusProvider } from "./contexts/ProStatusContext";
 import AppRoutes from "./AppRoutes";
-import { Suspense } from "react";
+import { Suspense, lazy } from "react";
+
+const ErrorBoundary = lazy(() => import('./components/ErrorBoundary'));
 
 const queryClient = new QueryClient();
 
@@ -19,9 +21,11 @@ const App = () => {
             <ProStatusProvider>
               <TooltipProvider>
                 <Toaster />
-                <Suspense fallback={<div>Loading...</div>}>
-                  <AppRoutes />
-                </Suspense>
+                <ErrorBoundary>
+                  <Suspense fallback={<div>Loading...</div>}>
+                    <AppRoutes />
+                  </Suspense>
+                </ErrorBoundary>
               </TooltipProvider>
             </ProStatusProvider>
           </AuthProvider>

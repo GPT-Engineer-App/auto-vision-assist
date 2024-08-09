@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { auth, db } from '@/lib/firebase';
 import { doc, getDoc, setDoc, onSnapshot } from 'firebase/firestore';
+import { toast } from 'sonner';
 
 const ProStatusContext = createContext();
 
@@ -22,11 +23,16 @@ export const ProStatusProvider = ({ children }) => {
               setDoc(userRef, { isPro: false });
             }
             setLoading(false);
+          }, (error) => {
+            console.error("Error fetching user data:", error);
+            toast.error("Failed to fetch user data. Please check your connection.");
+            setIsPro(false);
+            setLoading(false);
           });
           return () => unsubscribeSnapshot();
         } catch (error) {
-          console.error("Error fetching user data:", error);
-          // Handle offline scenario
+          console.error("Error setting up listener:", error);
+          toast.error("Failed to set up data listener. Please try again.");
           setIsPro(false);
           setLoading(false);
         }
