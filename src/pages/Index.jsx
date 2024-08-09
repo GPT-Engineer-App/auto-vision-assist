@@ -1,11 +1,23 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { motion } from "framer-motion";
 import AuthForm from "@/components/AuthForm";
 import { useAuth } from "@/contexts/AuthContext";
+import { toast } from "sonner";
 
 const Index = () => {
+  useEffect(() => {
+    const handleError = (error) => {
+      console.error("Caught error:", error);
+      toast.error("An unexpected error occurred. Please try again.");
+    };
+
+    window.addEventListener('error', handleError);
+    return () => window.removeEventListener('error', handleError);
+  }, []);
+
+  try {
   const navigate = useNavigate();
   const { user } = useAuth();
   const [isLoading, setIsLoading] = useState(false);
@@ -47,6 +59,10 @@ const Index = () => {
       </motion.div>
     </div>
   );
+  } catch (error) {
+    console.error("Error in Index component:", error);
+    return <div>An unexpected error occurred. Please try refreshing the page.</div>;
+  }
 };
 
 export default Index;
