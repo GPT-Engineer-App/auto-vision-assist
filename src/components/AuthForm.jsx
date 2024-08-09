@@ -12,13 +12,18 @@ import { Lock, Mail, User, AlertTriangle } from "lucide-react";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import { useForm } from "react-hook-form";
 import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 
 const AuthForm = ({ isLogin, setIsLoading }) => {
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [username, setUsername] = useState("");
-  const [userType, setUserType] = useState("free");
+  const form = useForm({
+    defaultValues: {
+      email: "",
+      password: "",
+      username: "",
+      userType: "free"
+    }
+  });
   const [isResettingPassword, setIsResettingPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [retryCount, setRetryCount] = useState(0);
@@ -39,8 +44,7 @@ const AuthForm = ({ isLogin, setIsLoading }) => {
     };
   }, []);
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
+  const handleSubmit = async (data) => {
     setLoading(true);
     setIsLoading(true);
     setNetworkError(false);
@@ -50,30 +54,28 @@ const AuthForm = ({ isLogin, setIsLoading }) => {
       }
 
       if (isResettingPassword) {
-        await sendPasswordResetEmail(auth, email);
+        await sendPasswordResetEmail(auth, data.email);
         toast.success("Password reset email sent. Check your inbox.");
         setIsResettingPassword(false);
-        setLoading(false);
-        setIsLoading(false);
         return;
       }
 
-      if (!isLogin && !isStrongPassword(password)) {
+      if (!isLogin && !isStrongPassword(data.password)) {
         throw new Error("Password does not meet security standards");
       }
 
       const authFunction = isLogin
-        ? () => signInWithEmailAndPassword(auth, email, password)
-        : () => createUserWithEmailAndPassword(auth, email, password);
+        ? () => signInWithEmailAndPassword(auth, data.email, data.password)
+        : () => createUserWithEmailAndPassword(auth, data.email, data.password);
 
       const result = await authFunction();
 
       if (!isLogin) {
         const user = result.user;
         await setDoc(doc(db, "users", user.uid), {
-          username,
-          email,
-          userType,
+          username: data.username,
+          email: data.email,
+          userType: data.userType,
           createdAt: serverTimestamp(),
         });
       }
@@ -144,21 +146,16 @@ const AuthForm = ({ isLogin, setIsLoading }) => {
             </AlertDescription>
           </Alert>
         )}
-        <form onSubmit={handleSubmit}>
-          <div className="space-y-4">
+        <Form {...form}>
+          <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-4">
             <FormField
+              control={form.control}
               name="email"
-              render={() => (
+              render={({ field }) => (
                 <FormItem>
                   <FormLabel>Email</FormLabel>
                   <FormControl>
-                    <Input
-                      type="email"
-                      placeholder="Enter your email"
-                      value={email}
-                      onChange={(e) => setEmail(e.target.value)}
-                      required
-                    />
+                    <Input type="email" placeholder="Enter your email" {...field} required />
                   </FormControl>
                 </FormItem>
               )}
