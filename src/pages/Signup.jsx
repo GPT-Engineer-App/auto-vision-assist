@@ -17,12 +17,11 @@ const Signup = () => {
         className="w-full max-w-md p-6 bg-card rounded-lg shadow-md"
       >
         <h1 className="text-3xl font-bold mb-6 text-center text-foreground">Sign Up</h1>
-        {isLoading ? (
-          <div className="flex justify-center items-center">
+        <AuthForm isLogin={false} setIsLoading={setIsLoading} />
+        {isLoading && (
+          <div className="flex justify-center items-center mt-4">
             <Loader2 className="h-8 w-8 animate-spin text-primary" />
           </div>
-        ) : (
-          <AuthForm isLogin={false} setIsLoading={setIsLoading} />
         )}
         <p className="mt-4 text-center text-muted-foreground">
           Already have an account?{' '}
