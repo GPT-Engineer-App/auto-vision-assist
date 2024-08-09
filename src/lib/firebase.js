@@ -50,11 +50,17 @@ export const fetchDTCByCode = async (code) => {
 
 export const fetchAllDTCs = async () => {
   try {
+    if (!auth.currentUser) {
+      throw new Error("User not authenticated");
+    }
     const dtcRef = collection(db, "dtcCodes");
     const querySnapshot = await getDocs(dtcRef);
     return querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
   } catch (error) {
     console.error("Error fetching all DTCs:", error);
+    if (error.code === "permission-denied") {
+      throw new Error("Permission denied. Please make sure you're logged in and have the necessary permissions.");
+    }
     throw new Error("Failed to fetch DTC codes. Please try again.");
   }
 };

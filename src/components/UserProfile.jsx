@@ -104,9 +104,11 @@ const UserProfile = () => {
       fetchUserProfile();
       loadUserPreferences();
     } else {
-      navigate("/");
+      // Don't navigate away if the user is not authenticated
+      // This allows the component to handle the unauthenticated state gracefully
+      setError("Please log in to view your profile.");
     }
-  }, [user, navigate]);
+  }, [user]);
 
   const loadUserPreferences = async () => {
     const savedPreferences = await loadPreferences();

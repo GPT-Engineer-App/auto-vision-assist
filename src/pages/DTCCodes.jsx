@@ -21,9 +21,13 @@ const DTCCodes = () => {
   const [dtcInput, setDtcInput] = useState('');
   const navigate = useNavigate();
 
-  const { data: allDTCs, isLoading: isLoadingAllDTCs } = useQuery({
+  const { data: allDTCs, isLoading: isLoadingAllDTCs, error: dtcError } = useQuery({
     queryKey: ['allDTCs'],
-    queryFn: fetchAllDTCs
+    queryFn: fetchAllDTCs,
+    retry: false,
+    onError: (error) => {
+      toast.error(error.message);
+    }
   });
 
   const { data: searchResults, isLoading: isSearching } = useQuery({
@@ -63,6 +67,10 @@ const DTCCodes = () => {
 
   if (isLoadingAllDTCs) {
     return <div>Loading DTC codes...</div>;
+  }
+
+  if (dtcError) {
+    return <div>Error loading DTC codes. Please try again later.</div>;
   }
 
   return (
