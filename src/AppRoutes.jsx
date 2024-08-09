@@ -9,7 +9,7 @@ const AddVehicle = lazy(() => import("./pages/AddVehicle"));
 const Garage = lazy(() => import("./pages/Garage"));
 const DTCCodes = lazy(() => import("./pages/DTCCodes"));
 const RangeFinder = lazy(() => import("./pages/RangeFinder"));
-const UserProfile = lazy(() => import("./pages/UserProfile"));
+const UserProfile = lazy(() => import("./components/UserProfile"));
 
 const AppRoutes = () => {
   const { user, loading } = useAuth();
