@@ -51,8 +51,6 @@ export const purchaseQueryPack = async () => {
 export const purchaseProVersion = async () => {
   if (!auth.currentUser) throw new Error('User not authenticated');
   
-  const stripe = await stripePromise;
-  
   try {
     const response = await fetch('/api/create-checkout-session', {
       method: 'POST',
@@ -67,8 +65,8 @@ export const purchaseProVersion = async () => {
     });
     
     if (!response.ok) {
-      const errorData = await response.json();
-      return { success: false, error: errorData.message || 'Failed to create checkout session' };
+      const errorData = await response.text();
+      return { success: false, error: errorData || 'Failed to create checkout session' };
     }
 
     const session = await response.json();

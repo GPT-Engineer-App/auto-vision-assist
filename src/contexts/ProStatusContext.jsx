@@ -24,20 +24,16 @@ export const ProStatusProvider = ({ children }) => {
             setLoading(false);
           });
           return () => unsubscribeSnapshot();
-          if (userDoc.exists()) {
-            setIsPro(userDoc.data().isPro || false);
-          } else {
-            await setDoc(userRef, { isPro: false });
-          }
         } catch (error) {
           console.error("Error fetching user data:", error);
           // Handle offline scenario
           setIsPro(false);
+          setLoading(false);
         }
       } else {
         setIsPro(false);
+        setLoading(false);
       }
-      setLoading(false);
     });
 
     return () => unsubscribe();
