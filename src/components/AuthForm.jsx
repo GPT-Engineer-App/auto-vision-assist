@@ -220,8 +220,8 @@ const AuthForm = ({ isLogin, setIsLoading }) => {
             <Button type="submit" className="w-full" disabled={loading}>
               {loading ? "Processing..." : (isLogin ? "Login" : "Sign Up")}
             </Button>
-          </div>
-        </form>
+          </form>
+        </Form>
       </CardContent>
       <CardFooter>
         <Button variant="outline" onClick={handleGoogleSignIn} className="w-full" disabled={loading}>
