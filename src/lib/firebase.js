@@ -67,7 +67,19 @@ export const searchDTCs = async (searchTerm) => {
       where("code", "<=", searchTerm.toUpperCase() + '\uf8ff')
     );
     const querySnapshot = await getDocs(q);
-    return querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+    const results = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+    
+    // If no results found by code, search by description
+    if (results.length === 0) {
+      const descriptionQuery = query(dtcRef,
+        where("description", ">=", searchTerm.toLowerCase()),
+        where("description", "<=", searchTerm.toLowerCase() + '\uf8ff')
+      );
+      const descriptionQuerySnapshot = await getDocs(descriptionQuery);
+      return descriptionQuerySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+    }
+    
+    return results;
   } catch (error) {
     console.error("Error searching DTCs:", error);
     throw new Error("Failed to search DTC codes. Please try again.");

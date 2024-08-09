@@ -32,7 +32,7 @@ const DTCCodes = () => {
     enabled: searchTerm.length > 0
   });
 
-  const { refetch: refetchDTC } = useQuery({
+  const { refetch: refetchDTC, isLoading: isAnalyzing } = useQuery({
     queryKey: ['dtc', dtcInput],
     queryFn: () => fetchDTCByCode(dtcInput),
     enabled: false,
@@ -87,7 +87,9 @@ const DTCCodes = () => {
             onChange={(e) => setDtcInput(e.target.value)}
             className="flex-grow"
           />
-          <Button onClick={handleAnalyze}>Analyze</Button>
+          <Button onClick={handleAnalyze} disabled={isAnalyzing}>
+            {isAnalyzing ? 'Analyzing...' : 'Analyze'}
+          </Button>
           <Button onClick={() => navigate(`/range-finder/${dtcInput}`)}>Range Finder: DTC</Button>
         </div>
       </div>
@@ -107,15 +109,21 @@ const DTCCodes = () => {
                 <TableRow>
                   <TableCell colSpan={3} className="text-center">Searching...</TableCell>
                 </TableRow>
-              ) : filteredCodes && filteredCodes.map((code) => (
-                <TableRow key={code.code}>
-                  <TableCell className="font-medium">{code.code}</TableCell>
-                  <TableCell>{code.description}</TableCell>
-                  <TableCell>
-                    <Button onClick={() => handleDTCSelect(code)}>Analyze</Button>
-                  </TableCell>
+              ) : filteredCodes && filteredCodes.length > 0 ? (
+                filteredCodes.map((code) => (
+                  <TableRow key={code.code}>
+                    <TableCell className="font-medium">{code.code}</TableCell>
+                    <TableCell>{code.description}</TableCell>
+                    <TableCell>
+                      <Button onClick={() => handleDTCSelect(code)}>Analyze</Button>
+                    </TableCell>
+                  </TableRow>
+                ))
+              ) : (
+                <TableRow>
+                  <TableCell colSpan={3} className="text-center">No DTC codes found</TableCell>
                 </TableRow>
-              ))}
+              )}
             </TableBody>
           </Table>
         </div>
