@@ -13,6 +13,7 @@ import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { useAuth } from "@/contexts/AuthContext";
 import { useProStatus } from "@/contexts/ProStatusContext";
+import { Loader2 } from 'lucide-react';
 
 const UserProfile = () => {
   const { user } = useAuth();
@@ -40,7 +41,7 @@ const UserProfile = () => {
           const userData = userDoc.data();
           setUserData(userData);
           setIsProEnabled(userData.isPro || false);
-          setIsPro(userData.isPro || false);
+          updateProStatus(userData.isPro || false);
         } else {
           // If the user document doesn't exist, create it
           const newUserData = {
@@ -51,7 +52,7 @@ const UserProfile = () => {
           await setDoc(doc(db, "users", user.uid), newUserData);
           setUserData(newUserData);
           setIsProEnabled(false);
-          setIsPro(false);
+          updateProStatus(false);
         }
         // Check if the user has purchased Pro version
         const hasPurchasedPro = await checkProPurchaseStatus();
@@ -64,6 +65,8 @@ const UserProfile = () => {
         console.error("Error fetching user profile:", error);
         if (error.code === 'permission-denied') {
           setError("Permission denied. Please make sure you're logged in.");
+        } else if (error.message.includes("client is offline")) {
+          setError("Unable to connect to the server. Please check your internet connection and try again.");
         } else {
           setError("Failed to load user profile. Please try again later.");
         }
@@ -153,121 +156,119 @@ const UserProfile = () => {
     setUserData(prev => ({ ...prev, [name]: value }));
   };
 
-  if (loading) {
-    return <div className="flex justify-center items-center h-full">
-      <div className="animate-spin rounded-full h-32 w-32 border-t-2 border-b-2 border-primary"></div>
-    </div>;
-  }
-
-  if (error) {
-    return <div className="text-red-500 p-4 bg-red-100 rounded-md">
-      <p>{error}</p>
-      <Button onClick={fetchUserProfile} className="mt-4">
-        Retry
-      </Button>
-    </div>;
-  }
-
-  if (!user) {
-    return <div className="text-center p-4">
-      <p>Please log in to view your profile.</p>
-      <Button onClick={() => navigate("/")} className="mt-4">
-        Go to Login
-      </Button>
-    </div>;
-  }
-
   return (
     <div className="space-y-4 p-4 bg-card rounded-lg shadow">
       <h2 className="text-2xl font-bold">User Profile</h2>
-      {isEditing ? (
-        <>
-          <Label htmlFor="username">Username</Label>
-          <Input
-            id="username"
-            name="username"
-            value={userData?.username || ''}
-            onChange={handleInputChange}
-          />
-          <Label htmlFor="email">Email</Label>
-          <Input
-            id="email"
-            name="email"
-            value={userData?.email || ''}
-            onChange={handleInputChange}
-            disabled
-          />
-          <Button onClick={handleSaveProfile}>Save Profile</Button>
-        </>
+      {loading ? (
+        <div className="flex justify-center items-center h-32">
+          <Loader2 className="h-8 w-8 animate-spin text-primary" />
+        </div>
+      ) : error ? (
+        <div className="text-red-500 p-4 bg-red-100 rounded-md">
+          <p>{error}</p>
+          <Button onClick={fetchUserProfile} className="mt-4">
+            Retry
+          </Button>
+        </div>
+      ) : !user ? (
+        <div className="text-center p-4">
+          <p>Please log in to view your profile.</p>
+          <Button onClick={() => navigate("/")} className="mt-4">
+            Go to Login
+          </Button>
+        </div>
       ) : (
         <>
-          <p>Username: {userData?.username || 'Not set'}</p>
-          <p>Email: {userData?.email}</p>
-          <Button onClick={handleEditProfile}>Edit Profile</Button>
+          {isEditing ? (
+            <>
+              <Label htmlFor="username">Username</Label>
+              <Input
+                id="username"
+                name="username"
+                value={userData?.username || ''}
+                onChange={handleInputChange}
+              />
+              <Label htmlFor="email">Email</Label>
+              <Input
+                id="email"
+                name="email"
+                value={userData?.email || ''}
+                onChange={handleInputChange}
+                disabled
+              />
+              <Button onClick={handleSaveProfile}>Save Profile</Button>
+            </>
+          ) : (
+            <>
+              <p>Username: {userData?.username || 'Not set'}</p>
+              <p>Email: {userData?.email}</p>
+              <Button onClick={handleEditProfile}>Edit Profile</Button>
+            </>
+          )}
+          <div className="flex items-center space-x-2">
+            <Switch
+              id="pro-mode"
+              checked={isProEnabled}
+              onCheckedChange={() => {}}
+              disabled={true}
+            />
+            <Label htmlFor="pro-mode">Pro Mode</Label>
+          </div>
+          <p>
+            {isProEnabled
+              ? "You are currently on the Pro plan. Enjoy unlimited features!"
+              : "Upgrade to Pro for unlimited features and no ads."}
+          </p>
+          {!isProEnabled && (
+            <Button onClick={() => handleProUpgrade()} disabled={loading}>
+              Upgrade to Pro
+            </Button>
+          )}
+          <h3 className="text-xl font-semibold mt-6 mb-4">Your Vehicles</h3>
+          {vehicles.length > 0 ? (
+            <ul className="list-disc pl-5">
+              {vehicles.map(vehicle => (
+                <li key={vehicle.id}>
+                  {vehicle.year} {vehicle.make} {vehicle.model}
+                </li>
+              ))}
+            </ul>
+          ) : (
+            <p>No vehicles added yet.</p>
+          )}
+          <Button onClick={() => navigate("/add-vehicle")} className="mt-2">
+            Add Vehicle
+          </Button>
+          <h3 className="text-xl font-semibold mt-6 mb-4">User Preferences</h3>
+          <div className="space-y-4">
+            <div className="flex items-center justify-between">
+              <Label htmlFor="darkMode">Dark Mode</Label>
+              <Switch
+                id="darkMode"
+                checked={preferences.darkMode}
+                onCheckedChange={(checked) => handlePreferenceChange('darkMode', checked)}
+              />
+            </div>
+            <div className="flex items-center justify-between">
+              <Label htmlFor="notifications">Notifications</Label>
+              <Switch
+                id="notifications"
+                checked={preferences.notifications}
+                onCheckedChange={(checked) => handlePreferenceChange('notifications', checked)}
+              />
+            </div>
+            <div className="flex items-center justify-between">
+              <Label htmlFor="language">Language</Label>
+              <Input
+                id="language"
+                value="English"
+                disabled
+                className="w-32 text-right"
+              />
+            </div>
+          </div>
         </>
       )}
-      <div className="flex items-center space-x-2">
-        <Switch
-          id="pro-mode"
-          checked={isProEnabled}
-          onCheckedChange={() => {}}
-          disabled={true}
-        />
-        <Label htmlFor="pro-mode">Pro Mode</Label>
-      </div>
-      <p>
-        {isProEnabled
-          ? "You are currently on the Pro plan. Enjoy unlimited features!"
-          : "Upgrade to Pro for unlimited features and no ads."}
-      </p>
-      {!isProEnabled && (
-        <Button onClick={() => handleProUpgrade()} disabled={loading}>
-          Upgrade to Pro
-        </Button>
-      )}
-      <h3 className="text-xl font-semibold mt-6 mb-4">Your Vehicles</h3>
-      {vehicles.length > 0 ? (
-        <ul className="list-disc pl-5">
-          {vehicles.map(vehicle => (
-            <li key={vehicle.id}>
-              {vehicle.year} {vehicle.make} {vehicle.model}
-            </li>
-          ))}
-        </ul>
-      ) : (
-        <p>No vehicles added yet.</p>
-      )}
-      <Button onClick={() => navigate("/add-vehicle")} className="mt-2">
-        Add Vehicle
-      </Button>
-      <h3 className="text-xl font-semibold mt-6 mb-4">User Preferences</h3>
-      <div className="space-y-4">
-        <div className="flex items-center justify-between">
-          <Label htmlFor="darkMode">Dark Mode</Label>
-          <Switch
-            id="darkMode"
-            checked={preferences.darkMode}
-            onCheckedChange={(checked) => handlePreferenceChange('darkMode', checked)}
-          />
-        </div>
-        <div className="flex items-center justify-between">
-          <Label htmlFor="notifications">Notifications</Label>
-          <Switch
-            id="notifications"
-            checked={preferences.notifications}
-            onCheckedChange={(checked) => handlePreferenceChange('notifications', checked)}
-          />
-        </div>
-        <div className="flex items-center justify-between">
-          <Label htmlFor="language">Language</Label>
-          <Input
-            id="language"
-            value="English"
-            disabled
-            className="w-32 text-right"
-          />
-        </div>
-      </div>
     </div>
   );
 };
