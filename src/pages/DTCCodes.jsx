@@ -24,9 +24,11 @@ const DTCCodes = () => {
   const { data: allDTCs, isLoading: isLoadingAllDTCs, error: dtcError } = useQuery({
     queryKey: ['allDTCs'],
     queryFn: fetchAllDTCs,
-    retry: false,
+    retry: 3,
+    retryDelay: 1000,
     onError: (error) => {
-      toast.error(error.message);
+      console.error("Error fetching DTCs:", error);
+      toast.error("Failed to load DTC codes. Please try again later.");
     }
   });
 
