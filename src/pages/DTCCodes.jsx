@@ -29,7 +29,8 @@ const DTCCodes = () => {
     onError: (error) => {
       console.error("Error fetching DTCs:", error);
       toast.error("Failed to load DTC codes. Please try again later.");
-    }
+    },
+    enabled: !!auth.currentUser
   });
 
   const { data: searchResults, isLoading: isSearching } = useQuery({

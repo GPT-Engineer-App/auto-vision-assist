@@ -50,12 +50,8 @@ export const fetchDTCByCode = async (code) => {
 
 export const fetchAllDTCs = async () => {
   try {
-    if (!auth.currentUser) {
-      throw new Error("User not authenticated");
-    }
     const dtcRef = collection(db, "dtcCodes");
-    const q = query(dtcRef, where("userId", "==", auth.currentUser.uid));
-    const querySnapshot = await getDocs(q);
+    const querySnapshot = await getDocs(dtcRef);
     return querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
   } catch (error) {
     console.error("Error fetching all DTCs:", error);
