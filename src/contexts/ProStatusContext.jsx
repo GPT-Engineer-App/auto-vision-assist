@@ -13,12 +13,18 @@ export const ProStatusProvider = ({ children }) => {
   useEffect(() => {
     const unsubscribe = auth.onAuthStateChanged(async (user) => {
       if (user) {
-        const userRef = doc(db, 'users', user.uid);
-        const userDoc = await getDoc(userRef);
-        if (userDoc.exists()) {
-          setIsPro(userDoc.data().isPro || false);
-        } else {
-          await setDoc(userRef, { isPro: false });
+        try {
+          const userRef = doc(db, 'users', user.uid);
+          const userDoc = await getDoc(userRef);
+          if (userDoc.exists()) {
+            setIsPro(userDoc.data().isPro || false);
+          } else {
+            await setDoc(userRef, { isPro: false });
+          }
+        } catch (error) {
+          console.error("Error fetching user data:", error);
+          // Handle offline scenario
+          setIsPro(false);
         }
       } else {
         setIsPro(false);
