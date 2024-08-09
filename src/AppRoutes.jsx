@@ -24,21 +24,17 @@ const AppRoutes = () => {
     return children;
   };
 
-  if (loading) {
-    return <div className="flex items-center justify-center h-screen">Loading...</div>;
-  }
-
   return (
     <Routes>
       <Route element={<Layout />}>
-        <Route index element={<Suspense fallback={<div>Loading...</div>}><Index /></Suspense>} />
-        <Route path="/signup" element={<Suspense fallback={<div>Loading...</div>}><Signup /></Suspense>} />
-        <Route path="/add-vehicle" element={<ProtectedRoute><Suspense fallback={<div>Loading...</div>}><AddVehicle /></Suspense></ProtectedRoute>} />
-        <Route path="/garage" element={<ProtectedRoute><Suspense fallback={<div>Loading...</div>}><Garage /></Suspense></ProtectedRoute>} />
-        <Route path="/dtc-codes" element={<ProtectedRoute><Suspense fallback={<div>Loading...</div>}><DTCCodes /></Suspense></ProtectedRoute>} />
-        <Route path="/range-finder" element={<ProtectedRoute><Suspense fallback={<div>Loading...</div>}><RangeFinder /></Suspense></ProtectedRoute>} />
-        <Route path="/range-finder/:dtc" element={<ProtectedRoute><Suspense fallback={<div>Loading...</div>}><RangeFinder /></Suspense></ProtectedRoute>} />
-        <Route path="/profile" element={<ProtectedRoute><Suspense fallback={<div>Loading...</div>}><UserProfile /></Suspense></ProtectedRoute>} />
+        <Route index element={<Index />} />
+        <Route path="/signup" element={<Signup />} />
+        <Route path="/add-vehicle" element={<ProtectedRoute><AddVehicle /></ProtectedRoute>} />
+        <Route path="/garage" element={<ProtectedRoute><Garage /></ProtectedRoute>} />
+        <Route path="/dtc-codes" element={<ProtectedRoute><DTCCodes /></ProtectedRoute>} />
+        <Route path="/range-finder" element={<ProtectedRoute><RangeFinder /></ProtectedRoute>} />
+        <Route path="/range-finder/:dtc" element={<ProtectedRoute><RangeFinder /></ProtectedRoute>} />
+        <Route path="/profile" element={<ProtectedRoute><UserProfile /></ProtectedRoute>} />
       </Route>
     </Routes>
   );
