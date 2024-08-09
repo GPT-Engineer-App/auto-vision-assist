@@ -15,24 +15,16 @@ const firebaseConfig = {
   measurementId: import.meta.env.VITE_FIREBASE_MEASUREMENT_ID
 };
 
-// Remove unused configs
-delete firebaseConfig.databaseURL;
-
 const app = initializeApp(firebaseConfig);
 export const auth = getAuth(app);
 export const db = getFirestore(app);
-export const analytics = import.meta.env.DEV ? null : getAnalytics(app);
+export const analytics = getAnalytics(app);
 export const storage = getStorage(app);
 export const functions = getFunctions(app);
 export const googleProvider = new GoogleAuthProvider();
 export const signInWithGoogle = () => signInWithPopup(auth, googleProvider);
 
-if (import.meta.env.DEV) {
-  connectAuthEmulator(auth, "http://localhost:9099");
-  connectFirestoreEmulator(db, "localhost", 8080);
-  connectFunctionsEmulator(functions, "localhost", 5001);
-  console.log("Connected to Firebase emulators");
-}
+// Remove emulator connections
 
 export const fetchDTCByCode = async (code) => {
   try {
