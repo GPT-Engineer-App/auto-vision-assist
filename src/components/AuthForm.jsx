@@ -161,16 +161,16 @@ const AuthForm = ({ isLogin, setIsLoading }) => {
               )}
             />
             <FormField
+              control={form.control}
               name="password"
-              render={() => (
+              render={({ field }) => (
                 <FormItem>
                   <FormLabel>Password</FormLabel>
                   <FormControl>
                     <Input
                       type="password"
                       placeholder="Enter your password"
-                      value={password}
-                      onChange={(e) => setPassword(e.target.value)}
+                      {...field}
                       required
                     />
                   </FormControl>
@@ -179,8 +179,9 @@ const AuthForm = ({ isLogin, setIsLoading }) => {
             />
             {!isLogin && (
               <FormField
+                control={form.control}
                 name="username"
-                render={() => (
+                render={({ field }) => (
                   <FormItem>
                     <FormLabel>Username</FormLabel>
                     <FormControl>
