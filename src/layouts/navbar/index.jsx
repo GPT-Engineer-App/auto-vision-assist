@@ -33,7 +33,7 @@ const Layout = () => {
         </div>
       </motion.header>
       <main className="flex-1 container py-6 bg-background">
-        {useLocation().pathname !== "/" && <Outlet />}
+        <Outlet />
       </main>
       <motion.footer
         initial={{ y: 100 }}
