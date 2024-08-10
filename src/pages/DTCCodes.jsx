@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
+import { auth } from '@/lib/firebase';
 import { useAuth } from '@/contexts/AuthContext';
 import { 
   Table,
@@ -18,7 +19,7 @@ import { toast } from 'sonner';
 
 const DTCCodes = () => {
   const [searchTerm, setSearchTerm] = useState('');
-  const [selectedDTCCode, setSelectedDTCCode] = useState(null);
+  const [selectedDTC, setSelectedDTC] = useState(null);
   const [dtcInput, setDtcInput] = useState('');
   const navigate = useNavigate();
   const { user } = useAuth();
@@ -41,7 +42,7 @@ const DTCCodes = () => {
     enabled: searchTerm.length > 0
   });
 
-  const { data: selectedDTCData, refetch: refetchDTC, isLoading: isAnalyzing } = useQuery({
+  const { refetch: refetchDTC, isLoading: isAnalyzing } = useQuery({
     queryKey: ['dtc', dtcInput],
     queryFn: () => fetchDTCByCode(dtcInput),
     enabled: false,
@@ -66,7 +67,7 @@ const DTCCodes = () => {
   };
 
   const handleDTCSelect = (dtc) => {
-    setSelectedDTCCode(dtc.code);
+    setSelectedDTC(dtc);
     setDtcInput(dtc.code);
   };
 
@@ -141,8 +142,8 @@ const DTCCodes = () => {
           </Table>
         </div>
         <div>
-          {selectedDTCData && (
-            <DTCAnalysisView dtc={selectedDTCData} />
+          {selectedDTC && (
+            <DTCAnalysisView dtc={selectedDTC} />
           )}
         </div>
       </div>

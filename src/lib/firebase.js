@@ -1,15 +1,17 @@
 import { initializeApp } from "firebase/app";
-import { getFirestore, collection, doc, getDoc, setDoc, updateDoc, deleteDoc, query, where, getDocs } from "firebase/firestore";
+import { getFirestore } from "firebase/firestore";
+import { getStorage } from "firebase/storage";
 import { getAuth, GoogleAuthProvider } from "firebase/auth";
 
 const firebaseConfig = {
-  apiKey: process.env.VITE_FIREBASE_API_KEY,
-  authDomain: process.env.VITE_FIREBASE_AUTH_DOMAIN,
-  projectId: process.env.VITE_FIREBASE_PROJECT_ID,
-  storageBucket: process.env.VITE_FIREBASE_STORAGE_BUCKET,
-  messagingSenderId: process.env.VITE_FIREBASE_MESSAGING_SENDER_ID,
-  appId: process.env.VITE_FIREBASE_APP_ID,
-  measurementId: process.env.VITE_FIREBASE_MEASUREMENT_ID
+  apiKey: "AIzaSyBaMsvZCdwFLWgTUZsTZlScUzDNc_WvyCQ",
+  authDomain: "auto-vision-pro-v2.firebaseapp.com",
+  databaseURL: "https://auto-vision-pro-v2-default-rtdb.firebaseio.com",
+  projectId: "auto-vision-pro-v2",
+  storageBucket: "auto-vision-pro-v2.appspot.com",
+  messagingSenderId: "933665969916",
+  appId: "1:933665969916:web:8278f8ecb9326848102979",
+  measurementId: "G-Q7MN5WQ8QE"
 };
 
 const app = initializeApp(firebaseConfig);
@@ -18,128 +20,63 @@ export const storage = getStorage(app);
 export const auth = getAuth(app);
 export const googleProvider = new GoogleAuthProvider();
 
-export const fetchUserProfile = async (userId) => {
+export const fetchDTCByCode = async (code) => {
   try {
-    const userRef = doc(db, 'users', userId);
-    const userDoc = await getDoc(userRef);
-    if (userDoc.exists()) {
-      return { id: userDoc.id, ...userDoc.data() };
-    }
-    return null;
+    const dtcData = await fetchDTCData();
+    const dtc = dtcData.find(item => item.code.toUpperCase() === code.toUpperCase());
+    return dtc || null;
   } catch (error) {
-    console.error("Error fetching user profile:", error);
-    throw new Error("Failed to fetch user profile. Please try again.");
-  }
-};
-
-export const updateUserProfile = async (userId, data) => {
-  try {
-    const userRef = doc(db, 'users', userId);
-    await updateDoc(userRef, data);
-  } catch (error) {
-    console.error("Error updating user profile:", error);
-    throw new Error("Failed to update user profile. Please try again.");
-  }
-};
-
-export const fetchUserVehicles = async (userId) => {
-  try {
-    const vehiclesRef = collection(db, 'vehicles');
-    const q = query(vehiclesRef, where("userId", "==", userId));
-    const querySnapshot = await getDocs(q);
-    return querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-  } catch (error) {
-    console.error("Error fetching user vehicles:", error);
-    throw new Error("Failed to fetch user vehicles. Please try again.");
-  }
-};
-
-export const addVehicle = async (vehicleData) => {
-  try {
-    const vehiclesRef = collection(db, 'vehicles');
-    const docRef = await addDoc(vehiclesRef, vehicleData);
-    return docRef.id;
-  } catch (error) {
-    console.error("Error adding vehicle:", error);
-    throw new Error("Failed to add vehicle. Please try again.");
-  }
-};
-
-export const updateVehicle = async (vehicleId, data) => {
-  try {
-    const vehicleRef = doc(db, 'vehicles', vehicleId);
-    await updateDoc(vehicleRef, data);
-  } catch (error) {
-    console.error("Error updating vehicle:", error);
-    throw new Error("Failed to update vehicle. Please try again.");
-  }
-};
-
-export const deleteVehicle = async (vehicleId) => {
-  try {
-    await deleteDoc(doc(db, 'vehicles', vehicleId));
-  } catch (error) {
-    console.error("Error deleting vehicle:", error);
-    throw new Error("Failed to delete vehicle. Please try again.");
-  }
-};
-
-export const fetchAppData = async (userId) => {
-  try {
-    const appDataRef = doc(db, 'appData', userId);
-    const appDataDoc = await getDoc(appDataRef);
-    if (appDataDoc.exists()) {
-      return appDataDoc.data();
-    }
-    return null;
-  } catch (error) {
-    console.error("Error fetching app data:", error);
-    throw new Error("Failed to fetch app data. Please try again.");
+    console.error("Error fetching DTC by code:", error);
+    throw new Error("Failed to fetch DTC information. Please try again.");
   }
 };
 
 export const fetchAllDTCs = async () => {
   try {
-    const dtcRef = collection(db, 'dtcCodes');
-    const querySnapshot = await getDocs(dtcRef);
-    return querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+    return await fetchDTCData();
   } catch (error) {
     console.error("Error fetching all DTCs:", error);
     throw new Error("Failed to fetch DTC codes. Please try again.");
   }
 };
 
-export const fetchDTCByCode = async (code) => {
-  try {
-    const dtcRef = doc(db, 'dtcCodes', code);
-    const dtcDoc = await getDoc(dtcRef);
-    if (dtcDoc.exists()) {
-      return { id: dtcDoc.id, ...dtcDoc.data() };
-    }
-    return null;
-  } catch (error) {
-    console.error("Error fetching DTC by code:", error);
-    throw new Error("Failed to fetch DTC code. Please try again.");
-  }
-};
-
 export const searchDTCs = async (searchTerm) => {
   try {
-    const dtcRef = collection(db, 'dtcCodes');
-    const q = query(
-      dtcRef,
-      where('code', '>=', searchTerm.toUpperCase()),
-      where('code', '<=', searchTerm.toUpperCase() + '\uf8ff')
+    const dtcData = await fetchDTCData();
+    return dtcData.filter(dtc => 
+      dtc.code.toUpperCase().includes(searchTerm.toUpperCase()) ||
+      dtc.description.toLowerCase().includes(searchTerm.toLowerCase())
     );
-    const querySnapshot = await getDocs(q);
-    return querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
   } catch (error) {
     console.error("Error searching DTCs:", error);
     throw new Error("Failed to search DTC codes. Please try again.");
   }
 };
 
-// Remove the fetchDTCData and parseCSV functions as they're no longer needed
+const fetchDTCData = async () => {
+  const storageRef = ref(storage, 'diagnostic_trouble_codes_rows.csv');
+  try {
+    const url = await getDownloadURL(storageRef);
+    const response = await fetch(url);
+    const csvText = await response.text();
+    return parseCSV(csvText);
+  } catch (error) {
+    console.error("Error fetching DTC data:", error);
+    throw new Error("Failed to fetch DTC data. Please try again.");
+  }
+};
+
+const parseCSV = (csvText) => {
+  const lines = csvText.split('\n');
+  const headers = lines[0].split(',');
+  return lines.slice(1).map(line => {
+    const values = line.split(',');
+    return headers.reduce((obj, header, index) => {
+      obj[header.trim()] = values[index]?.trim() || '';
+      return obj;
+    }, {});
+  });
+};
 
 export const updateData = async (collectionName, docId, data) => {
   try {
