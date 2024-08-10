@@ -8,6 +8,7 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { toast } from "sonner";
 import { motion } from "framer-motion";
+import { fetchAllMakes, fetchModelsForMake, fetchEngineSizesForMakeAndModel } from "@/lib/vehicleApi";
 
 const AddVehicle = () => {
   const [year, setYear] = useState("");
@@ -22,24 +23,28 @@ const AddVehicle = () => {
   const [makes, setMakes] = useState([]);
   const [models, setModels] = useState([]);
   const [engineSizes, setEngineSizes] = useState([]);
+  const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
-
-  const predefinedMakes = [
-    "Acura", "Alfa Romeo", "Aston Martin", "Audi", "Bentley", "BMW", "Buick", "Cadillac",
-    "Chevrolet", "Chrysler", "Dodge", "Ferrari", "Fiat", "Ford", "Genesis", "GMC", "Honda",
-    "Hyundai", "Infiniti", "Jaguar", "Jeep", "Kia", "Lamborghini", "Land Rover", "Lexus",
-    "Lincoln", "Lotus", "Maserati", "Mazda", "McLaren", "Mercedes-Benz", "Mini", "Mitsubishi",
-    "Nissan", "Porsche", "Ram", "Rolls-Royce", "Subaru", "Tesla", "Toyota", "Volkswagen", "Volvo"
-  ];
 
   const drivetrains = ['FWD', 'RWD', 'AWD', '4WD'];
   const bodyConfigurations = ['Sedan', 'Coupe', 'Hatchback', 'Convertible', 'Van', 'SUV', 'Truck'];
 
   useEffect(() => {
     populateYears();
-    setMakes(predefinedMakes);
-    populateEngineSizes();
+    fetchMakes();
   }, []);
+
+  useEffect(() => {
+    if (make && year) {
+      fetchModels();
+    }
+  }, [make, year]);
+
+  useEffect(() => {
+    if (make && model && year) {
+      fetchEngineSizes();
+    }
+  }, [make, model, year]);
 
   const populateYears = () => {
     const currentYear = new Date().getFullYear();
@@ -47,45 +52,43 @@ const AddVehicle = () => {
     setYears(yearsList);
   };
 
-  const populateEngineSizes = () => {
-    const sizes = [];
-    for (let size = 1.0; size <= 12.0; size += 0.1) {
-      sizes.push(size.toFixed(1) + 'L');
+  const fetchMakes = async () => {
+    try {
+      const makesList = await fetchAllMakes();
+      setMakes(makesList);
+    } catch (error) {
+      console.error('Error fetching makes:', error);
+      toast.error('Failed to load vehicle makes');
     }
-    setEngineSizes(sizes);
   };
 
-  const populateModels = async (selectedMake, selectedYear) => {
+  const fetchModels = async () => {
     try {
-      const response = await fetch(`https://vpic.nhtsa.dot.gov/api/vehicles/GetModelsForMakeYear/make/${selectedMake}/modelyear/${selectedYear}?format=json`);
-      const data = await response.json();
-      const modelsList = data.Results.map(model => model.Model_Name);
-      setModels(Array.from(new Set(modelsList)));
+      const modelsList = await fetchModelsForMake(make, year);
+      setModels(modelsList);
     } catch (error) {
       console.error('Error fetching models:', error);
       toast.error('Failed to load models');
     }
   };
 
-  const handleYearChange = (selectedYear) => {
-    setYear(selectedYear);
-    if (make) {
-      populateModels(make, selectedYear);
-    }
-  };
-
-  const handleMakeChange = (selectedMake) => {
-    setMake(selectedMake);
-    if (year) {
-      populateModels(selectedMake, year);
+  const fetchEngineSizes = async () => {
+    try {
+      const sizes = await fetchEngineSizesForMakeAndModel(year, make, model);
+      setEngineSizes(sizes);
+    } catch (error) {
+      console.error('Error fetching engine sizes:', error);
+      toast.error('Failed to load engine sizes');
     }
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setIsLoading(true);
 
     if (!auth.currentUser) {
       toast.error("You must be logged in to add a vehicle");
+      setIsLoading(false);
       return;
     }
 
@@ -112,6 +115,8 @@ const AddVehicle = () => {
       } else {
         toast.error("Error adding vehicle: " + error.message);
       }
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -127,7 +132,7 @@ const AddVehicle = () => {
       <form onSubmit={handleSubmit} className="space-y-4">
         <div>
           <Label htmlFor="year">Year</Label>
-          <Select value={year} onValueChange={handleYearChange}>
+          <Select value={year} onValueChange={setYear}>
             <SelectTrigger id="year">
               <SelectValue placeholder="Select year" />
             </SelectTrigger>
@@ -140,7 +145,7 @@ const AddVehicle = () => {
         </div>
         <div>
           <Label htmlFor="make">Make</Label>
-          <Select value={make} onValueChange={handleMakeChange}>
+          <Select value={make} onValueChange={setMake}>
             <SelectTrigger id="make">
               <SelectValue placeholder="Select make" />
             </SelectTrigger>
@@ -212,6 +217,8 @@ const AddVehicle = () => {
             <SelectContent>
               <SelectItem value="gas">Gas</SelectItem>
               <SelectItem value="diesel">Diesel</SelectItem>
+              <SelectItem value="electric">Electric</SelectItem>
+              <SelectItem value="hybrid">Hybrid</SelectItem>
             </SelectContent>
           </Select>
         </div>
@@ -225,7 +232,9 @@ const AddVehicle = () => {
             placeholder="Enter vehicle mileage"
           />
         </div>
-        <Button type="submit">Add Vehicle</Button>
+        <Button type="submit" disabled={isLoading}>
+          {isLoading ? "Adding Vehicle..." : "Add Vehicle"}
+        </Button>
       </form>
     </motion.div>
   );
