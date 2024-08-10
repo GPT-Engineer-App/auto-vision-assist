@@ -26,22 +26,28 @@ export const signInWithGoogle = () => signInWithPopup(auth, googleProvider);
 
 // Removed emulator connections
 
+import { getStorage, ref, getDownloadURL } from "firebase/storage";
+
+const storage = getStorage();
+
 export const fetchDTCByCode = async (code) => {
   try {
-    const dtcRef = doc(db, "dtcCodes", code.toUpperCase());
-    const dtcSnap = await getDoc(dtcRef);
-    if (dtcSnap.exists()) {
-      return { id: dtcSnap.id, ...dtcSnap.data() };
-    } else {
-      const querySnapshot = await getDocs(
-        query(collection(db, "dtcCodes"), where("code", "==", code.toUpperCase()))
-      );
-      if (!querySnapshot.empty) {
-        const doc = querySnapshot.docs[0];
-        return { id: doc.id, ...doc.data() };
-      }
-      return null;
+    const dtcRef = ref(storage, 'diagnostic_trouble_codes_rows.csv');
+    const url = await getDownloadURL(dtcRef);
+    const response = await fetch(url);
+    const csvData = await response.text();
+    const rows = csvData.split('\n').map(row => row.split(','));
+    const dtc = rows.find(row => row[0] === code.toUpperCase());
+    if (dtc) {
+      return {
+        code: dtc[0],
+        description: dtc[1],
+        possibleCauses: dtc[2],
+        diagnosticAids: dtc[3],
+        application: dtc[4]
+      };
     }
+    return null;
   } catch (error) {
     console.error("Error fetching DTC by code:", error);
     throw new Error("Failed to fetch DTC information. Please try again.");
@@ -50,39 +56,31 @@ export const fetchDTCByCode = async (code) => {
 
 export const fetchAllDTCs = async () => {
   try {
-    const dtcRef = collection(db, "dtcCodes");
-    const querySnapshot = await getDocs(dtcRef);
-    return querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+    const dtcRef = ref(storage, 'diagnostic_trouble_codes_rows.csv');
+    const url = await getDownloadURL(dtcRef);
+    const response = await fetch(url);
+    const csvData = await response.text();
+    const rows = csvData.split('\n').map(row => row.split(','));
+    return rows.slice(1).map(row => ({
+      code: row[0],
+      description: row[1],
+      possibleCauses: row[2],
+      diagnosticAids: row[3],
+      application: row[4]
+    }));
   } catch (error) {
     console.error("Error fetching all DTCs:", error);
-    if (error.code === "permission-denied") {
-      throw new Error("Permission denied. Please make sure you're logged in and have the necessary permissions.");
-    }
     throw new Error("Failed to fetch DTC codes. Please try again.");
   }
 };
 
 export const searchDTCs = async (searchTerm) => {
   try {
-    const dtcRef = collection(db, "dtcCodes");
-    const q = query(dtcRef, 
-      where("code", ">=", searchTerm.toUpperCase()),
-      where("code", "<=", searchTerm.toUpperCase() + '\uf8ff')
+    const allDTCs = await fetchAllDTCs();
+    return allDTCs.filter(dtc => 
+      dtc.code.includes(searchTerm.toUpperCase()) || 
+      dtc.description.toLowerCase().includes(searchTerm.toLowerCase())
     );
-    const querySnapshot = await getDocs(q);
-    const results = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-    
-    // If no results found by code, search by description
-    if (results.length === 0) {
-      const descriptionQuery = query(dtcRef,
-        where("description", ">=", searchTerm.toLowerCase()),
-        where("description", "<=", searchTerm.toLowerCase() + '\uf8ff')
-      );
-      const descriptionQuerySnapshot = await getDocs(descriptionQuery);
-      return descriptionQuerySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-    }
-    
-    return results;
   } catch (error) {
     console.error("Error searching DTCs:", error);
     throw new Error("Failed to search DTC codes. Please try again.");
