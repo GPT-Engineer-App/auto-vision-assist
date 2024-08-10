@@ -25,9 +25,7 @@ export const signInWithGoogle = () => signInWithPopup(auth, googleProvider);
 
 // Removed emulator connections
 
-import { getStorage, ref, getDownloadURL } from "firebase/storage";
-
-const storage = getStorage();
+import { ref, getDownloadURL } from "firebase/storage";
 
 export const fetchDTCByCode = async (code) => {
   try {
