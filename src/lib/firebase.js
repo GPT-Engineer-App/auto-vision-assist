@@ -2,6 +2,7 @@ import { initializeApp } from "firebase/app";
 import { getAuth, GoogleAuthProvider, signInWithPopup, connectAuthEmulator } from "firebase/auth";
 import { getFirestore, doc, getDoc, updateDoc, deleteDoc, collection, query, where, getDocs, connectFirestoreEmulator } from "firebase/firestore";
 import { getAnalytics } from "firebase/analytics";
+import { getStorage } from "firebase/storage";
 import { getFunctions, connectFunctionsEmulator } from "firebase/functions";
 
 const firebaseConfig = {
@@ -25,25 +26,22 @@ export const signInWithGoogle = () => signInWithPopup(auth, googleProvider);
 
 // Removed emulator connections
 
-import { ref, getDownloadURL } from "firebase/storage";
-
 export const fetchDTCByCode = async (code) => {
   try {
-    const dtcRef = collection(db, "dtcCodes");
-    const q = query(dtcRef, where("code", "==", code.toUpperCase()));
-    const querySnapshot = await getDocs(q);
-    
-    if (!querySnapshot.empty) {
-      const dtcData = querySnapshot.docs[0].data();
-      return {
-        code: dtcData.code,
-        description: dtcData.description,
-        possibleCauses: dtcData.possibleCauses,
-        diagnosticAids: dtcData.diagnosticAids,
-        application: dtcData.application
-      };
+    const dtcRef = doc(db, "dtcCodes", code.toUpperCase());
+    const dtcSnap = await getDoc(dtcRef);
+    if (dtcSnap.exists()) {
+      return { id: dtcSnap.id, ...dtcSnap.data() };
+    } else {
+      const querySnapshot = await getDocs(
+        query(collection(db, "dtcCodes"), where("code", "==", code.toUpperCase()))
+      );
+      if (!querySnapshot.empty) {
+        const doc = querySnapshot.docs[0];
+        return { id: doc.id, ...doc.data() };
+      }
+      return null;
     }
-    return null;
   } catch (error) {
     console.error("Error fetching DTC by code:", error);
     throw new Error("Failed to fetch DTC information. Please try again.");
@@ -54,15 +52,12 @@ export const fetchAllDTCs = async () => {
   try {
     const dtcRef = collection(db, "dtcCodes");
     const querySnapshot = await getDocs(dtcRef);
-    return querySnapshot.docs.map(doc => ({
-      code: doc.data().code,
-      description: doc.data().description,
-      possibleCauses: doc.data().possibleCauses,
-      diagnosticAids: doc.data().diagnosticAids,
-      application: doc.data().application
-    }));
+    return querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
   } catch (error) {
     console.error("Error fetching all DTCs:", error);
+    if (error.code === "permission-denied") {
+      throw new Error("Permission denied. Please make sure you're logged in and have the necessary permissions.");
+    }
     throw new Error("Failed to fetch DTC codes. Please try again.");
   }
 };
@@ -70,19 +65,24 @@ export const fetchAllDTCs = async () => {
 export const searchDTCs = async (searchTerm) => {
   try {
     const dtcRef = collection(db, "dtcCodes");
-    const q = query(
-      dtcRef,
+    const q = query(dtcRef, 
       where("code", ">=", searchTerm.toUpperCase()),
       where("code", "<=", searchTerm.toUpperCase() + '\uf8ff')
     );
     const querySnapshot = await getDocs(q);
-    return querySnapshot.docs.map(doc => ({
-      code: doc.data().code,
-      description: doc.data().description,
-      possibleCauses: doc.data().possibleCauses,
-      diagnosticAids: doc.data().diagnosticAids,
-      application: doc.data().application
-    }));
+    const results = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+    
+    // If no results found by code, search by description
+    if (results.length === 0) {
+      const descriptionQuery = query(dtcRef,
+        where("description", ">=", searchTerm.toLowerCase()),
+        where("description", "<=", searchTerm.toLowerCase() + '\uf8ff')
+      );
+      const descriptionQuerySnapshot = await getDocs(descriptionQuery);
+      return descriptionQuerySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+    }
+    
+    return results;
   } catch (error) {
     console.error("Error searching DTCs:", error);
     throw new Error("Failed to search DTC codes. Please try again.");
