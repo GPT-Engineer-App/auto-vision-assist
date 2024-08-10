@@ -28,7 +28,14 @@ const AuthForm = ({ isLogin, setIsLoading }) => {
   const [loading, setLoading] = useState(false);
   const [retryCount, setRetryCount] = useState(0);
   const [networkError, setNetworkError] = useState(false);
+  const [error, setError] = useState(null);
   const navigate = useNavigate();
+
+  useEffect(() => {
+    if (error) {
+      toast.error(error);
+    }
+  }, [error]);
 
   useEffect(() => {
     const checkNetworkConnection = () => {
@@ -86,9 +93,9 @@ const AuthForm = ({ isLogin, setIsLoading }) => {
       console.error("Authentication error:", error);
       if (error.code === "auth/network-request-failed") {
         setNetworkError(true);
-        toast.error("Network error. Please check your internet connection and try again.");
+        setError("Network error. Please check your internet connection and try again.");
       } else {
-        toast.error(error.message || "An error occurred during authentication. Please try again.");
+        setError(error.message || "An error occurred during authentication. Please try again.");
       }
     } finally {
       setLoading(false);
@@ -198,10 +205,10 @@ const AuthForm = ({ isLogin, setIsLoading }) => {
             {!isLogin && (
               <FormField
                 name="userType"
-                render={() => (
+                render={({ field }) => (
                   <FormItem>
                     <FormLabel>User Type</FormLabel>
-                    <Select onValueChange={(value) => field.onChange(value)} defaultValue={field.value}>
+                    <Select onValueChange={field.onChange} defaultValue={field.value}>
                       <FormControl>
                         <SelectTrigger>
                           <SelectValue placeholder="Select user type" />
