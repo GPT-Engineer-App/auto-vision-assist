@@ -2,7 +2,6 @@ import { initializeApp } from "firebase/app";
 import { getAuth, GoogleAuthProvider, signInWithPopup, connectAuthEmulator } from "firebase/auth";
 import { getFirestore, doc, getDoc, updateDoc, deleteDoc, collection, query, where, getDocs, connectFirestoreEmulator } from "firebase/firestore";
 import { getAnalytics } from "firebase/analytics";
-import { getStorage } from "firebase/storage";
 import { getFunctions, connectFunctionsEmulator } from "firebase/functions";
 
 const firebaseConfig = {
@@ -32,19 +31,18 @@ const storage = getStorage();
 
 export const fetchDTCByCode = async (code) => {
   try {
-    const dtcRef = ref(storage, 'diagnostic_trouble_codes_rows.csv');
-    const url = await getDownloadURL(dtcRef);
-    const response = await fetch(url);
-    const csvData = await response.text();
-    const rows = csvData.split('\n').map(row => row.split(','));
-    const dtc = rows.find(row => row[0] === code.toUpperCase());
-    if (dtc) {
+    const dtcRef = collection(db, "dtcCodes");
+    const q = query(dtcRef, where("code", "==", code.toUpperCase()));
+    const querySnapshot = await getDocs(q);
+    
+    if (!querySnapshot.empty) {
+      const dtcData = querySnapshot.docs[0].data();
       return {
-        code: dtc[0],
-        description: dtc[1],
-        possibleCauses: dtc[2],
-        diagnosticAids: dtc[3],
-        application: dtc[4]
+        code: dtcData.code,
+        description: dtcData.description,
+        possibleCauses: dtcData.possibleCauses,
+        diagnosticAids: dtcData.diagnosticAids,
+        application: dtcData.application
       };
     }
     return null;
@@ -56,17 +54,14 @@ export const fetchDTCByCode = async (code) => {
 
 export const fetchAllDTCs = async () => {
   try {
-    const dtcRef = ref(storage, 'diagnostic_trouble_codes_rows.csv');
-    const url = await getDownloadURL(dtcRef);
-    const response = await fetch(url);
-    const csvData = await response.text();
-    const rows = csvData.split('\n').map(row => row.split(','));
-    return rows.slice(1).map(row => ({
-      code: row[0],
-      description: row[1],
-      possibleCauses: row[2],
-      diagnosticAids: row[3],
-      application: row[4]
+    const dtcRef = collection(db, "dtcCodes");
+    const querySnapshot = await getDocs(dtcRef);
+    return querySnapshot.docs.map(doc => ({
+      code: doc.data().code,
+      description: doc.data().description,
+      possibleCauses: doc.data().possibleCauses,
+      diagnosticAids: doc.data().diagnosticAids,
+      application: doc.data().application
     }));
   } catch (error) {
     console.error("Error fetching all DTCs:", error);
@@ -76,11 +71,20 @@ export const fetchAllDTCs = async () => {
 
 export const searchDTCs = async (searchTerm) => {
   try {
-    const allDTCs = await fetchAllDTCs();
-    return allDTCs.filter(dtc => 
-      dtc.code.includes(searchTerm.toUpperCase()) || 
-      dtc.description.toLowerCase().includes(searchTerm.toLowerCase())
+    const dtcRef = collection(db, "dtcCodes");
+    const q = query(
+      dtcRef,
+      where("code", ">=", searchTerm.toUpperCase()),
+      where("code", "<=", searchTerm.toUpperCase() + '\uf8ff')
     );
+    const querySnapshot = await getDocs(q);
+    return querySnapshot.docs.map(doc => ({
+      code: doc.data().code,
+      description: doc.data().description,
+      possibleCauses: doc.data().possibleCauses,
+      diagnosticAids: doc.data().diagnosticAids,
+      application: doc.data().application
+    }));
   } catch (error) {
     console.error("Error searching DTCs:", error);
     throw new Error("Failed to search DTC codes. Please try again.");
