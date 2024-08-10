@@ -2,6 +2,8 @@ import React, { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
+import { auth } from '@/lib/firebase';
+import { useAuth } from '@/contexts/AuthContext';
 import { 
   Table,
   TableBody,
@@ -20,6 +22,7 @@ const DTCCodes = () => {
   const [selectedDTC, setSelectedDTC] = useState(null);
   const [dtcInput, setDtcInput] = useState('');
   const navigate = useNavigate();
+  const { user } = useAuth();
 
   const { data: allDTCs, isLoading: isLoadingAllDTCs, error: dtcError } = useQuery({
     queryKey: ['allDTCs'],
@@ -30,7 +33,7 @@ const DTCCodes = () => {
       console.error("Error fetching DTCs:", error);
       toast.error("Failed to load DTC codes. Please try again later.");
     },
-    enabled: !!auth.currentUser
+    enabled: !!user
   });
 
   const { data: searchResults, isLoading: isSearching } = useQuery({
