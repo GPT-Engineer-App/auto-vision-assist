@@ -187,8 +187,7 @@ const AuthForm = ({ isLogin, setIsLoading }) => {
                     <FormControl>
                       <Input
                         placeholder="Choose a username"
-                        value={username}
-                        onChange={(e) => setUsername(e.target.value)}
+                        {...field}
                         required
                       />
                     </FormControl>
@@ -202,7 +201,7 @@ const AuthForm = ({ isLogin, setIsLoading }) => {
                 render={() => (
                   <FormItem>
                     <FormLabel>User Type</FormLabel>
-                    <Select onValueChange={setUserType} defaultValue={userType}>
+                    <Select onValueChange={(value) => field.onChange(value)} defaultValue={field.value}>
                       <FormControl>
                         <SelectTrigger>
                           <SelectValue placeholder="Select user type" />
