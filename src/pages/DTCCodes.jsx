@@ -15,6 +15,7 @@ import {
 import DTCAnalysisView from '@/components/DTCAnalysisView';
 import { useNavigate } from 'react-router-dom';
 import { searchDTCs, fetchAllDTCs, fetchDTCByCode } from '@/lib/firebase';
+import { useQuery } from '@tanstack/react-query';
 import { toast } from 'sonner';
 
 const DTCCodes = () => {
@@ -42,7 +43,7 @@ const DTCCodes = () => {
     enabled: searchTerm.length > 0
   });
 
-  const { refetch: refetchDTC, isLoading: isAnalyzing } = useQuery({
+  const { data: selectedDTC, refetch: refetchDTC, isLoading: isAnalyzing } = useQuery({
     queryKey: ['dtc', dtcInput],
     queryFn: () => fetchDTCByCode(dtcInput),
     enabled: false,
