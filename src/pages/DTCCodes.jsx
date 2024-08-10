@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { auth } from '@/lib/firebase';
+import { auth, db } from '@/lib/firebase';
 import { useAuth } from '@/contexts/AuthContext';
 import { 
   Table,
@@ -16,6 +16,8 @@ import DTCAnalysisView from '@/components/DTCAnalysisView';
 import { useNavigate } from 'react-router-dom';
 import { searchDTCs, fetchAllDTCs, fetchDTCByCode } from '@/lib/firebase';
 import { toast } from 'sonner';
+import { doc, getDoc, updateDoc, increment } from "firebase/firestore";
+import { useProStatus } from '@/contexts/ProStatusContext';
 
 const DTCCodes = () => {
   const [searchTerm, setSearchTerm] = useState('');
@@ -23,6 +25,7 @@ const DTCCodes = () => {
   const [dtcInput, setDtcInput] = useState('');
   const navigate = useNavigate();
   const { user } = useAuth();
+  const { isPro } = useProStatus();
 
   const { data: allDTCs, isLoading: isLoadingAllDTCs, error: dtcError } = useQuery({
     queryKey: ['allDTCs'],
@@ -53,6 +56,22 @@ const DTCCodes = () => {
   const handleAnalyze = async () => {
     if (dtcInput) {
       try {
+        if (!isPro) {
+          const userRef = doc(db, "users", user.uid);
+          const userSnap = await getDoc(userRef);
+          const userData = userSnap.data();
+
+          if (userData.queryCount <= 0) {
+            toast.error("You've used all your free queries. Upgrade to Pro for unlimited access!");
+            return;
+          }
+
+          // Decrement query count for free users
+          await updateDoc(userRef, {
+            queryCount: increment(-1)
+          });
+        }
+
         const result = await refetchDTC();
         if (result.data) {
           setSelectedDTC(result.data);
