@@ -109,6 +109,20 @@ export const fetchAllDTCs = async () => {
   }
 };
 
+export const fetchDTCByCode = async (code) => {
+  try {
+    const dtcRef = doc(db, 'dtcCodes', code);
+    const dtcDoc = await getDoc(dtcRef);
+    if (dtcDoc.exists()) {
+      return { id: dtcDoc.id, ...dtcDoc.data() };
+    }
+    return null;
+  } catch (error) {
+    console.error("Error fetching DTC by code:", error);
+    throw new Error("Failed to fetch DTC code. Please try again.");
+  }
+};
+
 export const searchDTCs = async (searchTerm) => {
   try {
     const dtcRef = collection(db, 'dtcCodes');
