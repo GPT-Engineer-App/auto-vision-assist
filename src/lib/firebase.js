@@ -2,7 +2,7 @@ import { initializeApp } from "firebase/app";
 import { getAuth, GoogleAuthProvider, signInWithPopup, connectAuthEmulator } from "firebase/auth";
 import { getFirestore, doc, getDoc, updateDoc, deleteDoc, collection, query, where, getDocs, connectFirestoreEmulator } from "firebase/firestore";
 import { getAnalytics } from "firebase/analytics";
-import { getStorage } from "firebase/storage";
+import { getStorage, ref, getDownloadURL } from "firebase/storage";
 import { getFunctions, connectFunctionsEmulator } from "firebase/functions";
 
 const firebaseConfig = {
@@ -28,20 +28,9 @@ export const signInWithGoogle = () => signInWithPopup(auth, googleProvider);
 
 export const fetchDTCByCode = async (code) => {
   try {
-    const dtcRef = doc(db, "dtcCodes", code.toUpperCase());
-    const dtcSnap = await getDoc(dtcRef);
-    if (dtcSnap.exists()) {
-      return { id: dtcSnap.id, ...dtcSnap.data() };
-    } else {
-      const querySnapshot = await getDocs(
-        query(collection(db, "dtcCodes"), where("code", "==", code.toUpperCase()))
-      );
-      if (!querySnapshot.empty) {
-        const doc = querySnapshot.docs[0];
-        return { id: doc.id, ...doc.data() };
-      }
-      return null;
-    }
+    const dtcData = await fetchDTCData();
+    const dtc = dtcData.find(item => item.code.toUpperCase() === code.toUpperCase());
+    return dtc || null;
   } catch (error) {
     console.error("Error fetching DTC by code:", error);
     throw new Error("Failed to fetch DTC information. Please try again.");
@@ -50,43 +39,49 @@ export const fetchDTCByCode = async (code) => {
 
 export const fetchAllDTCs = async () => {
   try {
-    const dtcRef = collection(db, "dtcCodes");
-    const querySnapshot = await getDocs(dtcRef);
-    return querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+    return await fetchDTCData();
   } catch (error) {
     console.error("Error fetching all DTCs:", error);
-    if (error.code === "permission-denied") {
-      throw new Error("Permission denied. Please make sure you're logged in and have the necessary permissions.");
-    }
     throw new Error("Failed to fetch DTC codes. Please try again.");
   }
 };
 
 export const searchDTCs = async (searchTerm) => {
   try {
-    const dtcRef = collection(db, "dtcCodes");
-    const q = query(dtcRef, 
-      where("code", ">=", searchTerm.toUpperCase()),
-      where("code", "<=", searchTerm.toUpperCase() + '\uf8ff')
+    const dtcData = await fetchDTCData();
+    return dtcData.filter(dtc => 
+      dtc.code.toUpperCase().includes(searchTerm.toUpperCase()) ||
+      dtc.description.toLowerCase().includes(searchTerm.toLowerCase())
     );
-    const querySnapshot = await getDocs(q);
-    const results = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-    
-    // If no results found by code, search by description
-    if (results.length === 0) {
-      const descriptionQuery = query(dtcRef,
-        where("description", ">=", searchTerm.toLowerCase()),
-        where("description", "<=", searchTerm.toLowerCase() + '\uf8ff')
-      );
-      const descriptionQuerySnapshot = await getDocs(descriptionQuery);
-      return descriptionQuerySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-    }
-    
-    return results;
   } catch (error) {
     console.error("Error searching DTCs:", error);
     throw new Error("Failed to search DTC codes. Please try again.");
   }
+};
+
+const fetchDTCData = async () => {
+  const storageRef = ref(storage, 'diagnostic_trouble_codes_rows.csv');
+  try {
+    const url = await getDownloadURL(storageRef);
+    const response = await fetch(url);
+    const csvText = await response.text();
+    return parseCSV(csvText);
+  } catch (error) {
+    console.error("Error fetching DTC data:", error);
+    throw new Error("Failed to fetch DTC data. Please try again.");
+  }
+};
+
+const parseCSV = (csvText) => {
+  const lines = csvText.split('\n');
+  const headers = lines[0].split(',');
+  return lines.slice(1).map(line => {
+    const values = line.split(',');
+    return headers.reduce((obj, header, index) => {
+      obj[header.trim()] = values[index]?.trim() || '';
+      return obj;
+    }, {});
+  });
 };
 
 export const updateData = async (collectionName, docId, data) => {
