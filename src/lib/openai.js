@@ -6,46 +6,52 @@ const openai = new OpenAI({
   dangerouslyAllowBrowser: true
 });
 
-class RateLimiter {
-  constructor(limit, window) {
-    this.limit = limit;
-    this.window = window;
-    this.tokens = [];
-  }
+let assistantId;
 
-  async waitForToken() {
-    const now = Date.now();
-    this.tokens = this.tokens.filter(t => now - t < this.window);
-    if (this.tokens.length >= this.limit) {
-      const oldestToken = this.tokens[0];
-      const msToWait = this.window - (now - oldestToken);
-      await new Promise(resolve => setTimeout(resolve, msToWait));
-      return this.waitForToken();
-    }
-    this.tokens.push(now);
+export const initializeAssistant = async () => {
+  try {
+    const assistant = await openai.beta.assistants.create({
+      name: "Auto Diagnostic Assistant",
+      instructions: "You are an automotive diagnostic assistant. Provide concise and helpful responses to vehicle-related queries, symptoms, and DTC codes.",
+      tools: [{ type: "code_interpreter" }],
+      model: "gpt-4-turbo-preview"
+    });
+    assistantId = assistant.id;
+    console.log("Assistant created with ID:", assistantId);
+  } catch (error) {
+    console.error("Error creating assistant:", error);
+    toast.error("Failed to initialize diagnostic assistant. Please try again later.");
   }
-}
-
-const rateLimiter = new RateLimiter(50, 60 * 1000); // 50 requests per minute
+};
 
 export const generateDiagnosticResponse = async (prompt, retries = 3) => {
+  if (!assistantId) {
+    await initializeAssistant();
+  }
+
   try {
-    await rateLimiter.waitForToken();
-    const response = await openai.chat.completions.create({
-      model: "gpt-3.5-turbo",
-      messages: [
-        { role: "system", content: "You are an automotive diagnostic assistant. Provide concise and helpful responses to vehicle-related queries." },
-        { role: "user", content: prompt }
-      ],
-      max_tokens: 150,
-      temperature: 0.7,
-      top_p: 1,
-      frequency_penalty: 0,
-      presence_penalty: 0,
+    const thread = await openai.beta.threads.create();
+    await openai.beta.threads.messages.create(thread.id, {
+      role: "user",
+      content: prompt
     });
 
-    if (response.choices && response.choices.length > 0) {
-      return response.choices[0].message.content.trim();
+    const run = await openai.beta.threads.runs.create(thread.id, {
+      assistant_id: assistantId
+    });
+
+    let runStatus = await openai.beta.threads.runs.retrieve(thread.id, run.id);
+
+    while (runStatus.status !== "completed") {
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      runStatus = await openai.beta.threads.runs.retrieve(thread.id, run.id);
+    }
+
+    const messages = await openai.beta.threads.messages.list(thread.id);
+    const lastMessage = messages.data[0];
+
+    if (lastMessage.role === "assistant") {
+      return lastMessage.content[0].text.value.trim();
     } else {
       throw new Error("No response generated");
     }

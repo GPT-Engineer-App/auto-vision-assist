@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { toast } from "sonner";
-import { generateDiagnosticResponse } from "@/lib/openai";
+import { generateDiagnosticResponse, initializeAssistant } from "@/lib/openai";
 import { useProStatus } from "@/contexts/ProStatusContext";
 
 const DiagnosticChat = ({ vehicleId }) => {
@@ -15,6 +15,10 @@ const DiagnosticChat = ({ vehicleId }) => {
   const [chatHistory, setChatHistory] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
   const queryClient = useQueryClient();
+
+  useEffect(() => {
+    initializeAssistant();
+  }, []);
 
   const { data: queryCount = 0, refetch: refetchQueryCount } = useQuery({
     queryKey: ["queryCount", auth.currentUser?.uid],
