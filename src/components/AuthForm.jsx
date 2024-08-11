@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
+import { Lock, Mail, User } from "lucide-react";
 
 const AuthForm = ({ isLogin }) => {
   const [email, setEmail] = useState("");
@@ -42,41 +43,53 @@ const AuthForm = ({ isLogin }) => {
     <form onSubmit={handleSubmit} className="space-y-4">
       {!isLogin && (
         <div className="space-y-2">
-          <Label htmlFor="username">Username</Label>
-          <Input
-            id="username"
-            type="text"
-            value={username}
-            onChange={(e) => setUsername(e.target.value)}
-            required
-          />
+          <Label htmlFor="username" className="text-gray-300">Username</Label>
+          <div className="relative">
+            <User className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500" size={18} />
+            <Input
+              id="username"
+              type="text"
+              value={username}
+              onChange={(e) => setUsername(e.target.value)}
+              required
+              className="pl-10 bg-gray-700 border-gray-600 text-white"
+            />
+          </div>
         </div>
       )}
       <div className="space-y-2">
-        <Label htmlFor="email">Email</Label>
-        <Input
-          id="email"
-          type="email"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-          required
-        />
+        <Label htmlFor="email" className="text-gray-300">Email</Label>
+        <div className="relative">
+          <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500" size={18} />
+          <Input
+            id="email"
+            type="email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            required
+            className="pl-10 bg-gray-700 border-gray-600 text-white"
+          />
+        </div>
       </div>
       <div className="space-y-2">
-        <Label htmlFor="password">Password</Label>
-        <Input
-          id="password"
-          type="password"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-          required
-        />
+        <Label htmlFor="password" className="text-gray-300">Password</Label>
+        <div className="relative">
+          <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500" size={18} />
+          <Input
+            id="password"
+            type="password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            required
+            className="pl-10 bg-gray-700 border-gray-600 text-white"
+          />
+        </div>
       </div>
-      <Button type="submit" className="w-full">
+      <Button type="submit" className="w-full bg-orange-500 hover:bg-orange-600 text-white">
         {isLogin ? "Log In" : "Sign Up"}
       </Button>
       {import.meta.env.DEV && (
-        <p className="text-sm text-muted-foreground mt-2">
+        <p className="text-sm text-gray-500 mt-2">
           Dev login: dev@example.com / devpassword
         </p>
       )}
