@@ -5,6 +5,7 @@ import { motion } from "framer-motion";
 import AuthForm from "@/components/AuthForm";
 import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "sonner";
+import { initializeAssistant } from "@/lib/openai";
 
 const Index = () => {
   const navigate = useNavigate();
@@ -18,6 +19,7 @@ const Index = () => {
     };
 
     window.addEventListener('error', handleError);
+    initializeAssistant();
     return () => window.removeEventListener('error', handleError);
   }, []);
 

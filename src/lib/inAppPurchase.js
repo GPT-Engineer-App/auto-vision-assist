@@ -28,7 +28,8 @@ export const purchaseQueryPack = async () => {
     });
     
     if (!response.ok) {
-      throw new Error('Failed to create checkout session');
+      const errorData = await response.text();
+      return { success: false, error: errorData || 'Failed to create checkout session' };
     }
 
     const session = await response.json();
@@ -38,13 +39,13 @@ export const purchaseQueryPack = async () => {
     });
     
     if (result.error) {
-      throw new Error(result.error.message);
+      return { success: false, error: result.error.message };
     }
     
-    return true;
+    return { success: true };
   } catch (error) {
     console.error('Error in query pack purchase:', error);
-    throw error;
+    return { success: false, error: error.message || 'An unexpected error occurred' };
   }
 };
 

@@ -4,6 +4,7 @@ import { createUserWithEmailAndPassword, signInWithEmailAndPassword, sendPasswor
 import { auth, db } from "../lib/firebase";
 import { doc, setDoc, serverTimestamp } from "firebase/firestore";
 import { signInWithGoogle } from "@/lib/firebaseOperations";
+import { initializeBillingClient } from "@/lib/inAppPurchase";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -35,6 +36,7 @@ const AuthForm = ({ isLogin, setIsLoading }) => {
     if (error) {
       toast.error(error);
     }
+    initializeBillingClient();
   }, [error]);
 
   useEffect(() => {

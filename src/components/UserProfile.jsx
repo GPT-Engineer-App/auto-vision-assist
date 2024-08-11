@@ -7,7 +7,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { toast } from "sonner";
 import { auth, db } from '@/lib/firebase';
 import { doc, getDoc, setDoc, updateDoc, collection, query, where, getDocs, deleteDoc } from 'firebase/firestore';
-import { purchaseProVersion, checkProPurchaseStatus, purchaseQueryPack, checkQueryPackPurchaseStatus } from '@/lib/inAppPurchase';
+import { purchaseProVersion, checkProPurchaseStatus, purchaseQueryPack, checkQueryPackPurchaseStatus, consumeQuery } from '@/lib/inAppPurchase';
 import { savePreferences, loadPreferences } from '@/lib/userPreferences';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
@@ -157,13 +157,34 @@ const UserProfile = () => {
 
     setLoading(true);
     try {
-      await purchaseQueryPack();
-      toast.success("Redirecting to payment page for query pack purchase...");
+      const result = await purchaseQueryPack();
+      if (result.success) {
+        toast.success("Query pack purchased successfully!");
+        setQueryPacks(prev => prev + 10); // Assuming each pack gives 10 queries
+      } else {
+        throw new Error(result.error || "Failed to purchase query pack");
+      }
     } catch (error) {
-      console.error("Error initiating query pack purchase:", error);
-      toast.error("Failed to initiate query pack purchase. Please try again.");
+      console.error("Error purchasing query pack:", error);
+      toast.error(error.message || "Failed to purchase query pack. Please try again.");
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleConsumeQuery = async () => {
+    if (!user) {
+      toast.error("You must be logged in to use queries");
+      return;
+    }
+
+    try {
+      await consumeQuery();
+      setQueryPacks(prev => prev - 1);
+      toast.success("Query consumed successfully");
+    } catch (error) {
+      console.error("Error consuming query:", error);
+      toast.error("Failed to consume query. Please try again.");
     }
   };
 
