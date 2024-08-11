@@ -6,9 +6,8 @@ import { ThemeProvider } from "@/components/theme-provider";
 import { AuthProvider } from "./contexts/AuthContext";
 import { ProStatusProvider } from "./contexts/ProStatusContext";
 import AppRoutes from "./AppRoutes";
-import { Suspense, lazy } from "react";
-
-const ErrorBoundary = lazy(() => import('./components/ErrorBoundary'));
+import { Suspense } from "react";
+import ErrorBoundary from './components/ErrorBoundary';
 
 const queryClient = new QueryClient();
 
@@ -22,7 +21,7 @@ const App = () => {
               <TooltipProvider>
                 <Toaster />
                 <ErrorBoundary>
-                  <Suspense fallback={<div>Loading...</div>}>
+                  <Suspense fallback={<div className="flex items-center justify-center h-screen">Loading...</div>}>
                     <AppRoutes />
                   </Suspense>
                 </ErrorBoundary>
