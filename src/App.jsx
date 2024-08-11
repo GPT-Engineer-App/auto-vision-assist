@@ -6,10 +6,25 @@ import { ThemeProvider } from "@/components/theme-provider";
 import { AuthProvider } from "./contexts/AuthContext";
 import { ProStatusProvider } from "./contexts/ProStatusContext";
 import AppRoutes from "./AppRoutes";
-import { Suspense } from "react";
+import { Suspense, useEffect, useState } from "react";
 import ErrorBoundary from './components/ErrorBoundary';
+import { auth } from './lib/firebase';
 
 const queryClient = new QueryClient();
+
+const App = () => {
+  const [firebaseInitialized, setFirebaseInitialized] = useState(false);
+
+  useEffect(() => {
+    const unsubscribe = auth.onAuthStateChanged(() => {
+      setFirebaseInitialized(true);
+    });
+    return () => unsubscribe();
+  }, []);
+
+  if (!firebaseInitialized) {
+    return <div>Loading...</div>;
+  }
 
 const App = () => {
   return (
