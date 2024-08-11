@@ -20,8 +20,6 @@ import DiagnosticChat from "@/components/DiagnosticChat";
 
 import { useAuth } from "@/contexts/AuthContext";
 import { useProStatus } from "@/contexts/ProStatusContext";
-import { doc, getDoc, updateDoc, increment } from "firebase/firestore";
-import { db } from "@/lib/firebase";
 
 const Garage = () => {
   const { user } = useAuth();
@@ -63,27 +61,13 @@ const Garage = () => {
     },
   });
 
-  const handleAddVehicle = async () => {
-    if (!user) {
-      toast.error("You must be logged in to add a vehicle");
-      return;
-    }
-
-    try {
-      const userRef = doc(db, "users", user.uid);
-      const userSnap = await getDoc(userRef);
-      const userData = userSnap.data();
-
-      if (!isPro && userData.vehicles >= 1) {
-        toast.error("Free users can only store one vehicle. Upgrade to Pro to add more!");
-      } else if (isPro && userData.vehicles >= 3) {
-        toast.error("Pro users can store up to three vehicles.");
-      } else {
-        navigate("/add-vehicle");
-      }
-    } catch (error) {
-      console.error("Error checking vehicle limit:", error);
-      toast.error("An error occurred. Please try again.");
+  const handleAddVehicle = () => {
+    if (!isPro && vehicles.length >= 1) {
+      toast.error("Free users can only store one vehicle. Upgrade to Pro to add more!");
+    } else if (isPro && vehicles.length >= 3) {
+      toast.error("Pro users can store up to three vehicles.");
+    } else {
+      navigate("/add-vehicle");
     }
   };
 
@@ -95,21 +79,8 @@ const Garage = () => {
     updateVehicleMutation.mutate(updatedVehicle);
   };
 
-  const handleDeleteVehicle = async (vehicleId) => {
-    try {
-      await deleteVehicleMutation.mutateAsync(vehicleId);
-      
-      // Update user's vehicle count
-      const userRef = doc(db, "users", user.uid);
-      await updateDoc(userRef, {
-        vehicles: increment(-1)
-      });
-
-      toast.success("Vehicle deleted successfully");
-    } catch (error) {
-      console.error("Error deleting vehicle:", error);
-      toast.error("Failed to delete vehicle. Please try again.");
-    }
+  const handleDeleteVehicle = (vehicleId) => {
+    deleteVehicleMutation.mutate(vehicleId);
   };
 
   const handleOpenSight = (vehicle) => {

@@ -5,7 +5,6 @@ import { motion } from "framer-motion";
 import AuthForm from "@/components/AuthForm";
 import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "sonner";
-import { generateDiagnosticResponse } from "@/lib/openai";
 
 const Index = () => {
   const navigate = useNavigate();
@@ -27,19 +26,6 @@ const Index = () => {
     navigate("/garage");
   };
 
-  const [query, setQuery] = useState('');
-  const [response, setResponse] = useState('');
-
-  const handleQuery = async () => {
-    try {
-      const aiResponse = await generateDiagnosticResponse(query);
-      setResponse(aiResponse);
-    } catch (error) {
-      console.error("Error generating response:", error);
-      toast.error("Failed to generate response. Please try again.");
-    }
-  };
-
   return (
     <div className="flex items-center justify-center min-h-screen bg-background">
       <motion.div
@@ -54,24 +40,6 @@ const Index = () => {
         <p className="text-xl mb-8 text-muted-foreground text-center">
           Your smart automotive companion
         </p>
-        <div className="mb-4">
-          <input
-            type="text"
-            value={query}
-            onChange={(e) => setQuery(e.target.value)}
-            placeholder="Enter your query..."
-            className="w-full p-2 border rounded"
-          />
-          <Button onClick={handleQuery} className="mt-2 w-full">
-            Submit Query
-          </Button>
-        </div>
-        {response && (
-          <div className="mt-4 p-4 bg-gray-100 rounded">
-            <h3 className="font-bold">AI Response:</h3>
-            <p>{response}</p>
-          </div>
-        )}
         {user ? (
           <>
             <Button onClick={handleGarageNavigation} size="lg" className="w-full text-lg mb-4" disabled={isLoading}>

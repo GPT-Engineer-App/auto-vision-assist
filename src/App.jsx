@@ -6,40 +6,13 @@ import { ThemeProvider } from "@/components/theme-provider";
 import { AuthProvider } from "./contexts/AuthContext";
 import { ProStatusProvider } from "./contexts/ProStatusContext";
 import AppRoutes from "./AppRoutes";
-import { Suspense, useEffect, useState } from "react";
-import ErrorBoundary from './components/ErrorBoundary';
-import { auth } from './lib/firebase';
+import { Suspense, lazy } from "react";
+
+const ErrorBoundary = lazy(() => import('./components/ErrorBoundary'));
 
 const queryClient = new QueryClient();
 
 const App = () => {
-  const [firebaseInitialized, setFirebaseInitialized] = useState(false);
-
-  useEffect(() => {
-    const unsubscribe = auth.onAuthStateChanged(() => {
-      setFirebaseInitialized(true);
-    });
-    return () => unsubscribe();
-  }, []);
-
-  if (!firebaseInitialized) {
-    return <div>Loading...</div>;
-  }
-
-const App = () => {
-  const [firebaseInitialized, setFirebaseInitialized] = useState(false);
-
-  useEffect(() => {
-    const unsubscribe = auth.onAuthStateChanged(() => {
-      setFirebaseInitialized(true);
-    });
-    return () => unsubscribe();
-  }, []);
-
-  if (!firebaseInitialized) {
-    return <div>Loading...</div>;
-  }
-
   return (
     <Router>
       <QueryClientProvider client={queryClient}>
@@ -49,7 +22,7 @@ const App = () => {
               <TooltipProvider>
                 <Toaster />
                 <ErrorBoundary>
-                  <Suspense fallback={<div className="flex items-center justify-center h-screen">Loading...</div>}>
+                  <Suspense fallback={<div>Loading...</div>}>
                     <AppRoutes />
                   </Suspense>
                 </ErrorBoundary>
@@ -60,6 +33,6 @@ const App = () => {
       </QueryClientProvider>
     </Router>
   );
-}
+};
 
 export default App;

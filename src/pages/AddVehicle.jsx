@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { addDoc, collection, doc, getDoc, updateDoc, increment } from "firebase/firestore";
+import { addDoc, collection } from "firebase/firestore";
 import { db, auth } from "@/lib/firebase";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -9,7 +9,6 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { toast } from "sonner";
 import { motion } from "framer-motion";
 import { fetchAllMakes, fetchModelsForMake, fetchEngineSizesForMakeAndModel } from "@/lib/vehicleApi";
-import { useProStatus } from "@/contexts/ProStatusContext";
 
 const AddVehicle = () => {
   const [year, setYear] = useState("");
@@ -83,8 +82,6 @@ const AddVehicle = () => {
     }
   };
 
-  const { isPro } = useProStatus();
-
   const handleSubmit = async (e) => {
     e.preventDefault();
     setIsLoading(true);
@@ -96,18 +93,8 @@ const AddVehicle = () => {
     }
 
     try {
-      const userRef = doc(db, "users", auth.currentUser.uid);
-      const userSnap = await getDoc(userRef);
-      const userData = userSnap.data();
-
-      if (!isPro && userData.vehicles && userData.vehicles.length >= 1) {
-        toast.error("Free users can only add one vehicle. Upgrade to Pro for more!");
-        setIsLoading(false);
-        return;
-      }
-
       const vehiclesRef = collection(db, "vehicles");
-      const newVehicle = {
+      await addDoc(vehiclesRef, {
         userId: auth.currentUser.uid,
         year,
         make,
@@ -118,15 +105,7 @@ const AddVehicle = () => {
         fuelType,
         mileage: Number(mileage),
         createdAt: new Date(),
-      };
-
-      await addDoc(vehiclesRef, newVehicle);
-
-      // Update user's vehicle count
-      await updateDoc(userRef, {
-        vehicles: increment(1)
       });
-
       toast.success("Vehicle added successfully");
       navigate("/garage");
     } catch (error) {
