@@ -27,6 +27,19 @@ const App = () => {
   }
 
 const App = () => {
+  const [firebaseInitialized, setFirebaseInitialized] = useState(false);
+
+  useEffect(() => {
+    const unsubscribe = auth.onAuthStateChanged(() => {
+      setFirebaseInitialized(true);
+    });
+    return () => unsubscribe();
+  }, []);
+
+  if (!firebaseInitialized) {
+    return <div>Loading...</div>;
+  }
+
   return (
     <Router>
       <QueryClientProvider client={queryClient}>
@@ -47,6 +60,6 @@ const App = () => {
       </QueryClientProvider>
     </Router>
   );
-};
+}
 
 export default App;
