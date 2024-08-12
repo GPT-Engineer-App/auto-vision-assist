@@ -56,19 +56,26 @@ const AuthForm = ({ isLogin, setIsLoading }) => {
                           Card 
                         } from '@/components/ui';
                         
-                        const AuthForm = () => {
-                          const { register, handleSubmit, formState: { errors, isSubmitting } } = useFormContext();
-                          const [isLogin, setIsLogin] = React.useState(true); 
-                          const [loading, setLoading] = React.useState(false); 
+                        const AuthForm = ({ isLogin, setIsLoading }) => {
+                          const methods = useForm();
+                          const { handleSubmit, formState: { errors, isSubmitting } } = methods;
                         
                           const onSubmit = async (data) => {
-                            // Handle form submission
+                            setIsLoading(true);
+                            try {
+                              // Handle form submission
+                              // Add your authentication logic here
+                            } catch (error) {
+                              console.error("Authentication error:", error);
+                            } finally {
+                              setIsLoading(false);
+                            }
                           };
-                        
+
                           return (
                             <Card>
                               <CardContent>
-                                <FormProvider>
+                                <FormProvider {...methods}>
                                   <Form onSubmit={handleSubmit(onSubmit)}>
                                     {/* ... (rest of the form fields) */}
                                     {!isLogin && (
