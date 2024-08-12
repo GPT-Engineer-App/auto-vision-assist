@@ -1,5 +1,5 @@
 import { initializeApp } from "firebase/app";
-import { getFirestore } from "firebase/firestore";
+import { getFirestore, collection, query, where, getDocs } from "firebase/firestore";
 import { getStorage } from "firebase/storage";
 import { getAuth, GoogleAuthProvider } from "firebase/auth";
 
@@ -49,4 +49,15 @@ export const fetchDTCByCode = async (code) => {
     console.error("Error fetching DTC by code:", error);
     throw new Error("Failed to fetch DTC information. Please try again.");
   }
+};
+
+export const fetchVehiclesForUser = async (userId) => {
+  if (!auth.currentUser) {
+    throw new Error("User must be authenticated to fetch vehicles");
+  }
+  const vehiclesRef = collection(db, "vehicles");
+  const q = query(vehiclesRef, where("userId", "==", userId));
+  const querySnapshot = await getDocs(q);
+
+  return querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
 };
