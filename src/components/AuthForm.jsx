@@ -1,11 +1,10 @@
 import React from 'react';
-import { useForm, FormProvider } from 'react-hook-form';
+import { useForm } from 'react-hook-form';
 import { Form, FormField, FormItem, FormLabel, Select, SelectContent, SelectItem, SelectTrigger, SelectValue, Button, CardContent, CardFooter, Card } from '@/components/ui';
 import { handleGoogleSignIn } from './handleGoogleSignIn';
 
 const AuthForm = ({ isLogin, setIsLoading }) => {
-  const methods = useForm();
-  const { handleSubmit, formState: { errors, isSubmitting } } = methods;
+  const { register, handleSubmit, formState: { errors, isSubmitting } } = useForm();
 
   const onSubmit = async (data) => {
     setIsLoading(true);
