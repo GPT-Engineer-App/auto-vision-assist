@@ -62,7 +62,7 @@ const AuthForm = ({ isLogin, setIsLoading }) => {
                               </CardFooter>
                             </Card>
                           );
-                        };
+                        }}
                       </FormItem>
                     )}
                   />
