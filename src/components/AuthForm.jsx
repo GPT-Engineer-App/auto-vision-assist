@@ -64,13 +64,6 @@ const AuthForm = ({ isLogin, setIsLoading }) => {
                           );
                         };
                         
-                        export default AuthForm;
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="free">Free</SelectItem>
-                        <SelectItem value="pro">Pro</SelectItem>
-                      </SelectContent>
-                    </Select>
                   </FormItem>
                 )}
               />
