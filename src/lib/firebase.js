@@ -14,6 +14,7 @@ const firebaseConfig = {
 
 if (!import.meta.env.VITE_FIREBASE_API_KEY) {
   console.error('Firebase API key is not set. Please check your environment variables.');
+  toast.error('Firebase configuration is incomplete. Some features may not work properly.');
 }
 
 const app = initializeApp(firebaseConfig);

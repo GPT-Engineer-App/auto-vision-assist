@@ -8,6 +8,7 @@ const openai = new OpenAI({
 
 if (!import.meta.env.VITE_OPENAI_API_KEY) {
   console.error('OpenAI API key is not set. Please set the VITE_OPENAI_API_KEY environment variable.');
+  toast.error('OpenAI API key is not set. Some features may not work properly.');
 }
 
 // Validate the API key
