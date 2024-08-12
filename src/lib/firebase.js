@@ -60,6 +60,16 @@ export const fetchAllDTCs = async () => {
   }
 };
 
+export const searchDTCs = async (searchQuery) => {
+  const dtcRef = collection(db, "dtc");
+  const q = query(dtcRef, 
+    where("code", ">=", searchQuery),
+    where("code", "<=", searchQuery + '\uf8ff')
+  );
+  const querySnapshot = await getDocs(q);
+  return querySnapshot.docs.map(doc => doc.data());
+};
+
 export const fetchVehiclesForUser = async (userId) => {
   if (!auth.currentUser) {
     throw new Error("User must be authenticated to fetch vehicles");
