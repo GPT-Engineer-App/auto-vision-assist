@@ -1,5 +1,5 @@
 import { initializeApp } from "firebase/app";
-import { getFirestore, collection, query, where, getDocs } from "firebase/firestore";
+import { getFirestore, collection, query, where, getDocs, updateDoc, deleteDoc } from "firebase/firestore";
 import { getStorage } from "firebase/storage";
 import { getAuth, GoogleAuthProvider } from "firebase/auth";
 
@@ -60,4 +60,14 @@ export const fetchVehiclesForUser = async (userId) => {
   const querySnapshot = await getDocs(q);
 
   return querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+};
+
+export const updateData = async (collectionName, docId, data) => {
+  const docRef = doc(db, collectionName, docId);
+  await updateDoc(docRef, data);
+};
+
+export const deleteData = async (collectionName, docId) => {
+  const docRef = doc(db, collectionName, docId);
+  await deleteDoc(docRef);
 };
