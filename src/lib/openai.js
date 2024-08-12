@@ -104,13 +104,3 @@ export const generateDiagnosticResponse = async (prompt, retries = 3) => {
     throw error;
   }
 };
-
-export const validateOpenAIKey = async () => {
-  try {
-    await openai.models.list();
-    return true;
-  } catch (error) {
-    console.error('Error validating OpenAI API key:', error);
-    return false;
-  }
-};
