@@ -12,11 +12,13 @@ export const ProStatusProvider = ({ children }) => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    let unsubscribeSnapshot = null;
+
     const unsubscribe = auth.onAuthStateChanged(async (user) => {
       if (user) {
         try {
           const userRef = doc(db, 'users', user.uid);
-          const unsubscribeSnapshot = onSnapshot(userRef, (doc) => {
+          unsubscribeSnapshot = onSnapshot(userRef, (doc) => {
             if (doc.exists()) {
               setIsPro(doc.data().isPro || false);
             } else {
@@ -29,7 +31,6 @@ export const ProStatusProvider = ({ children }) => {
             setIsPro(false);
             setLoading(false);
           });
-          return () => unsubscribeSnapshot();
         } catch (error) {
           console.error("Error setting up listener:", error);
           toast.error("Failed to set up data listener. Please try again.");
@@ -42,7 +43,12 @@ export const ProStatusProvider = ({ children }) => {
       }
     });
 
-    return () => unsubscribe();
+    return () => {
+      unsubscribe();
+      if (unsubscribeSnapshot) {
+        unsubscribeSnapshot();
+      }
+    };
   }, []);
 
   const updateProStatus = async (status) => {

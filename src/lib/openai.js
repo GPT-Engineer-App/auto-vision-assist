@@ -6,6 +6,10 @@ const openai = new OpenAI({
   dangerouslyAllowBrowser: true
 });
 
+if (!import.meta.env.VITE_OPENAI_API_KEY) {
+  console.warn('OpenAI API key is not set. Please set the VITE_OPENAI_API_KEY environment variable.');
+}
+
 let assistantId;
 
 export const initializeAssistant = async () => {
