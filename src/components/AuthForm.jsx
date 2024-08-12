@@ -20,10 +20,9 @@ const AuthForm = ({ isLogin, setIsLoading }) => {
   };
 
   return (
-    <FormProvider {...methods}>
     <Card>
       <CardContent>
-        <FormProvider>
+        <FormProvider {...methods}>
           <Form onSubmit={handleSubmit(onSubmit)}>
             {/* ... (rest of the form fields) */}
             {!isLogin && (
