@@ -63,10 +63,9 @@ const AuthForm = ({ isLogin, setIsLoading }) => {
                             </Card>
                           );
                         };
-                        
-                  </FormItem>
-                )}
-              />
+                      </FormItem>
+                    )}
+                  />
             )}
             <Button type="submit" className="w-full" disabled={isSubmitting}>
               {isSubmitting ? "Processing..." : (isLogin ? "Login" : "Sign Up")}
