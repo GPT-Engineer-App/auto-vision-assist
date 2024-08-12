@@ -1,18 +1,26 @@
 import React from 'react';
-import { FormProvider, useFormContext } from 'react-hook-form';
-import { Form, FormField, FormItem, FormLabel, Select, Button, CardContent, CardFooter, Card } from '@/components/ui';
-import { handleGoogleSignIn } from './handleGoogleSignIn'; // Import the handleGoogleSignIn function
+import { useForm, FormProvider } from 'react-hook-form';
+import { Form, FormField, FormItem, FormLabel, Select, SelectContent, SelectItem, SelectTrigger, SelectValue, Button, CardContent, CardFooter, Card } from '@/components/ui';
+import { handleGoogleSignIn } from './handleGoogleSignIn';
 
-const AuthForm = () => {
-  const { register, handleSubmit, formState: { errors, isSubmitting } } = useFormContext();
-  const [isLogin, setIsLogin] = React.useState(true); // Define the isLogin state
-  const [loading, setLoading] = React.useState(false); // Define the loading state
+const AuthForm = ({ isLogin, setIsLoading }) => {
+  const methods = useForm();
+  const { handleSubmit, formState: { errors, isSubmitting } } = methods;
 
   const onSubmit = async (data) => {
-    // Handle form submission
+    setIsLoading(true);
+    try {
+      // Handle form submission
+      // Add your authentication logic here
+    } catch (error) {
+      console.error("Authentication error:", error);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
-return (  
+  return (
+    <FormProvider {...methods}>
     <Card>
       <CardContent>
         <FormProvider>
