@@ -14,7 +14,7 @@ import {
 } from "@/components/ui/table";
 import DTCAnalysisView from '@/components/DTCAnalysisView';
 import { useNavigate } from 'react-router-dom';
-import { searchDTCs, fetchAllDTCs, fetchDTCByCode } from '@/lib/firebase';
+import { searchDTCs, fetchDTCByCode } from '@/lib/firebase';
 import { toast } from 'sonner';
 
 const DTCCodes = () => {
@@ -26,7 +26,11 @@ const DTCCodes = () => {
 
   const { data: allDTCs, isLoading: isLoadingAllDTCs, error: dtcError } = useQuery({
     queryKey: ['allDTCs'],
-    queryFn: fetchAllDTCs,
+    queryFn: async () => {
+      const dtcRef = collection(db, 'dtc');
+      const querySnapshot = await getDocs(dtcRef);
+      return querySnapshot.docs.map(doc => doc.data());
+    },
     retry: 3,
     retryDelay: 1000,
     onError: (error) => {

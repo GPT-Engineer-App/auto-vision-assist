@@ -1,18 +1,21 @@
 import { initializeApp } from "firebase/app";
-import { getFirestore } from "firebase/firestore";
+import { getFirestore, collection, query, where, getDocs, updateDoc, deleteDoc } from "firebase/firestore";
 import { getStorage } from "firebase/storage";
 import { getAuth, GoogleAuthProvider } from "firebase/auth";
 
 const firebaseConfig = {
-  apiKey: "AIzaSyBaMsvZCdwFLWgTUZsTZlScUzDNc_WvyCQ",
-  authDomain: "auto-vision-pro-v2.firebaseapp.com",
-  databaseURL: "https://auto-vision-pro-v2-default-rtdb.firebaseio.com",
-  projectId: "auto-vision-pro-v2",
-  storageBucket: "auto-vision-pro-v2.appspot.com",
-  messagingSenderId: "933665969916",
-  appId: "1:933665969916:web:8278f8ecb9326848102979",
-  measurementId: "G-Q7MN5WQ8QE"
+  apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
+  authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN,
+  projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID,
+  storageBucket: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET,
+  messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID,
+  appId: import.meta.env.VITE_FIREBASE_APP_ID
 };
+
+if (!import.meta.env.VITE_FIREBASE_API_KEY) {
+  console.error('Firebase API key is not set. Please check your environment variables.');
+  toast.error('Firebase configuration is incomplete. Some features may not work properly.');
+}
 
 const app = initializeApp(firebaseConfig);
 export const db = getFirestore(app);
@@ -49,4 +52,44 @@ export const fetchDTCByCode = async (code) => {
     console.error("Error fetching DTC by code:", error);
     throw new Error("Failed to fetch DTC information. Please try again.");
   }
+};
+
+export const fetchAllDTCs = async () => {
+  try {
+    return await fetchDTCData();
+  } catch (error) {
+    console.error("Error fetching all DTCs:", error);
+    throw new Error("Failed to fetch all DTC codes. Please try again.");
+  }
+};
+
+export const searchDTCs = async (searchQuery) => {
+  const dtcRef = collection(db, "dtc");
+  const q = query(dtcRef, 
+    where("code", ">=", searchQuery),
+    where("code", "<=", searchQuery + '\uf8ff')
+  );
+  const querySnapshot = await getDocs(q);
+  return querySnapshot.docs.map(doc => doc.data());
+};
+
+export const fetchVehiclesForUser = async (userId) => {
+  if (!auth.currentUser) {
+    throw new Error("User must be authenticated to fetch vehicles");
+  }
+  const vehiclesRef = collection(db, "vehicles");
+  const q = query(vehiclesRef, where("userId", "==", userId));
+  const querySnapshot = await getDocs(q);
+
+  return querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+};
+
+export const updateData = async (collectionName, docId, data) => {
+  const docRef = doc(db, collectionName, docId);
+  await updateDoc(docRef, data);
+};
+
+export const deleteData = async (collectionName, docId) => {
+  const docRef = doc(db, collectionName, docId);
+  await deleteDoc(docRef);
 };

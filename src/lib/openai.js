@@ -6,9 +6,35 @@ const openai = new OpenAI({
   dangerouslyAllowBrowser: true
 });
 
+if (!import.meta.env.VITE_OPENAI_API_KEY) {
+  console.error('OpenAI API key is not set. Please set the VITE_OPENAI_API_KEY environment variable.');
+  toast.error('OpenAI API key is not set. Some features may not work properly.');
+}
+
+// Validate the API key
+const validateOpenAIKey = async () => {
+  try {
+    await openai.models.list();
+    console.log('OpenAI API key is valid');
+    return true;
+  } catch (error) {
+    console.error('Error validating OpenAI API key:', error);
+    return false;
+  }
+};
+
+// Call the validation function
+validateOpenAIKey();
+
 let assistantId;
 
 export const initializeAssistant = async () => {
+  if (!await validateOpenAIKey()) {
+    console.error("Invalid OpenAI API key. Assistant initialization skipped.");
+    toast.error("Failed to initialize diagnostic assistant due to invalid API key.");
+    return;
+  }
+  
   try {
     const assistant = await openai.beta.assistants.create({
       name: "Auto Diagnostic Assistant",
@@ -77,15 +103,5 @@ export const generateDiagnosticResponse = async (prompt, retries = 3) => {
       toast.error("Failed to generate diagnostic response. Please try again.");
     }
     throw error;
-  }
-};
-
-export const validateOpenAIKey = async () => {
-  try {
-    await openai.models.list();
-    return true;
-  } catch (error) {
-    console.error('Error validating OpenAI API key:', error);
-    return false;
   }
 };
