@@ -1,15 +1,17 @@
 import { initializeApp } from "firebase/app";
+import { getAnalytics } from "firebase/analytics";
 import { getFirestore, collection, query, where, getDocs, updateDoc, deleteDoc } from "firebase/firestore";
 import { getStorage } from "firebase/storage";
 import { getAuth, GoogleAuthProvider } from "firebase/auth";
 
 const firebaseConfig = {
-  apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
-  authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN,
-  projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID,
-  storageBucket: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET,
-  messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID,
-  appId: import.meta.env.VITE_FIREBASE_APP_ID
+  apiKey: "AIzaSyAskPAqZe_4FFHDoiOGovRom6MToav7ug8",
+  authDomain: "auto-vision-diagnostic-pro.firebaseapp.com",
+  projectId: "auto-vision-diagnostic-pro",
+  storageBucket: "auto-vision-diagnostic-pro.appspot.com",
+  messagingSenderId: "62146177615",
+  appId: "1:62146177615:web:e82691c9a95326abcd183a",
+  measurementId: "G-CKTC1BCDBR"
 };
 
 if (!import.meta.env.VITE_FIREBASE_API_KEY) {
@@ -35,6 +37,7 @@ if (!validateFirebaseConfig()) {
 }
 
 const app = initializeApp(firebaseConfig);
+const analytics = getAnalytics(app);
 export const db = getFirestore(app);
 export const storage = getStorage(app);
 export const auth = getAuth(app);
