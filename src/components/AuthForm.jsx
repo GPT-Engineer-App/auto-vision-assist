@@ -1,99 +1,242 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { createUserWithEmailAndPassword, signInWithEmailAndPassword } from "firebase/auth";
-import { auth } from "@/lib/firebase";
+import { createUserWithEmailAndPassword, signInWithEmailAndPassword, sendPasswordResetEmail } from "firebase/auth";
+import { auth, db } from "../lib/firebase";
+import { doc, setDoc, serverTimestamp } from "firebase/firestore";
+import { signInWithGoogle } from "@/lib/firebaseOperations";
+import { initializeBillingClient } from "@/lib/inAppPurchase";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
-import { Lock, Mail, User } from "lucide-react";
+import { Lock, Mail, User, AlertTriangle } from "lucide-react";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import { useForm } from "react-hook-form";
+import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 
-const AuthForm = ({ isLogin }) => {
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [username, setUsername] = useState("");
+const AuthForm = ({ isLogin, setIsLoading }) => {
+  const form = useForm({
+    defaultValues: {
+      email: "",
+      password: "",
+      username: "",
+      userType: "free"
+    }
+  });
+  const [isResettingPassword, setIsResettingPassword] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [retryCount, setRetryCount] = useState(0);
+  const [networkError, setNetworkError] = useState(false);
+  const [error, setError] = useState(null);
   const navigate = useNavigate();
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
+  useEffect(() => {
+    if (error) {
+      toast.error(error);
+    }
+    initializeBillingClient();
+  }, [error]);
+
+  useEffect(() => {
+    const checkNetworkConnection = () => {
+      setNetworkError(!navigator.onLine);
+    };
+
+    window.addEventListener('online', checkNetworkConnection);
+    window.addEventListener('offline', checkNetworkConnection);
+
+    return () => {
+      window.removeEventListener('online', checkNetworkConnection);
+      window.removeEventListener('offline', checkNetworkConnection);
+    };
+  }, []);
+
+  const handleSubmit = async (data) => {
+    setLoading(true);
+    setIsLoading(true);
+    setNetworkError(false);
     try {
-      // Check for generic login credentials in development environment
-      if (import.meta.env.DEV && email === "dev@example.com" && password === "devpassword") {
-        console.log("Logging in with generic credentials");
-        toast.success("Logged in with generic credentials");
-        navigate("/garage");
+      if (!navigator.onLine) {
+        throw new Error("No internet connection. Please check your network and try again.");
+      }
+
+      if (isResettingPassword) {
+        await sendPasswordResetEmail(auth, data.email);
+        toast.success("Password reset email sent. Check your inbox.");
+        setIsResettingPassword(false);
         return;
       }
 
-      if (isLogin) {
-        await signInWithEmailAndPassword(auth, email, password);
-        toast.success("Logged in successfully");
-      } else {
-        await createUserWithEmailAndPassword(auth, email, password);
-        toast.success("Account created successfully");
+      if (!isLogin && !isStrongPassword(data.password)) {
+        throw new Error("Password does not meet security standards");
       }
+
+      const authFunction = isLogin
+        ? () => signInWithEmailAndPassword(auth, data.email, data.password)
+        : () => createUserWithEmailAndPassword(auth, data.email, data.password);
+
+      const result = await authFunction();
+
+      if (!isLogin) {
+        const user = result.user;
+        await setDoc(doc(db, "users", user.uid), {
+          username: data.username,
+          email: data.email,
+          userType: data.userType,
+          createdAt: serverTimestamp(),
+        });
+      }
+
+      toast.success(isLogin ? "Logged in successfully" : "Account created successfully");
       navigate("/garage");
     } catch (error) {
       console.error("Authentication error:", error);
-      toast.error(error.message);
+      if (error.code === "auth/network-request-failed") {
+        setNetworkError(true);
+        setError("Network error. Please check your internet connection and try again.");
+      } else {
+        setError(error.message || "An error occurred during authentication. Please try again.");
+      }
+    } finally {
+      setLoading(false);
+      setIsLoading(false);
     }
   };
 
+  const isStrongPassword = (password) => {
+    const minLength = 8;
+    const hasNumber = /\d/;
+    const hasUpperCase = /[A-Z]/;
+    const hasLowerCase = /[a-z]/;
+    const hasSpecialChar = /[!@#$%^&*(),.?":{}|<>]/;
+    
+    return password.length >= minLength &&
+           hasNumber.test(password) &&
+           hasUpperCase.test(password) &&
+           hasLowerCase.test(password) &&
+           hasSpecialChar.test(password);
+  };
+
+  const handleGoogleSignIn = async () => {
+    try {
+      setIsLoading(true);
+      await signInWithGoogle();
+      toast.success("Logged in with Google successfully");
+      navigate("/garage");
+    } catch (error) {
+      console.error("Google sign-in error:", error);
+      toast.error("Failed to sign in with Google");
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const togglePasswordReset = () => {
+    setIsResettingPassword(!isResettingPassword);
+  };
+
   return (
-    <form onSubmit={handleSubmit} className="space-y-4">
-      {!isLogin && (
-        <div className="space-y-2">
-          <Label htmlFor="username" className="text-gray-300">Username</Label>
-          <div className="relative">
-            <User className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500" size={18} />
-            <Input
-              id="username"
-              type="text"
-              value={username}
-              onChange={(e) => setUsername(e.target.value)}
-              required
-              className="pl-10 bg-gray-700 border-gray-600 text-white"
+    <Card>
+      <CardHeader>
+        <CardTitle>{isLogin ? "Login" : "Sign Up"}</CardTitle>
+        <CardDescription>
+          {isLogin ? "Enter your credentials to access your account" : "Create a new account"}
+        </CardDescription>
+      </CardHeader>
+      <CardContent>
+        {networkError && (
+          <Alert variant="destructive" className="mb-4">
+            <AlertTriangle className="h-4 w-4" />
+            <AlertTitle>Network Error</AlertTitle>
+            <AlertDescription>
+              Unable to connect to the server. Please check your internet connection and try again.
+            </AlertDescription>
+          </Alert>
+        )}
+        <Form {...form}>
+          <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-4">
+            <FormField
+              control={form.control}
+              name="email"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Email</FormLabel>
+                  <FormControl>
+                    <Input type="email" placeholder="Enter your email" {...field} required />
+                  </FormControl>
+                </FormItem>
+              )}
             />
-          </div>
-        </div>
-      )}
-      <div className="space-y-2">
-        <Label htmlFor="email" className="text-gray-300">Email</Label>
-        <div className="relative">
-          <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500" size={18} />
-          <Input
-            id="email"
-            type="email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            required
-            className="pl-10 bg-gray-700 border-gray-600 text-white"
-          />
-        </div>
-      </div>
-      <div className="space-y-2">
-        <Label htmlFor="password" className="text-gray-300">Password</Label>
-        <div className="relative">
-          <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500" size={18} />
-          <Input
-            id="password"
-            type="password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            required
-            className="pl-10 bg-gray-700 border-gray-600 text-white"
-          />
-        </div>
-      </div>
-      <Button type="submit" className="w-full bg-orange-500 hover:bg-orange-600 text-white">
-        {isLogin ? "Log In" : "Sign Up"}
-      </Button>
-      {import.meta.env.DEV && (
-        <p className="text-sm text-gray-500 mt-2">
-          Dev login: dev@example.com / devpassword
-        </p>
-      )}
-    </form>
+            <FormField
+              control={form.control}
+              name="password"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Password</FormLabel>
+                  <FormControl>
+                    <Input
+                      type="password"
+                      placeholder="Enter your password"
+                      {...field}
+                      required
+                    />
+                  </FormControl>
+                </FormItem>
+              )}
+            />
+            {!isLogin && (
+              <FormField
+                control={form.control}
+                name="username"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Username</FormLabel>
+                    <FormControl>
+                      <Input
+                        placeholder="Choose a username"
+                        {...field}
+                        required
+                      />
+                    </FormControl>
+                  </FormItem>
+                )}
+              />
+            )}
+            {!isLogin && (
+              <FormField
+                name="userType"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>User Type</FormLabel>
+                    <Select onValueChange={field.onChange} defaultValue={field.value}>
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select user type" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        <SelectItem value="free">Free</SelectItem>
+                        <SelectItem value="pro">Pro</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </FormItem>
+                )}
+              />
+            )}
+            <Button type="submit" className="w-full" disabled={loading}>
+              {loading ? "Processing..." : (isLogin ? "Login" : "Sign Up")}
+            </Button>
+          </form>
+        </Form>
+      </CardContent>
+      <CardFooter>
+        <Button variant="outline" onClick={handleGoogleSignIn} className="w-full" disabled={loading}>
+          Sign in with Google
+        </Button>
+      </CardFooter>
+    </Card>
   );
 };
 

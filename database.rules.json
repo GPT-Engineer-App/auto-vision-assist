@@ -1,0 +1,73 @@
+{
+  "rules": {
+    "users": {
+      "$uid": {
+        ".read": "$uid === auth.uid",
+        ".write": "$uid === auth.uid",
+        "profile": {
+          ".validate": "newData.hasChildren(['username', 'email', 'subscriptionType'])",
+          "username": {
+            ".validate": "newData.isString() && newData.val().length > 0"
+          },
+          "email": {
+            ".validate": "newData.isString() && newData.val().length > 0"
+          },
+          "subscriptionType": {
+            ".validate": "newData.isString() && (newData.val() === 'free' || newData.val() === 'pro')"
+          }
+        },
+        "vehicles": {
+          "$vehicleId": {
+            ".validate": "newData.hasChildren(['year', 'make', 'model', 'engineDisplacement', 'fuelType', 'drivetrain', 'bodyStyle', 'mileage'])",
+            "year": {
+              ".validate": "newData.isNumber()"
+            },
+            "make": {
+              ".validate": "newData.isString() && newData.val().length > 0"
+            },
+            "model": {
+              ".validate": "newData.isString() && newData.val().length > 0"
+            },
+            "engineDisplacement": {
+              ".validate": "newData.isString() && newData.val().length > 0"
+            },
+            "fuelType": {
+              ".validate": "newData.isString() && newData.val().length > 0"
+            },
+            "drivetrain": {
+              ".validate": "newData.isString() && newData.val().length > 0"
+            },
+            "bodyStyle": {
+              ".validate": "newData.isString() && newData.val().length > 0"
+            },
+            "mileage": {
+              ".validate": "newData.isNumber()"
+            }
+          }
+        },
+        "dtcs": {
+          "$dtcId": {
+            ".validate": "newData.hasChildren(['code', 'theoryOfOperation'])",
+            "code": {
+              ".validate": "newData.isString() && newData.val().length > 0"
+            },
+            "theoryOfOperation": {
+              ".validate": "newData.isString() && newData.val().length > 0"
+            }
+          }
+        },
+        "queryPacks": {
+          "$queryPackId": {
+            ".validate": "newData.hasChildren(['name', 'queriesRemaining'])",
+            "name": {
+              ".validate": "newData.isString() && newData.val().length > 0"
+            },
+            "queriesRemaining": {
+              ".validate": "newData.isNumber()"
+            }
+          }
+        }
+      }
+    }
+  }
+}

@@ -1,10 +1,9 @@
-import { Home, UserPlus, Car, Wrench, FileCode2, Activity } from "lucide-react";
+import { Home, UserPlus, Car, Wrench, FileCode2 } from "lucide-react";
 import Index from "./pages/Index.jsx";
 import Signup from "./pages/Signup.jsx";
 import AddVehicle from "./pages/AddVehicle.jsx";
 import GaragePage from "./pages/Garage.jsx";
 import DTCCodes from "./pages/DTCCodes.jsx";
-import WireframeCar from "./WireframeCar";  // Import the WireframeCar component
 
 export const navItems = [
   {
@@ -36,11 +35,5 @@ export const navItems = [
     to: "/dtc-codes",
     icon: <FileCode2 className="h-4 w-4" />,
     page: <DTCCodes />,
-  },
-  {
-    title: "Wireframe Car",
-    to: "/wireframe-car",
-    icon: <Activity className="h-4 w-4" />, // Use any suitable icon from lucide-react
-    page: <WireframeCar />,  // Add the WireframeCar component as the page
   },
 ];
