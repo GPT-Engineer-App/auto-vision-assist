@@ -51,6 +51,15 @@ export const fetchDTCByCode = async (code) => {
   }
 };
 
+export const fetchAllDTCs = async () => {
+  try {
+    return await fetchDTCData();
+  } catch (error) {
+    console.error("Error fetching all DTCs:", error);
+    throw new Error("Failed to fetch all DTC codes. Please try again.");
+  }
+};
+
 export const fetchVehiclesForUser = async (userId) => {
   if (!auth.currentUser) {
     throw new Error("User must be authenticated to fetch vehicles");
