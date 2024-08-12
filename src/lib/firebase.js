@@ -5,13 +5,13 @@ import { getStorage } from "firebase/storage";
 import { getAuth, GoogleAuthProvider } from "firebase/auth";
 
 const firebaseConfig = {
-  apiKey: "AIzaSyAskPAqZe_4FFHDoiOGovRom6MToav7ug8",
-  authDomain: "auto-vision-diagnostic-pro.firebaseapp.com",
-  projectId: "auto-vision-diagnostic-pro",
-  storageBucket: "auto-vision-diagnostic-pro.appspot.com",
-  messagingSenderId: "62146177615",
-  appId: "1:62146177615:web:e82691c9a95326abcd183a",
-  measurementId: "G-CKTC1BCDBR"
+  apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
+  authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN,
+  projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID,
+  storageBucket: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET,
+  messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID,
+  appId: import.meta.env.VITE_FIREBASE_APP_ID,
+  measurementId: import.meta.env.VITE_FIREBASE_MEASUREMENT_ID
 };
 
 if (!import.meta.env.VITE_FIREBASE_API_KEY) {
