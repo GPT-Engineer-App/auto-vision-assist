@@ -1,4 +1,5 @@
 import { initializeApp } from "firebase/app";
+import { getAnalytics } from "firebase/analytics";
 import { getFirestore, collection, query, where, getDocs, updateDoc, deleteDoc } from "firebase/firestore";
 import { getStorage } from "firebase/storage";
 import { getAuth, GoogleAuthProvider } from "firebase/auth";
@@ -9,15 +10,34 @@ const firebaseConfig = {
   projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID,
   storageBucket: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET,
   messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID,
-  appId: import.meta.env.VITE_FIREBASE_APP_ID
+  appId: import.meta.env.VITE_FIREBASE_APP_ID,
+  measurementId: import.meta.env.VITE_FIREBASE_MEASUREMENT_ID
 };
 
 if (!import.meta.env.VITE_FIREBASE_API_KEY) {
   console.error('Firebase API key is not set. Please check your environment variables.');
-  toast.error('Firebase configuration is incomplete. Some features may not work properly.');
+  console.warn('Firebase configuration is incomplete. Some features may not work properly.');
+}
+
+// Validate Firebase config
+const validateFirebaseConfig = () => {
+  const requiredKeys = ['apiKey', 'authDomain', 'projectId', 'storageBucket', 'messagingSenderId', 'appId'];
+  const missingKeys = requiredKeys.filter(key => !firebaseConfig[key]);
+  
+  if (missingKeys.length > 0) {
+    console.error(`Missing Firebase configuration keys: ${missingKeys.join(', ')}`);
+    console.warn('Please check your .env file and ensure all Firebase configuration variables are set.');
+    return false;
+  }
+  return true;
+};
+
+if (!validateFirebaseConfig()) {
+  throw new Error('Invalid Firebase configuration. Please check your environment variables.');
 }
 
 const app = initializeApp(firebaseConfig);
+const analytics = getAnalytics(app);
 export const db = getFirestore(app);
 export const storage = getStorage(app);
 export const auth = getAuth(app);
