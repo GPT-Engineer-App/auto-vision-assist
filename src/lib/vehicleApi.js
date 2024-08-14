@@ -3,12 +3,12 @@ import { toast } from "sonner";
 const NHTSA_API_BASE_URL = 'https://vpic.nhtsa.dot.gov/api';
 
 const MANUFACTURERS = [
-  "Chevrolet", "GMC", "Buick", "Cadillac", "Ford", "Lincoln", "Chrysler", "Dodge", "Jeep", "Ram", "Fiat",
-  "Toyota", "Lexus", "Honda", "Acura", "Nissan", "Infiniti", "Hyundai", "Kia", "Volkswagen", "Audi", "Porsche",
-  "Bentley", "Lamborghini", "Bugatti", "BMW", "Mini", "Rolls-Royce", "Mercedes-Benz", "Smart", "Subaru", "Mazda",
-  "Mitsubishi", "Tesla", "Volvo", "Jaguar", "Land Rover", "Alfa Romeo", "Aston Martin", "Lotus", "Ferrari",
-  "Pontiac", "Saturn", "Hummer", "Oldsmobile", "Plymouth", "Saab", "Mercury", "Scion", "Daewoo"
-];
+  "Acura", "Alfa Romeo", "Aston Martin", "Audi", "Bentley", "BMW", "Bugatti", "Buick", "Cadillac", "Chevrolet",
+  "Chrysler", "Daewoo", "Dodge", "Ferrari", "Fiat", "Ford", "GMC", "Honda", "Hummer", "Hyundai", "Infiniti",
+  "Jaguar", "Jeep", "Kia", "Lamborghini", "Land Rover", "Lexus", "Lincoln", "Lotus", "Mazda", "Mercedes-Benz",
+  "Mercury", "Mini", "Mitsubishi", "Nissan", "Oldsmobile", "Plymouth", "Pontiac", "Porsche", "Ram", "Rolls-Royce",
+  "Saab", "Saturn", "Scion", "Smart", "Subaru", "Tesla", "Toyota", "Volkswagen", "Volvo"
+].sort();
 
 const handleApiResponse = async (response) => {
   if (!response.ok) {
@@ -24,9 +24,9 @@ export const fetchAllMakes = async () => {
 
 export const fetchModelsForMake = async (make, year) => {
   try {
-    const response = await fetch(`${NHTSA_API_BASE_URL}/vehicles/GetMakesForManufacturerAndYear/make/${encodeURIComponent(make)}/modelyear/${year}?format=json`);
+    const response = await fetch(`${NHTSA_API_BASE_URL}/vehicles/GetModelsForMakeYear/make/${encodeURIComponent(make)}/modelyear/${year}?format=json`);
     const results = await handleApiResponse(response);
-    return Array.from(new Set(results.map(model => model.Model_Name)));
+    return Array.from(new Set(results.map(model => model.Model_Name))).sort();
   } catch (error) {
     console.error('Error fetching models:', error);
     toast.error('Failed to fetch vehicle models. Please try again.');
@@ -40,7 +40,7 @@ export const fetchEngineSizesForMakeAndModel = async (year, make, model) => {
     const results = await handleApiResponse(response);
     const modelData = results.filter(m => m.Model_Name === model);
     const engineSizes = modelData.map(m => m.DisplacementL).filter(Boolean);
-    return Array.from(new Set(engineSizes)).map(size => size.toFixed(1) + 'L');
+    return Array.from(new Set(engineSizes)).map(size => size.toFixed(1) + 'L').sort();
   } catch (error) {
     console.error('Error fetching engine sizes:', error);
     toast.error('Failed to fetch engine sizes. Please try again.');
