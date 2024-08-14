@@ -2,6 +2,14 @@ import { toast } from "sonner";
 
 const NHTSA_API_BASE_URL = 'https://vpic.nhtsa.dot.gov/api';
 
+const MANUFACTURERS = [
+  "Chevrolet", "GMC", "Buick", "Cadillac", "Ford", "Lincoln", "Chrysler", "Dodge", "Jeep", "Ram", "Fiat",
+  "Toyota", "Lexus", "Honda", "Acura", "Nissan", "Infiniti", "Hyundai", "Kia", "Volkswagen", "Audi", "Porsche",
+  "Bentley", "Lamborghini", "Bugatti", "BMW", "Mini", "Rolls-Royce", "Mercedes-Benz", "Smart", "Subaru", "Mazda",
+  "Mitsubishi", "Tesla", "Volvo", "Jaguar", "Land Rover", "Alfa Romeo", "Aston Martin", "Lotus", "Ferrari",
+  "Pontiac", "Saturn", "Hummer", "Oldsmobile", "Plymouth", "Saab", "Mercury", "Scion", "Daewoo"
+];
+
 const handleApiResponse = async (response) => {
   if (!response.ok) {
     throw new Error('API request failed');
@@ -11,20 +19,12 @@ const handleApiResponse = async (response) => {
 };
 
 export const fetchAllMakes = async () => {
-  try {
-    const response = await fetch(`${NHTSA_API_BASE_URL}/vehicles/getallmakes?format=json`);
-    const results = await handleApiResponse(response);
-    return results.map(make => make.Make_Name);
-  } catch (error) {
-    console.error('Error fetching makes:', error);
-    toast.error('Failed to fetch vehicle makes. Please try again.');
-    throw error;
-  }
+  return MANUFACTURERS;
 };
 
 export const fetchModelsForMake = async (make, year) => {
   try {
-    const response = await fetch(`${NHTSA_API_BASE_URL}/vehicles/getmodelsformakeyear/make/${encodeURIComponent(make)}/modelyear/${year}?format=json`);
+    const response = await fetch(`${NHTSA_API_BASE_URL}/vehicles/GetMakesForManufacturerAndYear/make/${encodeURIComponent(make)}/modelyear/${year}?format=json`);
     const results = await handleApiResponse(response);
     return Array.from(new Set(results.map(model => model.Model_Name)));
   } catch (error) {
@@ -36,7 +36,7 @@ export const fetchModelsForMake = async (make, year) => {
 
 export const fetchEngineSizesForMakeAndModel = async (year, make, model) => {
   try {
-    const response = await fetch(`${NHTSA_API_BASE_URL}/vehicles/getmodelsformakeyear/make/${encodeURIComponent(make)}/modelyear/${year}?format=json`);
+    const response = await fetch(`${NHTSA_API_BASE_URL}/vehicles/GetModelsForMakeYear/make/${encodeURIComponent(make)}/modelyear/${year}?format=json`);
     const results = await handleApiResponse(response);
     const modelData = results.filter(m => m.Model_Name === model);
     const engineSizes = modelData.map(m => m.DisplacementL).filter(Boolean);
